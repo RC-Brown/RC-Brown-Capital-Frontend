@@ -1,0 +1,50 @@
+{
+    "parserOptions": {
+      "project": ["./tsconfig.json"]
+    },
+    "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "next/core-web-vitals", "prettier"],
+    "env": {
+      "es6": true,
+      "jest": true,
+      "browser": true
+    },
+    "plugins": ["unused-imports", "@typescript-eslint", "@stylistic"],
+    "ignorePatterns": ["src/_tracker.js"],
+    "rules": {
+      "prefer-destructuring": [
+        "error",
+        {
+          "array": true,
+          "object": true
+        }
+      ],
+      "no-restricted-imports": [
+        "error",
+        {
+          "patterns": ["..*"]
+        }
+      ],
+      "@stylistic/quotes": ["error", "double"],
+      "@stylistic/semi": ["error", "always"],
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "unused-imports/no-unused-imports": ["error"],
+      "@typescript-eslint/no-unsafe-argument": ["error"],
+      "@typescript-eslint/no-unsafe-call": ["error"],
+      "@typescript-eslint/no-unsafe-member-access": ["error"],
+      "@typescript-eslint/no-unsafe-assignment": ["error"],
+      "@typescript-eslint/no-unsafe-return": ["error"],
+      "@typescript-eslint/no-floating-promises": "error",
+      "unused-imports/no-unused-vars": [
+        "error",
+        {
+          "vars": "all",
+          "varsIgnorePattern": "^_",
+          "args": "after-used",
+          "argsIgnorePattern": "^_",
+          "caughtErrors": "all"
+        }
+      ]
+    }
+  }
+  
