@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/lib/hooks/use-mobile";
@@ -18,7 +18,7 @@ interface Testimonial {
 }
 
 export default function TestimonialCarousel() {
-  const [api, setApi] = useState<any>();
+  const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const isMobile = useMediaQuery("(max-width: 768px)");
   const isTablet = useMediaQuery("(max-width: 1024px)");

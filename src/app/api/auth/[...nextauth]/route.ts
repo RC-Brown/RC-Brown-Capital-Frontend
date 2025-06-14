@@ -1,21 +1,44 @@
 // app/api/auth/[...nextauth]/route.ts
-import NextAuth from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { NextAuthOptions } from 'next-auth';
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { NextAuthOptions } from "next-auth";
 
-export const authOptions: NextAuthOptions = {
+// Extend NextAuth types
+declare module "next-auth" {
+  interface Session {
+    accessToken?: string;
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
+  }
+
+  interface User {
+    accessToken?: string;
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    accessToken?: string;
+  }
+}
+
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
-      name: 'Email & Password',
+      name: "Email & Password",
       credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials) return null;
         const res = await fetch(`${process.env.AUTH_API_BASE}/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify(credentials),
         });
         const user = await res.json();
@@ -37,13 +60,16 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      session.user = session.user || {};
-      session.user.id = token.sub;
-      session.accessToken = token.accessToken as string;
+      if (token.sub) {
+        session.user.id = token.sub;
+      }
+      if (token.accessToken) {
+        session.accessToken = token.accessToken;
+      }
       return session;
     },
   },
-  session: { strategy: 'jwt' },
+  session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
 };
 
