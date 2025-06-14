@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { TrendingUp, Building2, Users, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import FeaturedListings from "@/components/molecules/featured-listings";
 import TestimonialCarousel from "@/components/molecules/testimonial-carousel";
 import Footer from "@/components/molecules/footer";
@@ -103,7 +103,7 @@ export default function Home() {
                 Streamlined investment made <br className='hidden sm:block' /> simple and effortless
               </h2>
               <p className='mb-4 text-sm leading-relaxed text-text-muted sm:mb-6 sm:text-base'>
-                Whether you're a first-time investor or expanding a seasoned portfolio, our marketplace equips you with
+                Whether you&apos;re a first-time investor or expanding a seasoned portfolio, our marketplace equips you with
                 the tools, insights, and support needed to make smart, efficient investment decisions.
               </p>
               <p className='mb-6 text-sm leading-relaxed text-text-muted sm:mb-8 sm:text-base'>
