@@ -15,43 +15,43 @@ export default function FeaturedListings() {
       name: "John Apartment",
       description:
         "123 Main St, Anytown, USA. This beautiful apartment features 2 spacious bedrooms, 2 modern bathrooms, a fully equipped kitchen, and a large living area with plenty of natural light. Located in the heart of Anytown, it offers easy access to shopping, dining, and public transportation. Perfect for families or professionals seeking comfort and convenience.",
-      image: "/images/featured-listing-1.png",
+      image: "/images/listing-1.png",
     },
     {
       name: "1004 North 10th Street",
       description:
         "1004 North 10th Street, Philadelphia, PA 19123. This stunning property offers 3 spacious bedrooms, 2.5 modern bathrooms, an open-concept kitchen with stainless steel appliances, and a sunlit living room perfect for entertaining. Enjoy hardwood floors throughout, a private backyard, and convenient access to local shops, restaurants, and public transportation. Ideal for families or professionals seeking a blend of comfort and city living.",
-      image: "/images/featured-listing-1.png",
+      image: "/images/listing-2.png",
     },
     {
       name: "RC Brown Apartment",
       description:
         "RC Brown Apartment, Philadelphia, PA 19123. This stunning property offers 3 spacious bedrooms, 2.5 modern bathrooms, an open-concept kitchen with stainless steel appliances, and a sunlit living room perfect for entertaining. Enjoy hardwood floors throughout, a private backyard, and convenient access to local shops, restaurants, and public transportation. Ideal for families or professionals seeking a blend of comfort and city living.",
-      image: "/images/featured-listing-1.png",
+      image: "/images/listing-3.png",
     },
     {
       name: "Avery Apartments",
       description:
         "Avery Apartments, Philadelphia, PA 19123. This stunning property offers 3 spacious bedrooms, 2.5 modern bathrooms, an open-concept kitchen with stainless steel appliances, and a sunlit living room perfect for entertaining. Enjoy hardwood floors throughout, a private backyard, and convenient access to local shops, restaurants, and public transportation. Ideal for families or professionals seeking a blend of comfort and city living.",
-      image: "/images/featured-listing-1.png",
+      image: "/images/listing-1.png",
     },
     {
       name: "Baker Apartments",
       description:
         "Baker Apartments, Philadelphia, PA 19123. This stunning property offers 3 spacious bedrooms, 2.5 modern bathrooms, an open-concept kitchen with stainless steel appliances, and a sunlit living room perfect for entertaining. Enjoy hardwood floors throughout, a private backyard, and convenient access to local shops, restaurants, and public transportation. Ideal for families or professionals seeking a blend of comfort and city living.",
-      image: "/images/featured-listing-1.png",
+      image: "/images/listing-3.png",
     },
     {
       name: "Cleveland Apartments",
       description:
         "Cleveland Apartments, Philadelphia, PA 19123. This stunning property offers 3 spacious bedrooms, 2.5 modern bathrooms, an open-concept kitchen with stainless steel appliances, and a sunlit living room perfect for entertaining. Enjoy hardwood floors throughout, a private backyard, and convenient access to local shops, restaurants, and public transportation. Ideal for families or professionals seeking a blend of comfort and city living.",
-      image: "/images/featured-listing-1.png",
+      image: "/images/listing-2.png",
     },
     {
       name: "Drexel Apartments",
       description:
         "Drexel Apartments, Philadelphia, PA 19123. This stunning property offers 3 spacious bedrooms, 2.5 modern bathrooms, an open-concept kitchen with stainless steel appliances, and a sunlit living room perfect for entertaining. Enjoy hardwood floors throughout, a private backyard, and convenient access to local shops, restaurants, and public transportation. Ideal for families or professionals seeking a blend of comfort and city living.",
-      image: "/images/featured-listing-1.png",
+      image: "/images/listing-1.png",
     },
   ];
 
@@ -79,7 +79,7 @@ export default function FeaturedListings() {
 
           <Button
             variant={"outline"}
-            className='hover:bg-tertiary hover:border-tertiary mx-auto mt-4 flex border-2 bg-white/10 px-10 py-3 text-xs font-bold text-white duration-75 hover:text-primary sm:mt-5 sm:px-12 sm:py-4 lg:px-16 lg:py-6 lg:text-sm'
+            className='mx-auto mt-4 flex border-2 bg-white/10 px-10 py-3 text-xs font-bold text-white duration-75 hover:border-tertiary hover:bg-tertiary hover:text-primary sm:mt-5 sm:px-12 sm:py-4 lg:px-16 lg:py-6 lg:text-sm'
           >
             Invest Now
           </Button>
@@ -101,7 +101,7 @@ export default function FeaturedListings() {
                 <div className='p-1'>
                   <Card className='group relative h-48 cursor-pointer overflow-hidden rounded-[10px] border-2 border-[#D9D9D9] sm:h-56 lg:h-[220px] lg:border-4'>
                     <div className='absolute inset-0 -z-10'>
-                      <Image src='/images/hero-img.png' alt='Business meeting' fill className='object-cover' priority />
+                      <Image src={listing.image} alt='Business meeting' fill className='object-cover' priority />
                     </div>
                     <div className='absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent sm:h-24' />
                     <CardContent className='relative flex h-full items-center justify-center p-4 sm:p-6'>
@@ -125,14 +125,14 @@ export default function FeaturedListings() {
             customIcon={
               <ChevronLeft className='box-content size-5 rounded-full bg-white/15 p-1.5 text-white sm:size-6 sm:p-2' />
             }
-            className='left-2 sm:left-4'
+            className='left-2 sm:-left-10'
           />
           <CarouselNext
             variant='ghost'
             customIcon={
               <ChevronRight className='box-content size-5 rounded-full bg-white/15 p-1.5 text-white sm:size-6 sm:p-2' />
             }
-            className='right-2 sm:right-4'
+            className='right-2 sm:-right-10'
           />
         </Carousel>
       </div>

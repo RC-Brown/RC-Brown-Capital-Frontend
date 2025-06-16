@@ -134,11 +134,11 @@ export default function Navbar() {
               <Image
                 src='/images/logo-dark.png'
                 alt='logo'
-                width={isMobile ? 160 : 210}
-                height={isMobile ? 115 : 150}
+                width={isMobile ? 160 : 229}
+                height={isMobile ? 48 : 48}
                 priority
                 loading='eager'
-                className='h-auto w-auto'
+                className=''
               />
             </div>
 
