@@ -15,6 +15,11 @@ const pps = Poppins({
 export const metadata: Metadata = {
   title: "RC Brown Capital",
   description: "Gateway to high yeid Real Estate Investments",
+  icons: {
+    icon: "/rc-favicon.png",
+    shortcut: "/rc-favicon.png",
+    apple: "/rc-favicon.png",
+  },
 };
 
 export default function RootLayout({
