@@ -62,15 +62,9 @@ export default function FeaturedListings() {
       </div>
       <div className='container relative mx-auto px-4 pb-6 pt-16 sm:px-6 sm:pb-9 sm:pt-20 lg:pt-28'>
         <div className='flex flex-col items-center text-center'>
-          <Image
-            src='/icons/video-play.svg'
-            alt='Video play'
-            width={56}
-            height={56}
-            className='mx-auto sm:h-16 sm:w-16 lg:h-[72px] lg:w-[72px]'
-          />
+          <Image src='/icons/video-play.svg' alt='Video play' width={56} height={56} className='mx-auto' />
 
-          <h2 className='mt-2 text-2xl font-bold uppercase text-white sm:mt-3 sm:text-3xl lg:text-[40px]'>
+          <h2 className='mt-2 text-2xl font-bold uppercase text-white sm:mt-3 sm:text-3xl lg:text-4xl'>
             The Marketplace for{" "}
             <span className='text-text-tertiary'>
               Smart <br /> Investments
@@ -91,21 +85,21 @@ export default function FeaturedListings() {
             loop: true,
           }}
           plugins={[autoplay.current]}
-          className='mx-auto mt-16 w-full max-w-7xl sm:mt-24 lg:mt-32'
+          className='mx-auto mt-16 w-full max-w-5xl sm:mt-24 lg:mt-32'
           onMouseEnter={() => autoplay.current.stop()}
           onMouseLeave={() => autoplay.current.play()}
         >
-          <CarouselContent className='-ml-2 sm:-ml-4'>
+          <CarouselContent className='-ml-2'>
             {lisitngs.map((listing, index) => (
-              <CarouselItem key={index} className='pl-2 sm:pl-4 md:basis-1/2 lg:basis-1/3'>
+              <CarouselItem key={index} className='pl-1 md:basis-1/2 lg:basis-1/3'>
                 <div className='p-1'>
-                  <Card className='group relative h-48 cursor-pointer overflow-hidden rounded-[10px] border-2 border-[#D9D9D9] sm:h-56 lg:h-[220px] lg:border-4'>
+                  <Card className='group relative h-48 cursor-pointer overflow-hidden rounded-[10px] border-2 border-[#D9D9D9] sm:h-56 lg:h-[190px] lg:border-4'>
                     <div className='absolute inset-0 -z-10'>
                       <Image src={listing.image} alt='Business meeting' fill className='object-cover' priority />
                     </div>
                     <div className='absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/80 to-transparent sm:h-24' />
                     <CardContent className='relative flex h-full items-center justify-center p-4 sm:p-6'>
-                      <span className='absolute bottom-3 left-3 z-10 text-lg font-semibold text-white transition-opacity duration-200 group-hover:opacity-0 sm:bottom-4 sm:left-4 sm:text-xl'>
+                      <span className='absolute bottom-3 left-3 z-10 text-lg font-semibold text-white transition-opacity duration-200 group-hover:opacity-0 sm:bottom-4 sm:left-4'>
                         {listing.name}
                       </span>
                       <span className='absolute bottom-3 left-3 right-3 z-10 line-clamp-2 text-sm font-light text-white opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:bottom-4 sm:left-4 sm:right-4 sm:text-base'>
