@@ -127,17 +127,16 @@ export default function Navbar() {
   return (
     <>
       <header className='sticky top-0 z-50 w-full bg-white shadow-sm'>
-        <div className='container mx-auto px-4 py-3 sm:px-6 lg:px-20 lg:py-8'>
+        <div className='container mx-auto px-4 py-3 sm:px-6 lg:px-14 lg:py-[26px]'>
           <div className='flex items-center justify-between'>
             {/* Logo */}
             <div className='flex-shrink-0'>
               <Image
                 src='/images/logo-dark.png'
                 alt='logo'
-                width={isMobile ? 160 : 229}
-                height={isMobile ? 48 : 48}
+                width={isMobile ? 160 : 200}
+                height={isMobile ? 48 : 35}
                 priority
-                loading='eager'
                 className=''
               />
             </div>
@@ -152,23 +151,23 @@ export default function Navbar() {
                         <NavigationMenuLink asChild>
                           <Link
                             href={item.href}
-                            className='px-4 py-2 font-semibold text-text-muted transition-colors hover:text-black'
+                            className='py-2 text-xs font-semibold text-text-muted transition-colors hover:text-black'
                           >
                             {item.name}
                           </Link>
                         </NavigationMenuLink>
                       ) : (
                         <>
-                          <NavigationMenuTrigger className='font-semibold text-text-muted transition-colors hover:text-black'>
+                          <NavigationMenuTrigger className='px-2 text-xs font-semibold text-text-muted transition-colors hover:text-black'>
                             {item.name}
                           </NavigationMenuTrigger>
                           {item.subMenu && (
-                            <NavigationMenuContent className='min-w-[200px] bg-white p-0'>
+                            <NavigationMenuContent className='min-w-[180px] bg-white p-0'>
                               {item.subMenu.map((subItem, index) => (
                                 <NavigationMenuLink
                                   key={index}
                                   asChild
-                                  className='block px-4 py-3 font-semibold text-text-muted transition-all hover:bg-primary hover:text-white'
+                                  className='block px-4 py-3 text-xs font-semibold text-text-muted transition-all hover:bg-primary hover:text-white'
                                 >
                                   <Link href={subItem.href}>{subItem.name}</Link>
                                 </NavigationMenuLink>
@@ -186,10 +185,10 @@ export default function Navbar() {
             {/* Desktop Auth Buttons */}
             {!isMobile && (
               <div className='flex items-center space-x-4 xl:space-x-6'>
-                <Button variant='link' className='px-0 text-sm font-semibold'>
+                <Button variant='link' className='px-0 text-sm font-normal' asChild>
                   <Link href='/login'>Log in</Link>
                 </Button>
-                <Button className='px-6 py-2 text-sm font-semibold xl:px-8'>
+                <Button className='px-6 py-2 text-sm font-semibold xl:px-8' value={"link"} asChild>
                   <Link href='/register'>Sign up</Link>
                 </Button>
               </div>
@@ -314,11 +313,23 @@ export default function Navbar() {
 
               {/* Mobile Auth Buttons */}
               <div className='space-y-3 border-t border-gray-200 p-4'>
-                <Button variant='outline' className='w-full py-3 text-base font-semibold' onClick={closeMobileMenu}>
+                <Button
+                  variant='outline'
+                  className='w-full py-3 text-base font-semibold'
+                  onClick={closeMobileMenu}
+                  asChild
+                >
                   <Link href='/login'>Log in</Link>
                 </Button>
-                <Button className='w-full py-3 text-base font-semibold' onClick={closeMobileMenu}>
-                  <Link href='/register'>Sign up</Link>
+                <Button
+                  className='w-full py-3 text-base font-semibold'
+                  onClick={closeMobileMenu}
+                  variant={"link"}
+                  asChild
+                >
+                  <Link href='/register' className='h-full w-full'>
+                    Sign up
+                  </Link>
                 </Button>
               </div>
             </div>

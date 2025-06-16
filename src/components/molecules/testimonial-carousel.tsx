@@ -153,9 +153,7 @@ export default function TestimonialCarousel() {
                     <Star key={i} className='size-3 fill-current sm:size-4' />
                   ))}
                 </div>
-                <p className='mb-4 flex-grow text-sm font-light text-text-muted sm:mb-6 sm:text-base'>
-                  {testimonial.content}
-                </p>
+                <p className='mb-4 flex-grow text-sm text-text-muted sm:mb-6'>{testimonial.content}</p>
                 <div className='flex items-center gap-3'>
                   <div className='relative h-10 w-10 overflow-hidden rounded-full sm:h-12 sm:w-12'>
                     <Image
@@ -166,7 +164,7 @@ export default function TestimonialCarousel() {
                     />
                   </div>
                   <div>
-                    <h4 className='text-sm font-semibold text-text-muted sm:text-base'>{testimonial.name}</h4>
+                    <h4 className='text-sm font-semibold text-text-muted'>{testimonial.name}</h4>
                     <p className='text-xs font-light text-[#55A2F0] sm:text-sm'>{testimonial.role}</p>
                   </div>
                 </div>
