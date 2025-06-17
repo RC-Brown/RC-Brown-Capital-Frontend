@@ -24,6 +24,10 @@ const config = {
           tertiary: "#82D361",
         },
       },
+      screens: {
+        // Target screens with max-height of 400px
+        medium: { raw: "(max-height: 780px)" },
+      },
     },
   },
   plugins: [],

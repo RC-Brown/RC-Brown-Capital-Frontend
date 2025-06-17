@@ -13,14 +13,14 @@ export default function Home() {
     <div className='min-h-screen bg-background-secondary'>
       <Navbar />
       {/* Hero Section */}
-      <section className='relative min-h-[90vh]'>
-        <div className='absolute inset-0 bg-red-700'>
+      <section className='medium:min-h-[90vh] relative min-h-[70vh]'>
+        <div className='absolute inset-0'>
           <Image src='/images/hero-img.png' alt='Business meeting' fill className='h-full object-cover' priority />
         </div>
 
         <div className='container relative mx-auto px-4 pt-16 sm:px-6 sm:pt-20 lg:px-16 lg:pt-24'>
-          <div className='max-w-xs sm:max-w-sm'>
-            <h1 className='mb-6 text-2xl font-bold leading-tight text-white sm:mb-8 sm:text-3xl lg:text-[42px] lg:leading-[1.5]'>
+          <div className='max-w-xs sm:max-w-sm xl:max-w-lg'>
+            <h1 className='mb-6 text-2xl font-bold leading-tight text-white sm:mb-8 sm:text-3xl lg:text-[42px] lg:leading-[1.5] xl:text-[48px] xl:leading-[1.5]'>
               Gateway to high <br className='hidden sm:block' /> yield Real Estate Investments.
             </h1>
 
@@ -31,7 +31,7 @@ export default function Home() {
           </div>
 
           {/* Feature Cards */}
-          <div className='absolute -bottom-[280px] left-1/2 grid w-[90%] max-w-6xl -translate-x-1/2 gap-4 sm:-bottom-[300px] sm:gap-6 md:-bottom-[305px] md:grid-cols-3 md:gap-8'>
+          <div className='absolute -bottom-[280px] left-1/2 grid w-[90%] max-w-6xl -translate-x-1/2 gap-4 sm:-bottom-[300px] sm:gap-6 md:-bottom-[305px] md:grid-cols-3 md:gap-6 xl:gap-8'>
             <Card className='group cursor-pointer rounded-[10px] border-none bg-white p-3 shadow-lg transition-all duration-300 ease-in-out hover:bg-primary hover:text-white'>
               <CardContent className='p-3 py-8 sm:py-10'>
                 <div className='flex flex-col items-center space-y-4 text-center sm:flex-row sm:items-start sm:space-x-6 sm:space-y-0 sm:text-left'>
@@ -43,7 +43,7 @@ export default function Home() {
                     className='flex-shrink-0 sm:h-[50px] sm:w-[50px]'
                   />
                   <div>
-                    <h3 className='text-lg font-normal leading-[1.4] sm:text-xl lg:text-2xl'>
+                    <h3 className='text-lg font-normal leading-[1.4] sm:text-xl xl:text-2xl'>
                       Invest Smarter, Live Better. Your Path to Passive Income Starts Here.
                     </h3>
                   </div>
@@ -62,7 +62,7 @@ export default function Home() {
                     className='flex-shrink-0 sm:h-[50px] sm:w-[50px]'
                   />
                   <div>
-                    <h3 className='text-lg font-normal leading-[1.4] sm:text-xl lg:text-2xl'>
+                    <h3 className='text-lg font-normal leading-[1.4] sm:text-xl xl:text-2xl'>
                       Own a Piece of the Property Pie - Real Estate for Every Investor.
                     </h3>
                   </div>
@@ -81,7 +81,7 @@ export default function Home() {
                     className='flex-shrink-0 sm:h-[50px] sm:w-[50px]'
                   />
                   <div>
-                    <h3 className='text-lg font-normal leading-[1.4] sm:text-xl lg:text-2xl'>
+                    <h3 className='text-lg font-normal leading-[1.4] sm:text-xl xl:text-2xl'>
                       Diversify and Relax, Unwind from Stock Market Stress.
                     </h3>
                   </div>
@@ -92,12 +92,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section className='mt-48 bg-white sm:mt-56'>
+      <section className='mt-32 bg-white sm:mt-56'>
         <div className='container mx-auto px-4 py-12 sm:px-6 sm:py-16 lg:px-16 lg:py-20'>
-          <div className='grid items-center gap-8 lg:grid-cols-2 lg:gap-12'>
+          <div className='grid gap-8 lg:grid-cols-2 lg:gap-12 xl:items-center'>
             <div className='order-2 lg:order-1'>
-              <h2 className='mb-4 text-2xl font-semibold leading-[1.4] tracking-tight text-primary sm:mb-6 sm:text-3xl lg:text-4xl lg:leading-[1.4]'>
-                Streamlined investment made <br className='hidden sm:block' /> simple and effortless
+              <h2 className='mb-4 text-2xl font-semibold leading-[1.4] tracking-tight text-primary sm:mb-6 sm:text-3xl lg:leading-[1.4] xl:text-4xl'>
+                Streamlined investment made <br className='hidden xl:block' /> simple and effortless
               </h2>
               <p className='mb-4 text-sm leading-relaxed text-text-muted sm:mb-6'>
                 Whether you&apos;re a first-time investor or expanding a seasoned portfolio, our marketplace equips you
@@ -261,12 +261,12 @@ export default function Home() {
       <section className='bg-white pb-12 sm:pb-16 lg:pb-20'>
         <div className='container mx-auto px-4 sm:px-6 lg:px-16'>
           <div className='flex flex-col overflow-hidden rounded-2xl bg-[#2A2A2A] sm:rounded-3xl md:flex-row'>
-            <div className='flex flex-col justify-center px-6 py-8 md:w-[54%] md:px-8 lg:px-12'>
-              <h2 className='mb-4 text-xl font-semibold tracking-tight text-white sm:mb-6 sm:text-2xl md:text-3xl lg:max-w-[78%] lg:text-4xl lg:leading-[1.5]'>
+            <div className='flex flex-col justify-center px-6 py-8 md:w-[54%] md:px-8 xl:px-12'>
+              <h2 className='mb-4 text-xl font-semibold tracking-tight text-white sm:mb-6 sm:text-2xl md:text-3xl lg:max-w-[78%] lg:leading-[1.5] xl:text-4xl xl:leading-[1.6]'>
                 Sign up with RC Brown Capital today & unlock premium real estate opportunities.
               </h2>
               <Button
-                className='w-fit border-2 border-white bg-white/10 px-8 py-3 text-xs font-semibold text-white sm:px-10 sm:py-4 lg:px-10 lg:py-5'
+                className='w-fit border-2 border-white bg-white/10 px-8 py-3 text-xs font-semibold text-white hover:border-tertiary hover:bg-tertiary hover:font-semibold hover:text-primary sm:px-10 sm:py-4 lg:px-10 lg:py-5'
                 variant='outline'
               >
                 Join RC BROWN
