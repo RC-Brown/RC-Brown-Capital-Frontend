@@ -119,18 +119,18 @@ export default function TestimonialCarousel() {
             onClick={() => api?.scrollPrev()}
             variant='outline'
             size='icon'
-            className='h-10 w-10 rounded-full border-2 border-primary hover:bg-primary hover:text-white sm:h-12 sm:w-12'
+            className='h-10 w-10 rounded-full border-2 border-primary hover:bg-primary hover:text-white xl:h-12 xl:w-12'
           >
-            <ChevronLeft className='h-4 w-4 sm:h-5 sm:w-5' />
+            <ChevronLeft className='size-4 xl:size-5' />
             <span className='sr-only'>Previous slide</span>
           </Button>
           <Button
             onClick={() => api?.scrollNext()}
             variant='outline'
             size='icon'
-            className='h-10 w-10 rounded-full border-2 border-primary hover:bg-primary hover:text-white sm:h-12 sm:w-12'
+            className='h-10 w-10 rounded-full border-2 border-primary hover:bg-primary hover:text-white xl:h-12 xl:w-12'
           >
-            <ChevronRight className='h-4 w-4 sm:h-5 sm:w-5' />
+            <ChevronRight className='size-4 xl:size-5' />
             <span className='sr-only'>Next slide</span>
           </Button>
         </div>

@@ -56,7 +56,7 @@ export default function FeaturedListings() {
   ];
 
   return (
-    <section className='relative min-h-[80vh] sm:min-h-screen'>
+    <section className='medium:min-h-screen medium:h-auto medium:max-h-fit relative h-[90vh] max-h-[650px]'>
       <div className='absolute inset-0'>
         <Image src='/images/featured-listing-bg.png' alt='Business meeting' fill className='object-cover' priority />
       </div>
@@ -85,7 +85,7 @@ export default function FeaturedListings() {
             loop: true,
           }}
           plugins={[autoplay.current]}
-          className='mx-auto mt-16 w-full max-w-5xl sm:mt-24 lg:mt-32'
+          className='medium:lg:mt-32 mx-auto mt-16 w-full max-w-5xl sm:mt-24 lg:mt-24'
           onMouseEnter={() => autoplay.current.stop()}
           onMouseLeave={() => autoplay.current.play()}
         >
@@ -119,14 +119,14 @@ export default function FeaturedListings() {
             customIcon={
               <ChevronLeft className='box-content size-5 rounded-full bg-white/15 p-1.5 text-white sm:size-6 sm:p-2' />
             }
-            className='left-2 sm:-left-10'
+            className='left-2 xl:-left-10'
           />
           <CarouselNext
             variant='ghost'
             customIcon={
               <ChevronRight className='box-content size-5 rounded-full bg-white/15 p-1.5 text-white sm:size-6 sm:p-2' />
             }
-            className='right-2 sm:-right-10'
+            className='right-2 xl:-right-10'
           />
         </Carousel>
       </div>
