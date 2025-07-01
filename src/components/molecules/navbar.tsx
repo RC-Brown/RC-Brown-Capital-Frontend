@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/src/components/ui/button";
 import { ChevronDown, X } from "lucide-react";
 import Link from "next/link";
-import { useMediaQuery } from "@/lib/hooks/use-mobile";
+import { useMediaQuery } from "@/src/lib/hooks/use-mobile";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,12 +13,20 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-} from "@/components/ui/navigation-menu";
+} from "@/src/components/ui/navigation-menu";
+import { signOut, useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const isMobile = useMediaQuery("(max-width: 1023px)");
+  const session = useSession().data;
+  const pathname = usePathname();
+  const authPaths = ["login", "register-investor", "register-sponsor"];
+  const isAuthPath = authPaths.some((authPath) => pathname.includes(authPath));
 
   const menu = [
     {
@@ -124,13 +132,30 @@ export default function Navbar() {
     setOpenSubmenu(null);
   };
 
+  const queryClient = useQueryClient();
+
+  async function onSignOut() {
+    try {
+      toast.loading("Signing you out...");
+      await signOut({
+        redirect: true,
+        callbackUrl: "/login",
+      });
+      toast.dismiss();
+      toast.success("See you soon!");
+      queryClient.clear();
+    } catch {
+      toast.error("An error occured");
+    }
+  }
+
   return (
     <>
-      <header className='sticky top-0 z-50 w-full bg-white shadow-sm'>
+      <header className='fixed top-0 z-50 w-full bg-white shadow-sm'>
         <div className='container mx-auto px-4 py-3 sm:px-6 lg:px-14 lg:py-[26px]'>
           <div className='flex items-center justify-between'>
             {/* Logo */}
-            <div className='flex-shrink-0'>
+            <Link href='/' className='flex-shrink-0'>
               <Image
                 src='/images/logo-dark.png'
                 alt='logo'
@@ -139,10 +164,10 @@ export default function Navbar() {
                 priority
                 className=''
               />
-            </div>
+            </Link>
 
             {/* Desktop Navigation */}
-            {!isMobile && (
+            {!isMobile && !isAuthPath && (
               <NavigationMenu viewport={false}>
                 <NavigationMenuList>
                   {menu.map((item) => (
@@ -183,15 +208,48 @@ export default function Navbar() {
             )}
 
             {/* Desktop Auth Buttons */}
-            {!isMobile && (
+            {!isMobile && !session && (
               <div className='flex items-center space-x-4 xl:space-x-6'>
                 <Button variant='link' className='px-0 text-sm font-normal' asChild>
                   <Link href='/login'>Log in</Link>
                 </Button>
-                <Button className='px-6 py-2 text-sm font-semibold xl:px-8' value={"link"} asChild>
-                  <Link href='/register'>Sign up</Link>
-                </Button>
+                <NavigationMenu viewport={false}>
+                  <NavigationMenuList>
+                    <NavigationMenuItem>
+                      <NavigationMenuTrigger className='bg-primary px-6 py-2 text-sm font-semibold text-white hover:bg-primary/90 xl:px-8'>
+                        Sign up
+                      </NavigationMenuTrigger>
+                      <NavigationMenuContent className='min-w-[200px] bg-white p-0'>
+                        <NavigationMenuLink
+                          asChild
+                          className='block px-4 py-3 text-sm font-semibold text-text-muted transition-all hover:bg-primary hover:text-white'
+                        >
+                          <Link href='/register-investor'>Register as Investor</Link>
+                        </NavigationMenuLink>
+                        <NavigationMenuLink
+                          asChild
+                          className='block px-4 py-3 text-sm font-semibold text-text-muted transition-all hover:bg-primary hover:text-white'
+                        >
+                          <Link href='/register-sponsor'>Register as Sponsor</Link>
+                        </NavigationMenuLink>
+                      </NavigationMenuContent>
+                    </NavigationMenuItem>
+                  </NavigationMenuList>
+                </NavigationMenu>
               </div>
+            )}
+
+            {!isMobile && session && (
+              <Button
+                variant='link'
+                className='px-0 text-sm font-normal'
+                onClick={() => {
+                  onSignOut();
+                }}
+              >
+                {/* profile pic ideally here */}
+                Log Out
+              </Button>
             )}
 
             {/* Mobile Menu Button */}
@@ -312,26 +370,39 @@ export default function Navbar() {
               </div>
 
               {/* Mobile Auth Buttons */}
-              <div className='space-y-3 border-t border-gray-200 p-4'>
+              {!session ? (
+                <div className='space-y-3 border-t border-gray-200 p-4'>
+                  <Button
+                    variant='outline'
+                    className='w-full py-3 text-base font-semibold'
+                    onClick={closeMobileMenu}
+                    asChild
+                  >
+                    <Link href='/login'>Log in</Link>
+                  </Button>
+                  <Button
+                    className='w-full py-3 text-base font-semibold'
+                    onClick={closeMobileMenu}
+                    variant={"link"}
+                    asChild
+                  >
+                    <Link href='/register' className='h-full w-full'>
+                      Sign up
+                    </Link>
+                  </Button>
+                </div>
+              ) : (
                 <Button
                   variant='outline'
                   className='w-full py-3 text-base font-semibold'
-                  onClick={closeMobileMenu}
-                  asChild
+                  onClick={async () => {
+                    await onSignOut();
+                    closeMobileMenu();
+                  }}
                 >
-                  <Link href='/login'>Log in</Link>
+                  Log Out
                 </Button>
-                <Button
-                  className='w-full py-3 text-base font-semibold'
-                  onClick={closeMobileMenu}
-                  variant={"link"}
-                  asChild
-                >
-                  <Link href='/register' className='h-full w-full'>
-                    Sign up
-                  </Link>
-                </Button>
-              </div>
+              )}
             </div>
           </div>
         </div>

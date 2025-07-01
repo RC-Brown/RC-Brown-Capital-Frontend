@@ -3,6 +3,7 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import NextTopLoader from "nextjs-toploader";
+import { Toaster } from "sonner";
 
 const pps = Poppins({
   variable: "--font-pps",
@@ -33,6 +34,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <NextTopLoader color='#1F3B5F' showSpinner={false} />
+          <Toaster   richColors={true} closeButton position='top-center' />
         </Providers>
       </body>
     </html>
