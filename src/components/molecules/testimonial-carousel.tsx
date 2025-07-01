@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/components/ui/carousel";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { useMediaQuery } from "@/lib/hooks/use-mobile";
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from "@/src/components/ui/carousel";
+import { Button } from "@/src/components/ui/button";
+import { cn } from "@/src/lib/utils";
+import { useMediaQuery } from "@/src/lib/hooks/use-mobile";
 
 interface Testimonial {
   id: number;

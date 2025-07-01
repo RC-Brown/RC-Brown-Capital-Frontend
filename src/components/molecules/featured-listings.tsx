@@ -2,10 +2,10 @@
 
 import React, { useRef } from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/src/components/ui/button";
+import { Card, CardContent } from "@/src/components/ui/card";
 import Autoplay from "embla-carousel-autoplay";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/src/components/ui/carousel";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function FeaturedListings() {
@@ -56,7 +56,7 @@ export default function FeaturedListings() {
   ];
 
   return (
-    <section className='medium:min-h-screen medium:h-auto medium:max-h-fit relative h-[90vh] max-h-[650px]'>
+    <section className='relative h-[90vh] max-h-[650px] medium:h-auto medium:max-h-fit medium:min-h-screen'>
       <div className='absolute inset-0'>
         <Image src='/images/featured-listing-bg.png' alt='Business meeting' fill className='object-cover' priority />
       </div>
@@ -85,7 +85,7 @@ export default function FeaturedListings() {
             loop: true,
           }}
           plugins={[autoplay.current]}
-          className='medium:lg:mt-32 mx-auto mt-16 w-full max-w-5xl sm:mt-24 lg:mt-24'
+          className='mx-auto mt-16 w-full max-w-5xl sm:mt-24 lg:mt-24 medium:lg:mt-32'
           onMouseEnter={() => autoplay.current.stop()}
           onMouseLeave={() => autoplay.current.play()}
         >

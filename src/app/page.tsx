@@ -1,19 +1,19 @@
-import Navbar from "@/components/molecules/navbar";
+import Navbar from "@/src/components/molecules/navbar";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/src/components/ui/card";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
 import { ArrowRight } from "lucide-react";
-import FeaturedListings from "@/components/molecules/featured-listings";
-import TestimonialCarousel from "@/components/molecules/testimonial-carousel";
-import Footer from "@/components/molecules/footer";
+import FeaturedListings from "@/src/components/molecules/featured-listings";
+import TestimonialCarousel from "@/src/components/molecules/testimonial-carousel";
+import Footer from "@/src/components/molecules/footer";
 
 export default function Home() {
   return (
     <div className='min-h-screen bg-background-secondary'>
       <Navbar />
       {/* Hero Section */}
-      <section className='medium:min-h-[90vh] relative min-h-[70vh]'>
+      <section className='relative min-h-[70vh] medium:min-h-[90vh]'>
         <div className='absolute inset-0'>
           <Image src='/images/hero-img.png' alt='Business meeting' fill className='h-full object-cover' priority />
         </div>
@@ -51,7 +51,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-            <Card className='group cursor-pointer rounded-[10px] border-none bg-primary p-3 text-white shadow-lg transition-all duration-300 ease-in-out hover:bg-white hover:text-black'>
+            <Card className='group cursor-pointer rounded-[10px] border-none bg-white p-3 shadow-lg transition-all duration-300 ease-in-out hover:bg-primary hover:text-white'>
               <CardContent className='p-3 py-8 sm:py-10'>
                 <div className='flex flex-col items-center space-y-4 text-center sm:flex-row sm:items-start sm:space-x-6 sm:space-y-0 sm:text-left'>
                   <Image
