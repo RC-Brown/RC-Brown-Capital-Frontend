@@ -1,4 +1,3 @@
-import Navbar from "@/src/components/molecules/navbar";
 import Image from "next/image";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Input } from "@/src/components/ui/input";
@@ -10,8 +9,7 @@ import Footer from "@/src/components/molecules/footer";
 
 export default function Home() {
   return (
-    <div className='min-h-screen bg-background-secondary'>
-      <Navbar />
+    <div className=''>
       {/* Hero Section */}
       <section className='relative min-h-[70vh] medium:min-h-[90vh]'>
         <div className='absolute inset-0'>

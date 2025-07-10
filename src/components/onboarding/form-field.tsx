@@ -1,0 +1,446 @@
+"use client";
+
+import { useRef, useImperativeHandle, forwardRef } from "react";
+import { Input } from "@/src/components/ui/input";
+import { Textarea } from "@/src/components/ui/textarea";
+import { Label } from "@/src/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
+import { cn } from "@/src/lib/utils";
+import { ProjectDetailsTable, ProjectDetailsTableRef } from "./project-details-table";
+import { TermsCheckbox } from "./terms-checkbox";
+import { SupportingDocuments } from "./supporting-documents";
+import { ReferenceLinksManager } from "./reference-links-manager";
+import { AddressInput } from "./address-input";
+import { UtilityBillUpload } from "./utility-bill-upload";
+import { FacialCapture } from "./facial-capture";
+import { BankTermsCheckbox } from "./bank-terms-checkbox";
+import { IdentificationFields } from "./identification-fields";
+import { FileUpload } from "./file-upload";
+import { BusinessPlanRating } from "./business-plan-rating";
+import { DefinitionsDocument } from "./definitions-document";
+import { DealSnapshot } from "./deal-snapshot";
+import { RiskConsiderations } from "./risk-considerations";
+import { SectionHeader } from "./section-header";
+import { KeyDealPoints } from "./key-deal-points";
+import { PropertyAddressInput } from "./property-address-input";
+import { SponsorMetricsTable } from "./sponsor-metrics-table";
+import OfferDetailsTable from "./offer-details-table";
+import DebtDetailsForm from "./debt-details-form";
+import EquityDetailsForm from "./equity-details-form";
+import BudgetTable from "./budget-table";
+import ExpensesRevenueForm from "./expenses-revenue-form";
+import { OnboardingField, FormFieldValue } from "@/src/types/onboarding";
+
+type FormData = Record<string, FormFieldValue>;
+
+interface FormFieldProps {
+  field: OnboardingField;
+  value: FormFieldValue;
+  onChange: (value: FormFieldValue) => void;
+  error?: string;
+  formData?: FormData;
+  spans2Columns?: boolean;
+}
+
+export interface FormFieldRef {
+  validateCustomComponent: () => boolean;
+}
+
+export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
+  ({ field, value, onChange, error, formData = {}, spans2Columns = false }, ref) => {
+    const projectDetailsTableRef = useRef<ProjectDetailsTableRef>(null);
+
+    // Expose validation method to parent
+    useImperativeHandle(ref, () => ({
+      validateCustomComponent: () => {
+        if (field.key === "completed_projects" && projectDetailsTableRef.current) {
+          return projectDetailsTableRef.current.validate();
+        }
+        return true;
+      },
+    }));
+
+    const renderField = () => {
+      switch (field.type) {
+        case "text":
+          return (
+            <Input
+              placeholder={field.placeholder}
+              value={(value as string | number) || ""}
+              onChange={(e) => onChange(e.target.value)}
+              className={cn(error && "border-red-500", "max-w-[300px] text-sm placeholder:text-text-muted/50")}
+            />
+          );
+
+        case "textarea":
+          return (
+            <Textarea
+              placeholder={field.placeholder}
+              value={(value as string | number) || ""}
+              onChange={(e) => onChange(e.target.value)}
+              className={cn("min-h-[100px]", error && "border-red-500", "text-sm placeholder:text-text-muted/50")}
+            />
+          );
+
+        case "select":
+          if (field.allowOther) {
+            const selectValue =
+              typeof value === "object" && value !== null && !Array.isArray(value) && "selectedValue" in value
+                ? (value as { selectedValue: string; otherValue: string }).selectedValue
+                : typeof value === "string"
+                  ? value
+                  : "";
+            const otherValue =
+              typeof value === "object" && value !== null && !Array.isArray(value) && "otherValue" in value
+                ? (value as { selectedValue: string; otherValue: string }).otherValue
+                : "";
+
+            return (
+              <div className='space-y-3'>
+                <Select
+                  value={selectValue}
+                  onValueChange={(selectedValue) => {
+                    if (selectedValue === "other") {
+                      onChange({ selectedValue, otherValue: otherValue || "" });
+                    } else {
+                      onChange({ selectedValue, otherValue: "" });
+                    }
+                  }}
+                >
+                  <SelectTrigger
+                    className={cn(
+                      error && "border-red-500",
+                      "text-sm placeholder:text-text-muted/50 data-[placeholder]:text-text-muted/80",
+                      spans2Columns && "w-auto min-w-[120px]" // Auto-width only for 2-column spans
+                    )}
+                  >
+                    <SelectValue
+                      placeholder={field.placeholder || field.options?.[0]?.label || "Select an option"}
+                      className='text-text-muted/80'
+                    />
+                  </SelectTrigger>
+                  <SelectContent className='bg-white text-text-muted/80'>
+                    {field.options?.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {selectValue === "other" && (
+                  <div className='space-y-2'>
+                    <Label className='text-base font-normal -tracking-[3%] text-text-muted'>Please specify:</Label>
+                    <Input
+                      placeholder='Enter your custom option'
+                      value={otherValue}
+                      onChange={(e) => onChange({ selectedValue: selectValue, otherValue: e.target.value })}
+                      className={cn(error && "border-red-500", "text-sm placeholder:text-text-muted/50")}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <Select value={(value as string | number)?.toString() || ""} onValueChange={onChange}>
+              <SelectTrigger
+                className={cn(
+                  error && "border-red-500",
+                  "text-sm placeholder:text-text-muted/50 data-[placeholder]:text-text-muted/80",
+                  spans2Columns && "w-auto min-w-[120px]" // Auto-width only for 2-column spans
+                )}
+              >
+                <SelectValue
+                  placeholder={field.placeholder || field.options?.[0]?.label || "Select an option"}
+                  className='text-text-muted/80'
+                />
+              </SelectTrigger>
+              <SelectContent className='bg-white text-text-muted/80'>
+                {field.options?.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+
+        case "radio":
+          if (field.allowOther) {
+            const selectedValue =
+              typeof value === "object" && value !== null && !Array.isArray(value) && "selectedValue" in value
+                ? (value as { selectedValue: string; otherValue: string }).selectedValue
+                : typeof value === "string" || typeof value === "number"
+                  ? value.toString()
+                  : "";
+            const otherValue =
+              typeof value === "object" && value !== null && !Array.isArray(value) && "otherValue" in value
+                ? (value as { selectedValue: string; otherValue: string }).otherValue
+                : "";
+
+            return (
+              <div className='space-y-3'>
+                <RadioGroup
+                  value={selectedValue}
+                  onValueChange={(selectedValue) => {
+                    if (selectedValue === "other") {
+                      onChange({ selectedValue, otherValue: otherValue || "" });
+                    } else {
+                      onChange({ selectedValue, otherValue: "" });
+                    }
+                  }}
+                >
+                  <div className='flex flex-wrap gap-3'>
+                    {field.options?.map((option) => (
+                      <div
+                        key={option.value}
+                        className='flex w-fit cursor-pointer items-center space-x-3 rounded-lg border border-black/10 px-4 py-2'
+                      >
+                        <Label
+                          htmlFor={option.value}
+                          className='cursor-pointer text-base font-normal -tracking-[3%] text-text-muted'
+                        >
+                          {option.label}
+                        </Label>
+                        <RadioGroupItem
+                          value={option.value}
+                          id={option.value}
+                          className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
+                        />
+                      </div>
+                    ))}
+                    <div className='flex w-fit cursor-pointer items-center space-x-3 rounded-lg border border-black/10 px-4 py-2'>
+                      <Label
+                        htmlFor='other'
+                        className='cursor-pointer text-base font-normal -tracking-[3%] text-text-muted'
+                      >
+                        Other
+                      </Label>
+                      <RadioGroupItem
+                        value='other'
+                        id='other'
+                        className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
+                      />
+                    </div>
+                  </div>
+                </RadioGroup>
+
+                {selectedValue === "other" && (
+                  <div className='space-y-2'>
+                    <Label className='text-base font-normal -tracking-[3%] text-text-muted'>Please specify:</Label>
+                    <Input
+                      placeholder='Enter your custom option'
+                      value={otherValue}
+                      onChange={(e) => onChange({ selectedValue: selectedValue, otherValue: e.target.value })}
+                      className={cn(error && "border-red-500", "text-sm placeholder:text-text-muted/50")}
+                    />
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <RadioGroup value={(value as string | number)?.toString() || ""} onValueChange={onChange}>
+              <div className='flex flex-wrap gap-3'>
+                {field.options?.map((option) => (
+                  <div
+                    key={option.value}
+                    className='flex w-fit cursor-pointer items-center space-x-3 rounded-lg border border-black/10 px-4 py-2'
+                  >
+                    <Label
+                      htmlFor={option.value}
+                      className='cursor-pointer text-base font-normal -tracking-[3%] text-text-muted'
+                    >
+                      {option.label}
+                    </Label>
+                    <RadioGroupItem
+                      value={option.value}
+                      id={option.value}
+                      className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
+                    />
+                  </div>
+                ))}
+              </div>
+            </RadioGroup>
+          );
+
+        case "multi-text":
+          const multiTextValue = (value as Record<string, string>) || {};
+          return (
+            <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
+              {field.multiTextOptions?.map((option) => (
+                <div key={option} className='space-y-2'>
+                  <Label className='hidden text-base font-normal -tracking-[3%] text-text-muted'>{option}</Label>
+                  <Input
+                    placeholder={`${option}`}
+                    value={multiTextValue[option] || ""}
+                    onChange={(e) => onChange({ ...multiTextValue, [option]: e.target.value })}
+                    className={cn("text-sm placeholder:text-text-muted/50")}
+                  />
+                </div>
+              ))}
+            </div>
+          );
+
+        case "custom-component":
+          if (field.customComponent === "TermsCheckbox") {
+            return <TermsCheckbox value={Boolean(value)} onChange={onChange} error={error} />;
+          }
+          if (field.key === "completed_projects") {
+            return (
+              <ProjectDetailsTable
+                ref={projectDetailsTableRef}
+                value={value as never}
+                onChange={onChange}
+                error={error}
+              />
+            );
+          }
+          if (field.customComponent === "SupportingDocuments") {
+            return <SupportingDocuments value={value as never} onChange={onChange} />;
+          }
+          if (field.customComponent === "ReferenceLinksManager") {
+            return <ReferenceLinksManager value={value as never} onChange={onChange} />;
+          }
+          if (field.customComponent === "AddressInput") {
+            return <AddressInput value={value as never} onChange={onChange} />;
+          }
+          if (field.customComponent === "UtilityBillUpload") {
+            return <UtilityBillUpload value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "FacialCapture") {
+            return <FacialCapture value={Boolean(value)} onChange={onChange} />;
+          }
+          if (field.customComponent === "BankTermsCheckbox") {
+            return <BankTermsCheckbox value={Boolean(value)} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "IdentificationFields") {
+            return (
+              <IdentificationFields
+                value={value as never}
+                onChange={onChange as never}
+                selectedCountry={formData.country as string}
+              />
+            );
+          }
+          if (field.customComponent === "BusinessPlanRating") {
+            return (
+              <BusinessPlanRating value={(value as Record<string, string>) || {}} onChange={onChange} error={error} />
+            );
+          }
+          if (field.customComponent === "DefinitionsDocument") {
+            return <DefinitionsDocument value={Boolean(value)} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "DealSnapshot") {
+            return <DealSnapshot value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "RiskConsiderations") {
+            return <RiskConsiderations value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "SectionHeader") {
+            return (
+              <SectionHeader
+                value={(value as string | number)?.toString() || ""}
+                onChange={onChange}
+                error={error}
+                label={field.label}
+              />
+            );
+          }
+          if (field.customComponent === "KeyDealPoints") {
+            return <KeyDealPoints value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "PropertyAddressInput") {
+            return (
+              <PropertyAddressInput
+                value={(value as string | number)?.toString() || ""}
+                onChange={onChange}
+                error={error}
+              />
+            );
+          }
+          if (field.customComponent === "SponsorMetricsTable") {
+            return <SponsorMetricsTable value={value as never} onChange={onChange as never} error={error} />;
+          }
+          if (field.customComponent === "OfferDetailsTable") {
+            return <OfferDetailsTable value={value as never} onChange={onChange} />;
+          }
+          if (field.customComponent === "DebtDetailsForm") {
+            return <DebtDetailsForm value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "EquityDetailsForm") {
+            return <EquityDetailsForm value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "BudgetTable") {
+            return <BudgetTable value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "ExpensesRevenueForm") {
+            return <ExpensesRevenueForm value={value as never} onChange={onChange as never} />;
+          }
+          if (field.key === "supporting_documents") {
+            return <SupportingDocuments value={value as never} onChange={onChange} />;
+          }
+          return (
+            <div className='rounded-lg border-2 border-dashed border-gray-300 p-4 text-center'>
+              <p className='text-sm text-gray-500'>Custom component: {field.customComponent}</p>
+            </div>
+          );
+
+        case "file":
+          return (
+            <FileUpload
+              value={(value as File[]) || []}
+              onChange={onChange}
+              multiple={false}
+              acceptedFileTypes={field.validation.fileTypes || [".pdf", ".doc", ".docx", ".jpg", ".png"]}
+            />
+          );
+
+        case "multi-file":
+          return (
+            <FileUpload
+              value={(value as File[]) || []}
+              onChange={onChange}
+              multiple={true}
+              acceptedFileTypes={field.validation.fileTypes || [".pdf", ".doc", ".docx", ".jpg", ".png"]}
+            />
+          );
+
+        default:
+          return null;
+      }
+    };
+
+    if (field.layout === "inline") {
+      return (
+        <div className='space-y-2'>
+          <div className='flex items-center gap-4'>
+            <div className='flex-1'>
+              <Label className='text-base font-normal -tracking-[3%] text-text-muted'>{field.label}</Label>
+            </div>
+            <div className='flex-1'>{renderField()}</div>
+          </div>
+          {field.description && <p className='text-base -tracking-[3%] text-text-muted/70'>{field.description}</p>}
+          {error && <p className='text-sm text-red-500'>{error}</p>}
+        </div>
+      );
+    }
+
+    return (
+      <div className='space-y-6'>
+        <Label className='text-base font-normal -tracking-[3%] text-text-muted'>
+          {field.label}
+          {field.description && <p className='mt-1 text-base -tracking-[3%] text-text-muted/70'>{field.description}</p>}
+        </Label>
+        {renderField()}
+        {error && <p className='text-sm text-red-500'>{error}</p>}
+      </div>
+    );
+  }
+);
+
+FormField.displayName = "FormField";

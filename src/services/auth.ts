@@ -55,7 +55,6 @@ export async function signUpInvestor(data: z.infer<typeof signUpInvestorSchema>)
 
     return { success: result.message, redirectTo: "/home" };
   } catch (error) {
-    console.log({ error });
     if (axios.isAxiosError(error)) {
       const response = error.response;
 
@@ -133,7 +132,6 @@ export async function signUpSponsor(data: z.infer<typeof signUpSponsorSchema>) {
 
     return { success: result.message, redirectTo: result.redirect_to };
   } catch (error) {
-    console.log({ error });
     if (axios.isAxiosError(error)) {
       const response = error.response;
 
@@ -176,7 +174,6 @@ export async function login(data: z.infer<typeof loginSchema>) {
       redirect: false,
     });
   } catch (error) {
-    console.log({ error });
     if (axios.isAxiosError(error)) {
       const response = error.response;
 

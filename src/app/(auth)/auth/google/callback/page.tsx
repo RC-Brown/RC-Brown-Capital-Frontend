@@ -19,7 +19,6 @@ export default function GoogleCallback() {
       // Redirect to dashboard or home
       router.push("/");
     } else {
-      // Handle error (missing token/user)
       router.push("/login?error=google_oauth_failed");
     }
   }, [searchParams, router]);
