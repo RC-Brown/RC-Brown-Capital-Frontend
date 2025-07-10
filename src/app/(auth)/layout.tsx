@@ -13,7 +13,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
   return (
     <div className=''>
       <Navbar />
-      <div className='grid w-full grid-cols-1 items-start gap-6 bg-[#F5F5F5] px-12 pb-12 pt-32 sm:gap-12 lg:grid-cols-2'>
+      <div className='grid w-full grid-cols-1 items-start gap-6 bg-background-secondary px-12 pb-12 pt-32 sm:gap-12 lg:grid-cols-2'>
         <div className='hidden overflow-hidden rounded-[30px] lg:block'>
           <DynamicAuthImage />
         </div>

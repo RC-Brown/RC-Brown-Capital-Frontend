@@ -55,10 +55,6 @@ export default function SponsorSignupPage() {
   const { errors } = formState;
   const router = useRouter();
 
-  console.log({
-    formState: getValues(),
-  });
-
   const signUpEmail = handleSubmit(async (data: RegisterSponsorType) => {
     setEmailLoading(true);
 

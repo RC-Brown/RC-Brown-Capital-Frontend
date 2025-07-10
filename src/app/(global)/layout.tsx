@@ -7,5 +7,5 @@ export default async function GlobalLayout({ children }: { children: React.React
   if (!session) {
     redirect("/login");
   }
-  return <main>{children}</main>;
+  return <div>{children}</div>;
 }

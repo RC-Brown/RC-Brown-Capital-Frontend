@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "./providers";
 import NextTopLoader from "nextjs-toploader";
 import { Toaster } from "sonner";
+import Navbar from "../components/molecules/navbar";
 
 const pps = Poppins({
   variable: "--font-pps",
@@ -32,9 +33,12 @@ export default function RootLayout({
     <html lang='en' suppressHydrationWarning={true} className='h-full'>
       <body className={`${pps.variable} antialiased`} suppressHydrationWarning={true}>
         <Providers>
-          {children}
+          <main>
+            <Navbar />
+            <div className='mt-24 bg-background-secondary'>{children}</div>
+          </main>
           <NextTopLoader color='#1F3B5F' showSpinner={false} />
-          <Toaster   richColors={true} closeButton position='top-center' />
+          <Toaster richColors={true} closeButton position='top-center' />
         </Providers>
       </body>
     </html>

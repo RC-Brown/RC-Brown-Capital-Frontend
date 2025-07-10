@@ -66,10 +66,6 @@ export default function InvestorSignupPage() {
         phoneNumber: code + data.phoneNumber,
       });
 
-      console.log({
-        response,
-      });
-
       setEmailLoading(false);
       if (response.error) {
         const { error } = response;

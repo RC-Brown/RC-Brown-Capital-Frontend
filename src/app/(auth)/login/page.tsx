@@ -55,7 +55,6 @@ export default function LoginPage() {
       router.push("/");
     } catch (error) {
       setEmailSignInLoading(false);
-      console.log(error);
     }
   });
 
