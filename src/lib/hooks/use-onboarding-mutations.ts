@@ -67,8 +67,10 @@ export function useSaveBusinessInformationStep() {
       // Show success message
       toast.success(data.message || "Step saved successfully!");
     },
-    onError: (error: Error, variables) => {
-      toast.error(error.message || "Failed to save step");
+    onError: (error: Error) => {
+      if (error instanceof Error) {
+        toast(error.message);
+      }
     },
   });
 }
@@ -143,8 +145,10 @@ export function useSaveCompanyRepresentativeStep() {
       // Show success message
       toast.success(data.message || "Company representative step saved successfully!");
     },
-    onError: (error: Error, variables) => {
-      toast.error(error.message || "Failed to save company representative step");
+    onError: (error: Error) => {
+      if (error instanceof Error) {
+        toast(error.message);
+      }
     },
   });
 }
@@ -204,8 +208,10 @@ export function useUploadSupportingDocuments() {
     onSuccess: (fileUrls, variables) => {
       toast.success(`${variables.files.length} file(s) uploaded successfully!`);
     },
-    onError: (error: Error, variables) => {
-      toast.error(error.message || "Failed to upload documents");
+    onError: (error: Error) => {
+      if (error instanceof Error) {
+        toast(error.message);
+      }
     },
   });
 }
@@ -277,6 +283,10 @@ export function useSaveAndContinue() {
 
       return true;
     } catch (error) {
+      if (error instanceof Error) {
+        toast(error.message);
+      }
+
       return false;
     }
   };
@@ -305,7 +315,11 @@ export function useSaveAsDraft() {
       toast.success("Draft saved successfully!");
       return true;
     } catch (error) {
-      toast.error("Failed to save draft");
+      if (error instanceof Error) {
+        toast(error.message);
+        return false;
+      }
+
       return false;
     }
   };
