@@ -51,7 +51,7 @@ export default function SponsorSignupPage() {
       agreeToTerms: false,
     },
   });
-  const { register, handleSubmit, formState, setValue, getValues } = methods;
+  const { register, handleSubmit, formState, setValue } = methods;
   const { errors } = formState;
   const router = useRouter();
 

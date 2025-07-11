@@ -54,6 +54,9 @@ export default function LoginPage() {
       toast.success("Welcome Back");
       router.push("/");
     } catch (error) {
+      if (error instanceof Error) {
+        toast(error.message);
+      }
       setEmailSignInLoading(false);
     }
   });
