@@ -85,7 +85,7 @@ export default function SponsorSignupPage() {
         throw new Error("Session not found");
       }
 
-      router.push("/");
+      router.push("/onboarding/sponsor");
     } catch (error) {
       if (error instanceof Error) {
         toast(error.message);
