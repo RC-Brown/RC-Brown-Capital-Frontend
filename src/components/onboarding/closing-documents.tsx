@@ -31,19 +31,25 @@ export function ClosingDocuments({ value = { documentType: "" }, onChange, error
     onChange({ documentType, file: uploadedFile });
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-      onChange({ documentType: selectedType, file });
-    }
-  };
+  // const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (file) {
+  //     setUploadedFile(file);
+  //     onChange({ documentType: selectedType, file });
+  //   }
+  // };
 
   const triggerFileUpload = () => {
     const input = document.createElement("input");
     input.type = "file";
     input.accept = ".pdf,.doc,.docx,.jpg,.jpeg,.png";
-    input.onchange = handleFileUpload;
+    input.onchange = (event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.files?.[0]) {
+        setUploadedFile(target.files[0]);
+        onChange({ documentType: selectedType, file: target.files[0] });
+      }
+    };
     input.click();
   };
 
