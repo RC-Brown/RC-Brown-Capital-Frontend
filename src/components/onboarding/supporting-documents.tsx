@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/src/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/src/components/ui/dialog";
 import { FileText, X, Plus } from "lucide-react";
@@ -22,7 +22,7 @@ interface SupportingDocumentsProps {
 }
 
 export function SupportingDocuments({ value = [], onChange }: SupportingDocumentsProps) {
-  const [documents, setDocuments] = useState<UploadedDocument[]>(value);
+  const [documents, setDocuments] = useState<UploadedDocument[]>(() => (Array.isArray(value) ? value : []));
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState<{ key: string; label: string } | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -49,6 +49,11 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
   ];
 
   const acceptedExtensions = ".pdf,.doc,.docx,.txt,.xls,.xlsx";
+
+  // Sync documents state when value prop changes
+  useEffect(() => {
+    setDocuments(Array.isArray(value) ? value : []);
+  }, [value]);
 
   const openUploadModal = (category: { key: string; label: string }) => {
     setActiveCategory(category);
@@ -80,14 +85,14 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
       }
     });
 
-    const updatedDocuments = [...documents, ...newDocuments];
+    const updatedDocuments = [...(documents || []), ...newDocuments];
     setDocuments(updatedDocuments);
     onChange(updatedDocuments);
     closeModal();
   };
 
   const removeDocument = (id: string) => {
-    const filteredDocuments = documents.filter((doc) => doc.id !== id);
+    const filteredDocuments = (documents || []).filter((doc) => doc.id !== id);
     setDocuments(filteredDocuments);
     onChange(filteredDocuments);
   };
@@ -117,7 +122,8 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
   };
 
   const getCategoryDocuments = (categoryKey: string) => {
-    return documents.filter((doc) => doc.categoryKey === categoryKey);
+    // Defensive check to ensure documents is always an array
+    return (documents || []).filter((doc) => doc.categoryKey === categoryKey);
   };
 
   return (
