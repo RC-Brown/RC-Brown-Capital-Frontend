@@ -93,7 +93,7 @@ export default function FormPage({ params }: FormPageProps) {
 
   // Real-time validation function wrapped in useCallback
   const validateSectionDataRealtime = useCallback(() => {
-    if (!currentSectionData) return;
+    if (!currentSectionData || !currentSectionData.fields) return;
 
     const currentSectionFields = currentSectionData.fields.filter(shouldShowField);
     const realtimeErrors: Record<string, string> = {};
@@ -216,6 +216,8 @@ export default function FormPage({ params }: FormPageProps) {
 
   const validateSectionData = () => {
     // Get only the fields for the current section that are visible
+    if (!currentSectionData || !currentSectionData.fields) return false;
+
     const currentSectionFields = currentSectionData.fields.filter(shouldShowField);
     const sectionFormData: Record<string, unknown> = {};
 
@@ -499,7 +501,7 @@ export default function FormPage({ params }: FormPageProps) {
               </CardHeader>
               <CardContent className='space-y-6'>
                 <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
-                  {currentSectionData.fields.filter(shouldShowField).map((field) => (
+                  {currentSectionData?.fields?.filter(shouldShowField)?.map((field) => (
                     <div
                       key={field.key}
                       className={`${
