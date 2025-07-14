@@ -4,13 +4,15 @@ import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Plus, X, Building } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 
 interface RiskConsiderationItem {
   id: string;
-  potentialRisk: string;
-  assessmentMitigation: string;
+  risk: string;
+  severity: string;
+  mitigation: string;
 }
 
 interface RiskConsiderationsProps {
@@ -19,16 +21,27 @@ interface RiskConsiderationsProps {
   error?: string;
 }
 
+const severityOptions = [
+  { value: "low", label: "Low" },
+  { value: "medium", label: "Medium" },
+  { value: "high", label: "High" },
+];
+
 export function RiskConsiderations({ value = [], onChange, error }: RiskConsiderationsProps) {
-  const [items, setItems] = useState<RiskConsiderationItem[]>(
-    value.length > 0 ? value : [{ id: "1", potentialRisk: "", assessmentMitigation: "" }]
-  );
+  const [items, setItems] = useState<RiskConsiderationItem[]>(() => {
+    // Safely handle potentially null/undefined values
+    if (Array.isArray(value) && value.length > 0) {
+      return value;
+    }
+    return [{ id: "1", risk: "", severity: "", mitigation: "" }];
+  });
 
   const handleAddNew = () => {
     const newItem: RiskConsiderationItem = {
       id: Date.now().toString(),
-      potentialRisk: "",
-      assessmentMitigation: "",
+      risk: "",
+      severity: "",
+      mitigation: "",
     };
     const newItems = [...items, newItem];
     setItems(newItems);
@@ -48,17 +61,6 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
     setItems(newItems);
     onChange(newItems);
   };
-
-  //   return (
-  //     items.length > 0 &&
-  //     items.every(
-  //       (item) =>
-  //         item.potentialRisk.trim() !== "" &&
-  //         item.assessmentMitigation.trim() !== "" &&
-  //         item.assessmentMitigation.length >= 10
-  //     )
-  //   );
-  // };
 
   return (
     <div className='space-y-6'>
@@ -83,8 +85,10 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
           <table className='w-full border-collapse'>
             <thead>
               <tr className='border-b border-gray-200'>
-                <th className='w-1/3 p-4 text-left text-sm font-medium text-gray-700'>Potential Risk</th>
-                <th className='w-2/3 p-4 text-left text-sm font-medium text-gray-700'>Assessment / Mitigation</th>
+                <th className='w-1/4 p-4 text-left text-sm font-medium text-gray-700'>Potential Risk</th>
+                <th className='w-1/6 p-4 text-left text-sm font-medium text-gray-700'>Severity</th>
+                <th className='w-1/2 p-4 text-left text-sm font-medium text-gray-700'>Mitigation Strategy</th>
+                <th className='w-1/12 p-4'></th>
               </tr>
             </thead>
             <tbody>
@@ -93,32 +97,49 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
                   <td className='p-4'>
                     <Input
                       placeholder='e.g. Rising construction costs'
-                      value={item.potentialRisk}
-                      onChange={(e) => handleItemChange(item.id, "potentialRisk", e.target.value)}
+                      value={item.risk}
+                      onChange={(e) => handleItemChange(item.id, "risk", e.target.value)}
                       className={cn("w-full", error && "border-red-500")}
                     />
                   </td>
                   <td className='p-4'>
-                    <div className='flex items-center space-x-2'>
-                      <Textarea
-                        placeholder='e.g. Assessment: Secured fixed-rate contracts to lock pricing in early phases.'
-                        value={item.assessmentMitigation}
-                        onChange={(e) => handleItemChange(item.id, "assessmentMitigation", e.target.value)}
-                        className={cn("min-h-[80px] flex-1", error && "border-red-500")}
-                        rows={3}
-                      />
-                      {items.length > 1 && (
-                        <Button
-                          type='button'
-                          variant='ghost'
-                          size='sm'
-                          onClick={() => handleRemove(item.id)}
-                          className='h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
-                        >
-                          <X className='h-4 w-4' />
-                        </Button>
-                      )}
-                    </div>
+                    <Select
+                      value={item.severity}
+                      onValueChange={(value) => handleItemChange(item.id, "severity", value)}
+                    >
+                      <SelectTrigger className={cn("w-full", error && "border-red-500")}>
+                        <SelectValue placeholder='Select' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {severityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </td>
+                  <td className='p-4'>
+                    <Textarea
+                      placeholder='e.g. Secured fixed-rate contracts to lock pricing in early phases.'
+                      value={item.mitigation}
+                      onChange={(e) => handleItemChange(item.id, "mitigation", e.target.value)}
+                      className={cn("min-h-[80px] w-full", error && "border-red-500")}
+                      rows={3}
+                    />
+                  </td>
+                  <td className='p-4'>
+                    {items.length > 1 && (
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='sm'
+                        onClick={() => handleRemove(item.id)}
+                        className='h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
+                      >
+                        <X className='h-4 w-4' />
+                      </Button>
+                    )}
                   </td>
                 </tr>
               ))}
