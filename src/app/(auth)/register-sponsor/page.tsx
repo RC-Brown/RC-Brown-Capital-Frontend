@@ -193,8 +193,7 @@ export default function SponsorSignupPage() {
 
           <div>
             <Input
-              type='url'
-              placeholder='Website (optional)'
+              placeholder='Website (optional) e.g https://www.google.com'
               {...register("website")}
               className='w-full rounded-md border-0 bg-white px-2 py-3 text-sm shadow-none placeholder:text-sm placeholder:text-text-muted/80'
             />

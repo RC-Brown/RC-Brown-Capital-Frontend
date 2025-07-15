@@ -49,7 +49,7 @@ export const RegisterSponsorSchema = z
       message: "You must agree to the terms and conditions",
     }),
     companyName: z.string().min(1, { message: "Company name is required" }),
-    website: z.string().url({ message: "Please enter a valid website URL" }),
+    website: z.string().url({ message: "Please enter a valid website URL" }).optional(),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
