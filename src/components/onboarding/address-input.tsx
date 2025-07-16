@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Input } from "@/src/components/ui/input";
-import { MapPin } from "lucide-react";
+import { MapPinIcon } from "@heroicons/react/24/solid";
 
 interface AddressInputProps {
   value?: {
@@ -27,7 +27,7 @@ export function AddressInput({ value = { address: "", useCompanyAddress: false }
   return (
     <div className='space-y-3'>
       <div className='relative'>
-        <MapPin className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400' />
+        <MapPinIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-black/80' />
         <Input
           placeholder='Company address'
           value={addressData.address}

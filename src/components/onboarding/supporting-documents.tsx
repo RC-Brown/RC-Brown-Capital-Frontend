@@ -136,19 +136,19 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
           return (
             <div key={category.key}>
               {/* Category Row */}
-              <div className='flex items-center py-3'>
-                <span className='whitespace-nowrap text-sm font-medium text-gray-700'>{category.label}</span>
+              <div className='flex items-center justify-between py-3 lg:w-[140%]'>
+                <span className='whitespace-nowrap text-sm text-gray-700 lg:whitespace-normal'>{category.label}</span>
                 <div className='mx-4 flex-1 border-b border-dashed border-text-muted'></div>
                 <Button
                   type='button'
                   variant='outline'
                   size='sm'
                   onClick={() => openUploadModal(category)}
-                  className='flex items-center gap-1 whitespace-nowrap rounded-lg px-2 py-4 text-sm'
+                  className='flex items-center gap-1 whitespace-nowrap rounded-md px-3 py-6 text-sm'
                 >
                   <span className='flex items-center gap-2'>
-                    <Plus className='h-3 w-3' />
-                    <span className='text-sm font-normal text-text-muted/80'>Upload</span>
+                    <span className='text-xs font-normal text-text-muted/80'>Upload</span>
+                    <Plus className='size-3 text-black' />
                   </span>
                 </Button>
               </div>
@@ -185,12 +185,12 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
 
       {/* Upload Dialog */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className='max-w-md rounded-lg bg-white p-6'>
+        <DialogContent className='max-w-lg rounded-2xl bg-white p-6 pt-10'>
           <DialogHeader>
-            <DialogTitle className='rounded-2xl text-center text-base font-semibold text-primary'>
+            <DialogTitle className='rounded-2xl text-center text-sm font-semibold text-primary'>
               Upload Supporting Documents
             </DialogTitle>
-            <DialogDescription className='text-center text-base text-[#858585]'>
+            <DialogDescription className='text-center text-sm text-[#858585]'>
               Please upload only relevant documents for this project
             </DialogDescription>
           </DialogHeader>
@@ -198,7 +198,7 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
           <div className='space-y-4'>
             {/* Category being uploaded to */}
             {activeCategory && (
-              <div className='mb-4 text-sm text-gray-600'>
+              <div className='mb-4 text-xs text-gray-600'>
                 Uploading to: <span className='font-medium'>{activeCategory.label}</span>
               </div>
             )}
@@ -219,8 +219,8 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
               <Image
                 src='/images/pdf.png'
                 alt='upload-document'
-                width={60}
-                height={60}
+                width={55}
+                height={55}
                 className='mx-auto flex items-center justify-center'
               />
 
@@ -243,7 +243,7 @@ export function SupportingDocuments({ value = [], onChange }: SupportingDocument
 
             <div className='flex w-full justify-end'>
               {/* Upload Button */}
-              <Button type='button' onClick={() => fileInputRef.current?.click()} className=''>
+              <Button type='button' onClick={() => fileInputRef.current?.click()} className='px-12 py-6 text-xs'>
                 Upload
               </Button>
             </div>

@@ -1,8 +1,9 @@
 "use client";
 
-import { Check, ArrowRight } from "lucide-react";
+import { Check } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { Button } from "@/src/components/ui/button";
+import { ArrowRightIcon, CheckIcon } from "@heroicons/react/24/outline";
 
 interface ProgressTrackerProps {
   phases: Array<{
@@ -24,8 +25,8 @@ export function ProgressTracker({ phases, currentPhase, onPhaseClick, onStartCur
         label: "NEXT",
         title: "Company Representative Details",
         description: "Please provide the required information to proceed",
-        color: "bg-[#4BA623]", // tertiary color
-        labelBgColor: "bg-[#5EBB37]",
+        color: "bg-tertiary", // tertiary color
+        labelBgColor: "bg-tertiary",
       };
     } else if (phaseIndex === 3) {
       // Project Upload (phase 4)
@@ -123,7 +124,7 @@ export function ProgressTracker({ phases, currentPhase, onPhaseClick, onStartCur
               <Button onClick={onStartCurrentPhase} className='ml-4 flex !h-auto space-x-2'>
                 <span className='flex items-center space-x-2 text-xl font-medium'>
                   <span>Start</span>
-                  <ArrowRight className='size-4' />
+                  <ArrowRightIcon className='size-4 stroke-[3px]' />
                 </span>
               </Button>
             )}
@@ -151,7 +152,7 @@ export function SectionProgressTracker({
   onSectionClick,
 }: SectionProgressTrackerProps) {
   return (
-    <div className='space-y-5'>
+    <div className='space-y-8'>
       {sections.map((section, index) => {
         const isCompleted = completedSections.includes(section.key);
         const isCurrent = index === currentSection;
@@ -161,7 +162,7 @@ export function SectionProgressTracker({
           <div key={section.key} className='flex items-center space-x-4'>
             <div
               className={cn(
-                "flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-colors",
+                "flex size-12 shrink-0 items-center justify-center rounded-full transition-colors",
                 isCompleted
                   ? "bg-tertiary text-white"
                   : isCurrent
@@ -171,7 +172,11 @@ export function SectionProgressTracker({
               )}
               onClick={() => isClickable && onSectionClick(index)}
             >
-              {isCompleted ? <Check className='size-5' /> : <span className='text-base font-medium'>{index + 1}</span>}
+              {isCompleted ? (
+                <CheckIcon className='size-5 rotate-6 stroke-[3.5px]' />
+              ) : (
+                <span className='text-base font-medium'>{index + 1}</span>
+              )}
             </div>
             <div
               className={cn("flex-1", isClickable && "cursor-pointer")}
@@ -179,8 +184,8 @@ export function SectionProgressTracker({
             >
               <h3
                 className={cn(
-                  "text-base font-medium",
-                  isCompleted ? "text-tertiary" : isCurrent ? "text-primary" : "text-text-muted/70"
+                  "text-sm font-medium",
+                  isCompleted ? "text-text-muted/80" : isCurrent ? "text-primary" : "text-text-muted/70"
                 )}
               >
                 {section.title}

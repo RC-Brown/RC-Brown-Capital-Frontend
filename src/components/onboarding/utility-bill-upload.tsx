@@ -108,7 +108,7 @@ export function UtilityBillUpload({ value = null, onChange }: UtilityBillUploadP
           </Button>
         </div>
       ) : (
-        <div className='flex items-center gap-4'>
+        <div className='flex items-center gap-4 whitespace-nowrap lg:w-[130%]'>
           <div className='flex-1'>
             <input
               type='text'

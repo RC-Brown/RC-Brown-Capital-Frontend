@@ -108,21 +108,21 @@ export function ReferenceLinksManager({ value = [], onChange }: ReferenceLinksMa
             {/* Link Section */}
             <div className='flex items-center gap-4'>
               <div className='flex items-center gap-2'>
-                <div className='text-base text-text-muted'>Link</div>
+                <div className='text-sm text-text-muted'>Link</div>
               </div>
               <Input
                 type='url'
                 placeholder='Provide a link'
                 value={link.url}
                 onChange={(e) => updateLink(link.id, "url", e.target.value)}
-                className='text-sm'
+                className='py-6 text-xs shadow-none placeholder:text-xs'
               />
             </div>
 
             {/* Related Document Section */}
             <div className='flex items-center gap-4'>
               <div className='flex items-center gap-2'>
-                <div className='text-base text-text-muted'>Related Document</div>
+                <div className='text-sm text-text-muted'>Related Document</div>
               </div>
 
               {link.file ? (
@@ -157,11 +157,11 @@ export function ReferenceLinksManager({ value = [], onChange }: ReferenceLinksMa
                     type='button'
                     variant='outline'
                     onClick={() => document.getElementById(`file-${link.id}`)?.click()}
-                    className='w-fit rounded-lg px-2 py-4 text-sm'
+                    className='w-fit rounded-md px-3 py-6 text-xs'
                   >
                     <span className='flex items-center gap-2'>
-                      <Plus className='h-4 w-4' />
-                      <span className='text-sm font-normal text-text-muted/80'>Upload</span>
+                      <span className='text-xs font-normal text-text-muted/80'>Upload</span>
+                      <Plus className='size-3 text-black' />
                     </span>
                   </Button>
                 </div>
@@ -177,7 +177,7 @@ export function ReferenceLinksManager({ value = [], onChange }: ReferenceLinksMa
       {links.length < MAX_LINKS && (
         <Button type='button' variant='ghost' onClick={addLink} className='w-fit px-0 text-gray-700'>
           <span className='flex items-center gap-2'>
-            <Plus className='h-4 w-4' />
+            <Plus className='size-5 stroke-[2.5px] text-black' />
             <span className='text-sm font-normal text-text-muted/80'>Add another references or testimonials</span>
           </span>
         </Button>

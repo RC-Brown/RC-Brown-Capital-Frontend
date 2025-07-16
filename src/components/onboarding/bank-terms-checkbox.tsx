@@ -26,9 +26,9 @@ export function BankTermsCheckbox({ value = false, onChange, error }: BankTermsC
           id='bank-terms'
           checked={isChecked}
           onCheckedChange={handleChange}
-          className={cn(error && "border-red-500", "mt-1 text-white")}
+          className={cn(error && "border-red-500", "mt-1 size-3 text-white")}
         />
-        <Label htmlFor='bank-terms' className='cursor-pointer text-sm font-normal leading-relaxed'>
+        <Label htmlFor='bank-terms' className='cursor-pointer text-xs font-normal leading-relaxed'>
           I have read accept the{" "}
           <a
             href='/terms'

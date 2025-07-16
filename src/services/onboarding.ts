@@ -225,7 +225,6 @@ const companyRepresentativeSchema = z.object({
     ])
     .optional(),
   utility_bill: z.any().optional(),
-  facial_capture: z.boolean().optional(),
   currency_of_account: z.string().optional(),
   account_currency: z.string().optional(),
   bank_name: z.string().optional(),
@@ -271,7 +270,6 @@ function validateCompanyRepresentativeStep(step: number, data: any): { success: 
       bvn: z.string().optional(),
       nin: z.string().optional(),
       ssn: z.string().optional(),
-      facial_capture: z.boolean().optional(),
     });
 
     const result = stepSchema.safeParse(data);
@@ -280,7 +278,8 @@ function validateCompanyRepresentativeStep(step: number, data: any): { success: 
 
   // Step 2: Bank Details (using backend field names since data is already transformed)
   if (step === 2) {
-    const stepSchema = z.object({
+    // Create conditional schema based on country
+    const baseSchema = {
       user_id: z.number().positive("User ID is required"),
       account_currency: z.string().min(1, "Currency of account is required"),
       bank_name: z.string().min(1, "Bank name is required"),
@@ -289,10 +288,18 @@ function validateCompanyRepresentativeStep(step: number, data: any): { success: 
       routing_number: z.string().min(1, "Routing number is required"),
       sort_code: z.string().min(1, "Sort code is required"),
       account_number: z.string().min(1, "Account number is required"),
-      iban: z.string().min(1, "IBAN is required"),
       terms_accepted: z.boolean().refine((val) => val === true, {
         message: "You must accept the terms and conditions",
       }),
+    };
+
+    // Add IBAN requirement only for United States
+    const stepSchema = z.object({
+      ...baseSchema,
+      iban:
+        data.country === "United States"
+          ? z.string().min(1, "IBAN is required for United States accounts")
+          : z.string().optional(),
     });
 
     const result = stepSchema.safeParse(data);

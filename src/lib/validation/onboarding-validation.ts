@@ -243,7 +243,6 @@ export const CompanyRepresentativeSchema = z.object({
   ssn: z.string().optional(),
   address: AddressInputSchema,
   utility_bill: z.any().optional(),
-  facial_capture: z.boolean().optional(),
 
   // Company Bank Details
   currency_of_account: z.string().min(1, "Account currency is required"),

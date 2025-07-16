@@ -61,7 +61,6 @@ export const COMPANY_REPRESENTATIVE_FIELD_MAPPING = {
   ssn: "ssn", // Optional field
   address: "address", // Custom component data
   utility_bill: "utility_bill", // File field
-  facial_capture: "facial_capture", // Custom component
 
   // Company Bank Details (Step 2)
   currency_of_account: "account_currency", // Backend expects 'account_currency'
@@ -205,6 +204,11 @@ export function transformCompanyRepDataToApi(
 
   // Apply field mappings
   Object.entries(formData).forEach(([frontendKey, value]) => {
+    // Explicitly exclude facial_capture from being sent to backend
+    if (frontendKey === "facial_capture") {
+      return;
+    }
+
     const backendKey =
       COMPANY_REPRESENTATIVE_FIELD_MAPPING[frontendKey as keyof typeof COMPANY_REPRESENTATIVE_FIELD_MAPPING];
 
@@ -230,7 +234,7 @@ export function transformCompanyRepDataToApi(
           // Skip file metadata objects without actual files
           return;
         }
-      } else if (frontendKey === "bank_terms_accepted" || frontendKey === "facial_capture") {
+      } else if (frontendKey === "bank_terms_accepted") {
         (apiData as any)[backendKey] = Boolean(value);
       }
       // Handle regular fields

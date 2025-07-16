@@ -56,7 +56,7 @@ export function CongratulationsPopup({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4'
+          className='fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4'
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
@@ -64,7 +64,7 @@ export function CongratulationsPopup({
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", duration: 0.5 }}
           >
-            <Card className='w-full max-w-md rounded-2xl bg-white'>
+            <Card className='w-full max-w-lg rounded-3xl bg-white'>
               <CardContent className='p-8 text-center'>
                 <motion.div
                   initial={{ scale: 0 }}
@@ -85,7 +85,7 @@ export function CongratulationsPopup({
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className='mb-4 text-2xl font-semibold text-primary'
+                  className='mb-2 text-xl font-semibold text-primary'
                 >
                   {title}
                 </motion.h2>
@@ -94,13 +94,13 @@ export function CongratulationsPopup({
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className='mb-8 text-base text-[#858585]'
+                  className='mx-auto mb-12 max-w-[90%] text-sm text-[#858585]'
                 >
                   {description}
                 </motion.p>
 
                 <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.5 }}>
-                  <Button onClick={onContinue} className='text-sm font-semibold'>
+                  <Button onClick={onContinue} className='px-4 py-6 text-xs font-medium'>
                     {ctaText}
                   </Button>
                 </motion.div>

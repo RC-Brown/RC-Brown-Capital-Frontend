@@ -4,7 +4,7 @@ export interface OnboardingField {
   type: "text" | "textarea" | "select" | "radio" | "file" | "multi-file" | "multi-text" | "custom-component";
   placeholder?: string;
   description?: string;
-  options?: { label: string; value: string }[];
+  options?: { label: string; value: string }[] | string; // string for special identifiers like "currencies"
   multiTextOptions?: string[];
   allowOther?: boolean;
   customComponent?: string;

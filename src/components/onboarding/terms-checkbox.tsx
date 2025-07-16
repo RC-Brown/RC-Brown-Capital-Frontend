@@ -19,7 +19,7 @@ export function TermsCheckbox({ value = false, onChange, error }: TermsCheckboxP
           onCheckedChange={(checked: boolean) => onChange(checked === true)}
           className='mt-0.5 text-white'
         />
-        <Label htmlFor='terms-checkbox' className='cursor-pointer text-sm leading-relaxed'>
+        <Label htmlFor='terms-checkbox' className='cursor-pointer text-xs font-normal leading-relaxed'>
           I have read and accept the{" "}
           <a
             href='/terms-and-conditions'

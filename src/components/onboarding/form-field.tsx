@@ -16,6 +16,8 @@ import { UtilityBillUpload } from "./utility-bill-upload";
 import { FacialCapture } from "./facial-capture";
 import { BankTermsCheckbox } from "./bank-terms-checkbox";
 import { IdentificationFields } from "./identification-fields";
+import { CurrencySelect } from "./currency-select";
+import { CountrySelect } from "./country-select";
 import { FileUpload } from "./file-upload";
 import { BusinessPlanRating } from "./business-plan-rating";
 import { DefinitionsDocument } from "./definitions-document";
@@ -30,6 +32,7 @@ import DebtDetailsForm from "./debt-details-form";
 import EquityDetailsForm from "./equity-details-form";
 import BudgetTable from "./budget-table";
 import ExpensesRevenueForm from "./expenses-revenue-form";
+import { SizeInput } from "./size-input";
 import { OnboardingField, FormFieldValue } from "@/src/types/onboarding";
 
 type FormData = Record<string, FormFieldValue>;
@@ -69,7 +72,10 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
               placeholder={field.placeholder}
               value={(value as string | number) || ""}
               onChange={(e) => onChange(e.target.value)}
-              className={cn(error && "border-red-500", "max-w-[300px] text-sm placeholder:text-text-muted/50")}
+              className={cn(
+                error && "border-red-500",
+                "max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+              )}
             />
           );
 
@@ -79,11 +85,41 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
               placeholder={field.placeholder}
               value={(value as string | number) || ""}
               onChange={(e) => onChange(e.target.value)}
-              className={cn("min-h-[100px]", error && "border-red-500", "text-sm placeholder:text-text-muted/50")}
+              className={cn(
+                "min-h-[100px]",
+                error && "border-red-500",
+                "text-sm shadow-none placeholder:text-text-muted/50"
+              )}
             />
           );
 
         case "select":
+          // Handle special currency select case
+          if (field.options === "currencies") {
+            return (
+              <CurrencySelect
+                value={(value as string) || ""}
+                onChange={onChange}
+                error={error}
+                placeholder={field.placeholder}
+                className={spans2Columns ? "w-auto min-w-[120px]" : ""}
+              />
+            );
+          }
+
+          // Handle special country select case
+          if (field.options === "countries") {
+            return (
+              <CountrySelect
+                value={(value as string) || ""}
+                onChange={onChange}
+                error={error}
+                placeholder={field.placeholder}
+                className={spans2Columns ? "w-auto min-w-[120px]" : ""}
+              />
+            );
+          }
+
           if (field.allowOther) {
             const selectValue =
               typeof value === "object" && value !== null && !Array.isArray(value) && "selectedValue" in value
@@ -111,32 +147,40 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                   <SelectTrigger
                     className={cn(
                       error && "border-red-500",
-                      "text-sm placeholder:text-text-muted/50 data-[placeholder]:text-text-muted/80",
+                      "text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
                       spans2Columns && "w-auto min-w-[120px]" // Auto-width only for 2-column spans
                     )}
                   >
                     <SelectValue
-                      placeholder={field.placeholder || field.options?.[0]?.label || "Select an option"}
-                      className='text-text-muted/80'
+                      placeholder={
+                        field.placeholder ||
+                        (Array.isArray(field.options) ? field.options[0]?.label : "Select an option")
+                      }
+                      className='text-xs text-text-muted/80 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'
                     />
                   </SelectTrigger>
                   <SelectContent className='bg-white text-text-muted/80'>
-                    {field.options?.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    {Array.isArray(field.options) &&
+                      field.options.map((option) => (
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className='cursor-pointer hover:bg-primary hover:text-white'
+                        >
+                          {option.label}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
 
                 {selectValue === "other" && (
                   <div className='space-y-2'>
-                    <Label className='text-base font-normal -tracking-[3%] text-text-muted'>Please specify:</Label>
+                    <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>Please specify:</Label>
                     <Input
                       placeholder='Enter your custom option'
                       value={otherValue}
                       onChange={(e) => onChange({ selectedValue: selectValue, otherValue: e.target.value })}
-                      className={cn(error && "border-red-500", "text-sm placeholder:text-text-muted/50")}
+                      className={cn(error && "border-red-500", "text-sm shadow-none placeholder:text-text-muted/50")}
                     />
                   </div>
                 )}
@@ -149,21 +193,28 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
               <SelectTrigger
                 className={cn(
                   error && "border-red-500",
-                  "text-sm placeholder:text-text-muted/50 data-[placeholder]:text-text-muted/80",
+                  "text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
                   spans2Columns && "w-auto min-w-[120px]" // Auto-width only for 2-column spans
                 )}
               >
                 <SelectValue
-                  placeholder={field.placeholder || field.options?.[0]?.label || "Select an option"}
-                  className='text-text-muted/80'
+                  placeholder={
+                    field.placeholder || (Array.isArray(field.options) ? field.options[0]?.label : "Select an option")
+                  }
+                  className='text-xs text-text-muted/80 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'
                 />
               </SelectTrigger>
               <SelectContent className='bg-white text-text-muted/80'>
-                {field.options?.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
+                {Array.isArray(field.options) &&
+                  field.options.map((option) => (
+                    <SelectItem
+                      key={option.value}
+                      value={option.value}
+                      className='cursor-pointer hover:bg-primary hover:text-white'
+                    >
+                      {option.label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           );
@@ -194,28 +245,29 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                   }}
                 >
                   <div className='flex flex-wrap gap-3'>
-                    {field.options?.map((option) => (
-                      <div
-                        key={option.value}
-                        className='flex w-fit cursor-pointer items-center space-x-3 rounded-lg border border-black/10 px-4 py-2'
-                      >
-                        <Label
-                          htmlFor={option.value}
-                          className='cursor-pointer text-base font-normal -tracking-[3%] text-text-muted'
+                    {Array.isArray(field.options) &&
+                      field.options.map((option) => (
+                        <div
+                          key={option.value}
+                          className='flex w-fit cursor-pointer items-center space-x-5 rounded-md border border-black/10 px-4 py-2'
                         >
-                          {option.label}
-                        </Label>
-                        <RadioGroupItem
-                          value={option.value}
-                          id={option.value}
-                          className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
-                        />
-                      </div>
-                    ))}
-                    <div className='flex w-fit cursor-pointer items-center space-x-3 rounded-lg border border-black/10 px-4 py-2'>
+                          <Label
+                            htmlFor={option.value}
+                            className='cursor-pointer text-xs font-normal -tracking-[3%] text-text-muted'
+                          >
+                            {option.label}
+                          </Label>
+                          <RadioGroupItem
+                            value={option.value}
+                            id={option.value}
+                            className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
+                          />
+                        </div>
+                      ))}
+                    <div className='flex w-fit cursor-pointer items-center space-x-5 rounded-md border border-black/10 px-4 py-2'>
                       <Label
                         htmlFor='other'
-                        className='cursor-pointer text-base font-normal -tracking-[3%] text-text-muted'
+                        className='cursor-pointer text-xs font-normal -tracking-[3%] text-text-muted'
                       >
                         Other
                       </Label>
@@ -230,12 +282,12 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
 
                 {selectedValue === "other" && (
                   <div className='space-y-2'>
-                    <Label className='text-base font-normal -tracking-[3%] text-text-muted'>Please specify:</Label>
+                    <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>Please specify:</Label>
                     <Input
                       placeholder='Enter your custom option'
                       value={otherValue}
                       onChange={(e) => onChange({ selectedValue: selectedValue, otherValue: e.target.value })}
-                      className={cn(error && "border-red-500", "text-sm placeholder:text-text-muted/50")}
+                      className={cn(error && "border-red-500", "text-sm shadow-none placeholder:text-text-muted/50")}
                     />
                   </div>
                 )}
@@ -246,24 +298,25 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
           return (
             <RadioGroup value={(value as string | number)?.toString() || ""} onValueChange={onChange}>
               <div className='flex flex-wrap gap-3'>
-                {field.options?.map((option) => (
-                  <div
-                    key={option.value}
-                    className='flex w-fit cursor-pointer items-center space-x-3 rounded-lg border border-black/10 px-4 py-2'
-                  >
-                    <Label
-                      htmlFor={option.value}
-                      className='cursor-pointer text-base font-normal -tracking-[3%] text-text-muted'
+                {Array.isArray(field.options) &&
+                  field.options.map((option) => (
+                    <div
+                      key={option.value}
+                      className='flex w-fit cursor-pointer items-center space-x-5 rounded-md border border-black/10 px-4 py-2'
                     >
-                      {option.label}
-                    </Label>
-                    <RadioGroupItem
-                      value={option.value}
-                      id={option.value}
-                      className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
-                    />
-                  </div>
-                ))}
+                      <Label
+                        htmlFor={option.value}
+                        className='cursor-pointer text-xs font-normal -tracking-[3%] text-text-muted'
+                      >
+                        {option.label}
+                      </Label>
+                      <RadioGroupItem
+                        value={option.value}
+                        id={option.value}
+                        className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
+                      />
+                    </div>
+                  ))}
               </div>
             </RadioGroup>
           );
@@ -274,12 +327,12 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
               {field.multiTextOptions?.map((option) => (
                 <div key={option} className='space-y-2'>
-                  <Label className='hidden text-base font-normal -tracking-[3%] text-text-muted'>{option}</Label>
+                  <Label className='hidden text-sm font-normal -tracking-[3%] text-text-muted'>{option}</Label>
                   <Input
                     placeholder={`${option}`}
                     value={multiTextValue[option] || ""}
                     onChange={(e) => onChange({ ...multiTextValue, [option]: e.target.value })}
-                    className={cn("text-sm placeholder:text-text-muted/50")}
+                    className={cn("text-sm shadow-none placeholder:text-text-muted/50")}
                   />
                 </div>
               ))}
@@ -381,6 +434,18 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
           if (field.customComponent === "ExpensesRevenueForm") {
             return <ExpensesRevenueForm value={value as never} onChange={onChange as never} />;
           }
+          if (field.customComponent === "SizeInput") {
+            return (
+              <SizeInput
+                value={value as { size: string; unit: string } | string}
+                onChange={onChange}
+                label={field.label}
+                placeholder={field.placeholder}
+                error={error}
+                required={field.validation?.required}
+              />
+            );
+          }
           if (field.key === "supporting_documents") {
             return <SupportingDocuments value={value as never} onChange={onChange} />;
           }
@@ -420,11 +485,11 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         <div className='space-y-2'>
           <div className='flex items-center gap-4'>
             <div className='flex-1'>
-              <Label className='text-base font-normal -tracking-[3%] text-text-muted'>{field.label}</Label>
+              <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>{field.label}</Label>
             </div>
             <div className='flex-1'>{renderField()}</div>
           </div>
-          {field.description && <p className='text-base -tracking-[3%] text-text-muted/70'>{field.description}</p>}
+          {field.description && <p className='text-sm -tracking-[3%] text-text-muted/70'>{field.description}</p>}
           {error && <p className='text-sm text-red-500'>{error}</p>}
         </div>
       );
@@ -432,9 +497,9 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
 
     return (
       <div className='space-y-6'>
-        <Label className='text-base font-normal -tracking-[3%] text-text-muted'>
+        <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>
           {field.label}
-          {field.description && <p className='mt-1 text-base -tracking-[3%] text-text-muted/70'>{field.description}</p>}
+          {field.description && <p className='mt-1 text-sm -tracking-[3%] text-text-muted/70'>{field.description}</p>}
         </Label>
         {renderField()}
         {error && <p className='text-sm text-red-500'>{error}</p>}

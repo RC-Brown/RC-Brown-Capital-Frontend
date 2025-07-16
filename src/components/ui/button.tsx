@@ -70,7 +70,7 @@ function Button({
             />
           </svg>
         )}
-        <span>{props.children}</span>
+        <span className='flex items-center justify-center gap-2'>{props.children}</span>
       </span>
     </Comp>
   );

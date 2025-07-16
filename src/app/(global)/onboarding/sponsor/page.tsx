@@ -9,53 +9,58 @@ import { sponsorOnboardingSchema } from "@/src/lib/data/sponsor-onboarding-schem
 import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
 import { ProgressTracker } from "@/src/components/molecules/progress-tracker";
 import Footer from "@/src/components/molecules/footer";
-import { Copy } from "lucide-react";
+import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
 import Image from "next/image";
 
-// Custom segmented progress circle component
-function SegmentedProgressCircle({ completed, total }: { completed: number; total: number }) {
+interface SegmentedProgressCircleProps {
+  completed: number;
+  total: number;
+}
+
+function SegmentedProgressCircle({ completed, total }: SegmentedProgressCircleProps) {
   const segments = Array.from({ length: total }, (_, i) => i < completed);
-  const radius = 32;
-  const circumference = 2 * Math.PI * radius;
-  const segmentAngle = 360 / total;
-  const gapAngle = 8; // Gap between segments in degrees
-  const segmentArcAngle = segmentAngle - gapAngle;
+  const radius = 36;
+  const strokeWidth = 6;
+  const normalizedRadius = radius - strokeWidth * 0.5;
+  const circumference = normalizedRadius * 2 * Math.PI;
+
+  // Calculate segment length with tiny gaps
+  const gapAngle = 8; // Tiny gap in degrees
+  const segmentAngle = (360 - total * gapAngle) / total; // Remaining degrees divided by segments
+  const segmentLength = (segmentAngle / 360) * circumference;
 
   return (
-    <div className='relative size-[100px] shrink-0'>
-      <svg className='h-full w-full -rotate-90' viewBox='0 0 100 100'>
+    <div className='relative mx-auto size-[100px] shrink-0'>
+      <svg className='h-full w-full -rotate-90' viewBox='0 0 80 80'>
         {segments.map((isCompleted, index) => {
-          const segmentArcLength = (segmentArcAngle / 360) * circumference;
-          const gapLength = (gapAngle / 360) * circumference;
-          const totalSegmentLength = segmentArcLength + gapLength;
-
-          const startOffset = index * totalSegmentLength;
+          const startAngle = index * (segmentAngle + gapAngle);
+          const offset = -(startAngle / 360) * circumference;
 
           return (
             <circle
               key={index}
-              cx='50'
-              cy='50'
-              r={radius}
+              cx='40'
+              cy='40'
+              r={normalizedRadius}
               fill='none'
-              stroke={isCompleted ? "#22c55e" : "#e5e7eb"}
-              strokeWidth='6'
-              strokeDasharray={`${segmentArcLength} ${circumference - segmentArcLength}`}
-              strokeDashoffset={-startOffset}
-              strokeLinecap='round'
-              className='transition-colors duration-300'
+              stroke={isCompleted ? "#82D361" : "#f1f5f9"}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${segmentLength} ${circumference - segmentLength}`}
+              strokeDashoffset={offset}
+              className='transition-all duration-300 ease-in-out'
             />
           );
         })}
       </svg>
       <div className='absolute inset-0 flex items-center justify-center'>
-        <span className='text-lg font-semibold text-gray-700'>
+        <span className='text-base font-semibold text-gray-800'>
           {completed}/{total}
         </span>
       </div>
     </div>
   );
 }
+
 export default function OnboardingLandingPage() {
   const router = useRouter();
   const { currentPhase, setCurrentPhase } = useOnboardingStore();
@@ -79,17 +84,17 @@ export default function OnboardingLandingPage() {
 
   return (
     <div className='bg-background-secondary'>
-      <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
-        <div className='grid grid-cols-1 gap-8 lg:grid-cols-5'>
+      <div className='mx-auto px-4 pb-8 pt-4 sm:px-6 lg:px-8'>
+        <div className='grid grid-cols-1 gap-4 lg:grid-cols-5'>
           {/* Left Sidebar - Progress Tracker */}
           <div className='lg:col-span-3'>
-            <Card className='border-none bg-white shadow-none'>
-              <CardHeader>
-                <div className='flex items-center justify-between'>
+            <Card className='rounded-2xl border-none bg-white shadow-none'>
+              <CardHeader className='pb-0'>
+                <div className='flex items-center justify-between pl-10'>
                   <div className=''>
                     <CardTitle className='text-2xl font-medium -tracking-[3%] text-primary'>Welcome Onboard</CardTitle>
-                    <p className='text-base text-[#858585]'>
-                      Complete your sponsor profile in four simple steps to start attracting serious investors
+                    <p className='text-sm text-[#858585]'>
+                      Complete your sponsor profile in four simple steps to <br /> start attracting serious investors
                     </p>
                   </div>
                   {/* Segmented Progress Circle */}
@@ -111,54 +116,43 @@ export default function OnboardingLandingPage() {
           <div className='lg:col-span-2'>
             <div className=''>
               {/* Call to Action Section */}
-              <div className='mb-6 rounded-lg bg-white p-8 text-center'>
+              <div className='mb-4 rounded-2xl bg-white p-8 text-center'>
                 {/* Profile Avatars */}
-                <div className='mb-6 flex items-center justify-center -space-x-2'>
-                  <Image
-                    src='/placeholder.svg?height=60&width=60'
-                    alt='Team member 1'
-                    width={60}
-                    height={60}
-                    className='h-12 w-12 rounded-full border-4 border-white shadow-lg'
-                  />
-                  <Image
-                    src='/placeholder.svg?height=60&width=60'
-                    alt='Team member 2'
-                    width={60}
-                    height={60}
-                    className='h-12 w-12 rounded-full border-4 border-white shadow-lg'
-                  />
-                  <Image
-                    src='/placeholder.svg?height=60&width=60'
-                    alt='Team member 3'
-                    width={60}
-                    height={60}
-                    className='h-12 w-12 rounded-full border-4 border-white shadow-lg'
-                  />
-                </div>
+                <Image
+                  src='/images/3-people.png'
+                  alt='Profile Avatars'
+                  className='mx-auto mb-6 flex justify-center'
+                  width={274}
+                  height={100}
+                />
 
-                <h2 className='mb-3 text-xl font-semibold text-gray-900'>Ready to take the next step?</h2>
+                <h2 className='mb-3 text-xl font-medium text-gray-900'>Ready to take the next step?</h2>
                 <p className='mx-auto mb-6 max-w-sm text-sm text-gray-600'>
                   We&apos;d love to hear from you, pick a time that works for you.
                 </p>
-                <Button className='bg-slate-700 px-8 py-2 text-white hover:bg-slate-800'>Schedule a call</Button>
+                <Button className='px-12 py-6 text-xs font-semibold text-white'>Schedule a call</Button>
               </div>
 
               {/* Invite Friends Section */}
-              <div className='rounded-lg bg-white p-6'>
+              <div className='rounded-2xl bg-white p-6'>
                 <h3 className='mb-2 text-lg font-semibold text-gray-900'>Invite your friends</h3>
                 <p className='mb-4 text-sm text-gray-600'>Invite other real estate sponsors to join the platform</p>
-                <div className='mb-6 flex gap-2'>
-                  <Input type='email' placeholder='Email address...' className='flex-1' />
-                  <Button className='bg-primary px-6 text-white hover:bg-slate-800'>Send</Button>
+                <div className='relative mb-6'>
+                  <Input type='email' placeholder='Email address...' className='py-6 pr-28' />
+                  <Button className='absolute right-2 top-1/2 -translate-y-1/2 transform bg-primary px-6 text-white hover:bg-slate-800'>
+                    Send
+                  </Button>
                 </div>
 
                 {/* Share Referral Link - now inside the same card */}
                 <div className='flex items-center justify-between border-t border-gray-100 pt-4'>
-                  <span className='text-lg font-semibold text-primary'>Share referral link</span>
-                  <Button variant='outline' className='flex items-center gap-2 bg-transparent'>
+                  <span className='text-lg font-medium text-primary'>Share referral link</span>
+                  <Button
+                    variant='outline'
+                    className='flex items-center gap-2 rounded-full border-0 bg-primary/5 text-xs font-semibold text-primary'
+                  >
                     Copy link
-                    <Copy className='size-4' />
+                    <DocumentDuplicateIcon className='size-4' />
                   </Button>
                 </div>
               </div>

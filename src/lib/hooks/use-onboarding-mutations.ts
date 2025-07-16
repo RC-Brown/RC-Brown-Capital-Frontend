@@ -65,7 +65,7 @@ export function useSaveBusinessInformationStep() {
       queryClient.invalidateQueries({ queryKey: onboardingKeys.progress() });
 
       // Show success message
-      toast.success(data.message || "Step saved successfully!");
+      // toast.success(data.message || "Step saved successfully!");
     },
     onError: (error: Error) => {
       if (error instanceof Error) {
@@ -143,7 +143,7 @@ export function useSaveCompanyRepresentativeStep() {
       queryClient.invalidateQueries({ queryKey: onboardingKeys.progress() });
 
       // Show success message
-      toast.success(data.message || "Company representative step saved successfully!");
+      // toast.success(data.message || "Company representative step saved successfully!");
     },
     onError: (error: Error) => {
       if (error instanceof Error) {

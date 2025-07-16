@@ -26,6 +26,7 @@ import {
 import { OnboardingField } from "@/src/types/onboarding";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
 interface FormPageProps {
   params: Promise<{
@@ -131,6 +132,25 @@ export default function FormPage({ params }: FormPageProps) {
       }
     });
 
+    // Preserve existing errors for required fields that are still empty
+    // This prevents the real-time validation from clearing errors that were set by manual validation
+    currentSectionFields.forEach((field) => {
+      const value = formData[field.key];
+      const hasExistingError = errors[field.key];
+
+      // If field is required, empty, and has an existing error, preserve it
+      if (
+        field.validation.required &&
+        hasExistingError &&
+        (!value ||
+          value === "" ||
+          (Array.isArray(value) && value.length === 0) ||
+          (typeof value === "object" && value !== null && Object.keys(value).length === 0))
+      ) {
+        realtimeErrors[field.key] = hasExistingError;
+      }
+    });
+
     // Only update errors if they've changed to avoid unnecessary re-renders
     const errorKeys = Object.keys(realtimeErrors).sort();
     const currentErrorKeys = Object.keys(errors).sort();
@@ -154,7 +174,7 @@ export default function FormPage({ params }: FormPageProps) {
 
         if (!hasCurrentValue) {
           // Set default for radio fields - always use first option
-          if (field.type === "radio" && field.options && field.options.length > 0) {
+          if (field.type === "radio" && Array.isArray(field.options) && field.options.length > 0) {
             if (field.allowOther) {
               // For radio fields with allowOther, use object format
               defaultValues[field.key] = {
@@ -168,7 +188,12 @@ export default function FormPage({ params }: FormPageProps) {
           }
 
           // Set default for select fields without placeholder - use first option
-          if (field.type === "select" && !field.placeholder && field.options && field.options.length > 0) {
+          if (
+            field.type === "select" &&
+            !field.placeholder &&
+            Array.isArray(field.options) &&
+            field.options.length > 0
+          ) {
             if (field.allowOther) {
               // For select fields with allowOther, use object format
               defaultValues[field.key] = {
@@ -364,6 +389,12 @@ export default function FormPage({ params }: FormPageProps) {
   };
 
   const proceedToNext = () => {
+    console.log({
+      currentSection,
+      phase,
+      phaseIndex,
+      phaseSectionsLength: phase.sections.length,
+    });
     if (currentSection < phase.sections.length - 1) {
       // Move to next section
       setCurrentSection(currentSection + 1);
@@ -441,23 +472,23 @@ export default function FormPage({ params }: FormPageProps) {
 
   return (
     <div className='min-h-screen bg-gray-50'>
-      <div className='mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl px-4 pb-8 pt-4 sm:px-6 lg:px-8'>
         <div className='grid grid-cols-1 gap-3 lg:grid-cols-6'>
           {/* Left Sidebar - Progress Tracker */}
           <div className='lg:col-span-2'>
             <div className='sticky top-28'>
-              <Card className='rounded-lg border-none bg-white px-4 shadow-none'>
-                <CardContent className='p-6'>
+              <Card className='rounded-2xl border-none bg-white px-4 shadow-none'>
+                <CardContent className='px-6 pb-6 pt-3'>
                   <div className='mb-4 flex items-center justify-between'>
                     <Button variant='ghost' onClick={handleBack} className='h-auto p-0 font-normal'>
                       <span className='flex items-center space-x-2'>
                         <ArrowLeft className='size-4' />
-                        <span className='text-base text-text-muted'>Back</span>
+                        <span className='text-sm text-text-muted'>Back</span>
                       </span>
                     </Button>
                     <Button
                       variant='outline'
-                      className='rounded-xl px-3 text-base text-text-muted'
+                      className='rounded-xl px-3 text-sm font-normal text-text-muted has-[>svg]:py-2'
                       onClick={handleSaveAndExit}
                       disabled={saveBusinessStepMutation.isPending || saveCompanyRepStepMutation.isPending}
                     >
@@ -485,21 +516,21 @@ export default function FormPage({ params }: FormPageProps) {
 
           {/* Main Content */}
           <div className='lg:col-span-4'>
-            <Card className='rounded-lg border-none bg-white px-6 shadow-none'>
+            <Card className='rounded-2xl border-none bg-white px-6 shadow-none'>
               <CardHeader>
                 <div className='flex items-center justify-between border-b border-black/10 pb-6'>
                   <div>
-                    <CardTitle className='text-2xl font-bold -tracking-[3%] text-primary'>
+                    <CardTitle className='text-xl font-semibold -tracking-[3%] text-primary'>
                       {currentSectionData.title}
                     </CardTitle>
                     <p className='mt-1 text-base text-text-muted'>{currentSectionData.description}</p>
                   </div>
-                  <div className='text-base text-text-muted/70'>
+                  <div className='text-sm text-text-muted/70'>
                     {currentSection + 1} OF {phase.sections.length}
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className='space-y-6'>
+              <CardContent className='space-y-6 xl:pr-24'>
                 <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
                   {currentSectionData?.fields?.filter(shouldShowField)?.map((field) => (
                     <div
@@ -528,7 +559,7 @@ export default function FormPage({ params }: FormPageProps) {
                   <Button
                     onClick={handleNext}
                     size='lg'
-                    className='px-9'
+                    className='px-9 text-xs'
                     disabled={saveBusinessStepMutation.isPending || saveCompanyRepStepMutation.isPending}
                   >
                     {saveBusinessStepMutation.isPending || saveCompanyRepStepMutation.isPending ? (
@@ -538,7 +569,7 @@ export default function FormPage({ params }: FormPageProps) {
                       </>
                     ) : (
                       <>
-                        <span className='mr-2'>Next</span> →
+                        <span className='mr-2'>Next</span> <ArrowRightIcon className='size-4 stroke-[3px]' />
                       </>
                     )}
                   </Button>

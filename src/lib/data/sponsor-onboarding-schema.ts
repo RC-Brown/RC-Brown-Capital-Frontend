@@ -282,9 +282,9 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               layout: "inline",
               gridSpan: 2,
               placeholder: "%",
-              options: Array.from({ length: 20 }, (_, i) => ({
-                label: `${i + 1}%`,
-                value: `${i + 1}`,
+              options: Array.from({ length: 71 }, (_, i) => ({
+                label: `${i + 10}%`,
+                value: `${i + 10}`,
               })),
               validation: { required: false },
             },
@@ -405,7 +405,8 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
       key: "company-representative",
       title: "Company Representative Details",
       slug: "company-representative",
-      description: "Designate your primary contact person",
+      description:
+        "We're almost there! Please fill out the company representative details to help us verify your identity and proceed smoothly to the next stage.",
       sections: [
         {
           key: "personal-details",
@@ -445,18 +446,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "country",
               label: "Country",
               type: "select",
-              options: [
-                { label: "Nigeria", value: "Nigeria" },
-                { label: "United States", value: "United States" },
-                { label: "United Kingdom", value: "United Kingdom" },
-                { label: "Canada", value: "Canada" },
-                { label: "Ghana", value: "Ghana" },
-                { label: "South Africa", value: "South Africa" },
-                { label: "Kenya", value: "Kenya" },
-                { label: "Germany", value: "Germany" },
-                { label: "France", value: "France" },
-                { label: "Australia", value: "Australia" },
-              ],
+              options: "countries", // Special identifier for country options
               validation: { required: true },
             },
             {
@@ -490,6 +480,10 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               label: "Social Security Number",
               type: "text",
               placeholder: "Enter your SSN",
+              condition: {
+                dependsOn: "country",
+                value: "United States",
+              },
               validation: { required: false },
             },
             // {
@@ -536,12 +530,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "select",
               layout: "inline",
               gridSpan: 2,
-              options: [
-                { label: "NGN", value: "NGN" },
-                { label: "USD", value: "USD" },
-                { label: "EUR", value: "EUR" },
-                { label: "GBP", value: "GBP" },
-              ],
+              options: "currencies", // Special identifier for currency options
               validation: { required: true },
             },
             {
@@ -586,6 +575,10 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               label: "IBAN",
               type: "text",
               placeholder: "International Bank Account Number",
+              condition: {
+                dependsOn: "country",
+                value: "United States",
+              },
               validation: { required: true },
             },
             {

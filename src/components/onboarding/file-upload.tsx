@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Button } from "@/src/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle} from "@/src/components/ui/dialog";
-import { Plus, X} from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/dialog";
+import { Plus, X } from "lucide-react";
 import Image from "next/image";
 
 interface FileUploadProps {
@@ -65,11 +65,11 @@ export function FileUpload({
           type='button'
           variant='outline'
           onClick={() => setIsModalOpen(true)}
-          className='rounded-lg border border-black/10 bg-white p-4 text-sm font-normal text-text-muted hover:bg-gray-50'
+          className='rounded-md border border-black/10 bg-white px-3 py-5 text-sm font-normal text-text-muted hover:bg-gray-50'
         >
           <span className='flex items-center gap-2'>
-            <span className='text-sm font-normal text-text-muted/80'>Upload</span>
-            <Plus className='h-4 w-4' />
+            <span className='text-xs font-normal text-text-muted/80'>Upload</span>
+            <Plus className='size-3 text-black' />
           </span>
         </Button>
 
@@ -120,15 +120,15 @@ export function FileUpload({
             onDragOver={handleDrag}
             onDrop={handleDrop}
           >
-              {/* PDF Icon */}
+            {/* PDF Icon */}
 
-              <Image
-                src='/images/pdf.png'
-                alt='upload-document'
-                width={60}
-                height={60}
-                className='mx-auto flex items-center justify-center'
-              />
+            <Image
+              src='/images/pdf.png'
+              alt='upload-document'
+              width={60}
+              height={60}
+              className='mx-auto flex items-center justify-center'
+            />
             <p className='mb-2 text-sm text-text-muted'>Drag and drop files here or click to browse</p>
             <p className='text-xs text-text-muted/70'>Supported formats: {acceptedFileTypes.join(", ")}</p>
             <input
