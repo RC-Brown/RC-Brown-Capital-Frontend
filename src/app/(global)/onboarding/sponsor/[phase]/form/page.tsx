@@ -69,6 +69,14 @@ export default function FormPage({ params }: FormPageProps) {
   // Find phase and current section data
   const phase = sponsorOnboardingSchema.phases.find((p) => p.slug === resolvedParams.phase);
   const phaseIndex = sponsorOnboardingSchema.phases.findIndex((p) => p.slug === resolvedParams.phase);
+
+  // Reset currentSection to 0 if it's out of bounds for the current phase
+  useEffect(() => {
+    if (phase && currentSection >= phase.sections.length) {
+      setCurrentSection(0);
+    }
+  }, [phase, currentSection, setCurrentSection]);
+
   const currentSectionData = phase?.sections[currentSection];
 
   // Function to check if a field should be shown based on conditions
@@ -233,9 +241,15 @@ export default function FormPage({ params }: FormPageProps) {
     return () => clearTimeout(timeoutId);
   }, [formData, currentSection, isValidating, validateSectionDataRealtime]);
 
-  // Early return AFTER all hooks have been called
+  // Handle navigation for invalid phase/section
+  useEffect(() => {
+    if (!phase || !currentSectionData) {
+      router.push("/onboarding/sponsor");
+    }
+  }, [phase, currentSectionData, router]);
+
+  // Early return if phase or section data is not available
   if (!phase || !currentSectionData) {
-    router.push("/onboarding/sponsor");
     return null;
   }
 
@@ -516,21 +530,43 @@ export default function FormPage({ params }: FormPageProps) {
 
           {/* Main Content */}
           <div className='lg:col-span-4'>
-            <Card className='rounded-2xl border-none bg-white px-6 shadow-none'>
-              <CardHeader>
-                <div className='flex items-center justify-between border-b border-black/10 pb-6'>
+            <Card
+              className={`rounded-2xl border-none bg-white shadow-none ${resolvedParams.phase === "project-upload" ? "p-0" : "px-6"}`}
+            >
+              <CardHeader className={`${resolvedParams.phase === "project-upload" ? "p-0" : "p-6"}`}>
+                <div
+                  className={`flex items-center justify-between pb-6 ${
+                    resolvedParams.phase === "project-upload"
+                      ? "rounded-t-lg bg-primary px-6 py-4 text-white"
+                      : "border-b border-black/10"
+                  }`}
+                >
                   <div>
-                    <CardTitle className='text-xl font-semibold -tracking-[3%] text-primary'>
+                    <CardTitle
+                      className={`text-xl font-semibold -tracking-[3%] ${
+                        resolvedParams.phase === "project-upload" ? "text-white" : "text-primary"
+                      }`}
+                    >
                       {currentSectionData.title}
                     </CardTitle>
-                    <p className='mt-1 text-base text-text-muted'>{currentSectionData.description}</p>
+                    <p
+                      className={`mt-1 text-base ${
+                        resolvedParams.phase === "project-upload" ? "text-white/90" : "text-text-muted"
+                      }`}
+                    >
+                      {currentSectionData.description}
+                    </p>
                   </div>
-                  <div className='text-sm text-text-muted/70'>
+                  <div
+                    className={`text-sm ${
+                      resolvedParams.phase === "project-upload" ? "text-white/90" : "text-text-muted/70"
+                    }`}
+                  >
                     {currentSection + 1} OF {phase.sections.length}
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className='space-y-6 xl:pr-24'>
+              <CardContent className={`space-y-6 xl:pr-24 ${resolvedParams.phase === "project-upload" ? "pt-6" : ""}`}>
                 <div className='grid grid-cols-1 gap-6 lg:grid-cols-2'>
                   {currentSectionData?.fields?.filter(shouldShowField)?.map((field) => (
                     <div

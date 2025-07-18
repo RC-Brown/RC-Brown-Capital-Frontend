@@ -15,10 +15,15 @@ import Image from "next/image";
 interface SegmentedProgressCircleProps {
   completed: number;
   total: number;
+  currentPhase: number;
 }
 
-function SegmentedProgressCircle({ completed, total }: SegmentedProgressCircleProps) {
-  const segments = Array.from({ length: total }, (_, i) => i < completed);
+function SegmentedProgressCircle({ completed, total, currentPhase }: SegmentedProgressCircleProps) {
+  // Use the same logic as ProgressTracker: a phase is completed if phase.isCompleted OR index < currentPhase
+  const segments = Array.from({ length: total }, (_, i) => {
+    const phase = sponsorOnboardingSchema.phases[i];
+    return phase.isCompleted || i < currentPhase;
+  });
   const radius = 36;
   const strokeWidth = 6;
   const normalizedRadius = radius - strokeWidth * 0.5;
@@ -78,8 +83,10 @@ export default function OnboardingLandingPage() {
     router.push(`/onboarding/sponsor/${phase.slug}`);
   };
 
-  // Calculate completion
-  const completedPhases = sponsorOnboardingSchema.phases.filter((phase) => phase.isCompleted).length;
+  // Calculate completion using the same logic as ProgressTracker
+  const completedPhases = sponsorOnboardingSchema.phases.filter(
+    (phase, index) => phase.isCompleted || index < currentPhase
+  ).length;
   const totalPhases = sponsorOnboardingSchema.phases.length;
 
   return (
@@ -98,7 +105,11 @@ export default function OnboardingLandingPage() {
                     </p>
                   </div>
                   {/* Segmented Progress Circle */}
-                  <SegmentedProgressCircle completed={completedPhases} total={totalPhases} />
+                  <SegmentedProgressCircle
+                    completed={completedPhases}
+                    total={totalPhases}
+                    currentPhase={currentPhase}
+                  />
                 </div>
               </CardHeader>
               <CardContent>

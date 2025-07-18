@@ -4,6 +4,7 @@ export interface OnboardingField {
   type: "text" | "textarea" | "select" | "radio" | "file" | "multi-file" | "multi-text" | "custom-component";
   placeholder?: string;
   description?: string;
+  tooltip?: string; // Tooltip content to display on hover
   options?: { label: string; value: string }[] | string; // string for special identifiers like "currencies"
   multiTextOptions?: string[];
   allowOther?: boolean;

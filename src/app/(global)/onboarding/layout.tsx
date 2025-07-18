@@ -85,7 +85,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
   const isSponsorOnboardingFirstPage = pathname === "/onboarding/sponsor";
 
   return (
-    <div className='min-h-screen'>
+    <div className='h-full bg-background-secondary'>
       {/* Tab Navigation - Only show on sponsor onboarding pages */}
       {isSponsorOnboardingFirstPage && (
         <div className='border-b border-gray-200 bg-white'>
@@ -117,7 +117,7 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
       )}
 
       {/* Main Content */}
-      <main className=''>{children}</main>
+      <div className='h-full'>{children}</div>
     </div>
   );
 }

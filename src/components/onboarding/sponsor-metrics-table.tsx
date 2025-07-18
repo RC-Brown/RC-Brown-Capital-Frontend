@@ -169,22 +169,28 @@ export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetr
         <table className='w-full border-collapse'>
           <thead>
             <tr className='border-b'>
-              <th className='p-3 text-left font-medium'>Category</th>
-              <th className='p-3 text-left font-medium'>Input</th>
-              <th className='p-3 text-left font-medium'>Brief info</th>
+              <th className='p-3 text-left font-medium text-text-muted'>Category</th>
+              <th className='p-3 text-left font-medium text-text-muted'>Input</th>
+              <th className='p-3 text-left font-medium text-text-muted'>Brief info</th>
             </tr>
           </thead>
           <tbody>
             {metricsConfig.map((metric) => (
               <tr key={metric.key} className='border-b'>
-                <td className='p-3 font-medium'>{metric.label}</td>
+                <td className='p-3 text-sm text-text-muted/80'>{metric.label}</td>
                 <td className='p-3'>
                   {metric.type === "select" ? (
                     <Select
                       value={metrics[metric.key as keyof SponsorMetricsData] || ""}
                       onValueChange={(value) => handleMetricChange(metric.key, value)}
                     >
-                      <SelectTrigger className={cn("w-full", error && "border-red-500")}>
+                      <SelectTrigger
+                        className={cn(
+                          "w-full",
+                          error && "border-red-500",
+                          "border border-black/10 py-6 shadow-none placeholder:text-xs"
+                        )}
+                      >
                         <SelectValue
                           placeholder={
                             metric.key === "yearsInOperation"
@@ -205,9 +211,13 @@ export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetr
                           }
                         />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className='bg-white'>
                         {metric.options?.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                          <SelectItem
+                            key={option.value}
+                            value={option.value}
+                            className='cursor-pointer hover:bg-primary hover:text-white'
+                          >
                             {option.label}
                           </SelectItem>
                         ))}
@@ -219,11 +229,14 @@ export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetr
                       placeholder={metric.placeholder || "Enter value"}
                       value={metrics[metric.key as keyof SponsorMetricsData] || ""}
                       onChange={(e) => handleMetricChange(metric.key, e.target.value)}
-                      className={cn(error && "border-red-500")}
+                      className={cn(
+                        error && "border-red-500",
+                        "border border-black/10 py-6 shadow-none placeholder:text-xs"
+                      )}
                     />
                   )}
                 </td>
-                <td className='p-3 text-sm text-gray-600'>{metric.info}</td>
+                <td className='p-3 text-sm text-text-muted/80'>{metric.info}</td>
               </tr>
             ))}
           </tbody>

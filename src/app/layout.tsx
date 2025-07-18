@@ -35,7 +35,7 @@ export default function RootLayout({
         <Providers>
           <main>
             <Navbar />
-            <div className='mt-24 bg-background-secondary'>{children}</div>
+            <div className='mt-24 h-full min-h-[calc(100vh-100px)] bg-background-secondary'>{children}</div>
           </main>
           <NextTopLoader color='#1F3B5F' showSpinner={false} />
           <Toaster richColors={true} closeButton position='top-center' />

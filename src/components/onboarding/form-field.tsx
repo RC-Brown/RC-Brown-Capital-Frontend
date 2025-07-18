@@ -6,6 +6,7 @@ import { Textarea } from "@/src/components/ui/textarea";
 import { Label } from "@/src/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/src/components/ui/radio-group";
+import { Tooltip } from "@/src/components/ui/tooltip";
 import { cn } from "@/src/lib/utils";
 import { ProjectDetailsTable, ProjectDetailsTableRef } from "./project-details-table";
 import { TermsCheckbox } from "./terms-checkbox";
@@ -17,6 +18,7 @@ import { FacialCapture } from "./facial-capture";
 import { BankTermsCheckbox } from "./bank-terms-checkbox";
 import { IdentificationFields } from "./identification-fields";
 import { CurrencySelect } from "./currency-select";
+import { CurrencyDropdown } from "./currency-dropdown";
 import { CountrySelect } from "./country-select";
 import { FileUpload } from "./file-upload";
 import { BusinessPlanRating } from "./business-plan-rating";
@@ -34,6 +36,19 @@ import BudgetTable from "./budget-table";
 import ExpensesRevenueForm from "./expenses-revenue-form";
 import { SizeInput } from "./size-input";
 import { OnboardingField, FormFieldValue } from "@/src/types/onboarding";
+import { SponsorLogoUpload } from "./sponsor-logo-upload";
+import { FundsModificationNotice } from "./funds-modification-notice";
+import { SponsorBackgroundSection } from "./sponsor-background-section";
+import { SponsorAboutSection } from "./sponsor-about-section";
+import { PhysicalDescriptionsTabs } from "./physical-descriptions-tabs";
+import { SiteDocumentsSection } from "./site-documents-section";
+import { SiteDocumentsUpload } from "./site-documents-upload";
+import { DocumentsSection } from "./documents-section";
+import { ClosingDocuments } from "./closing-documents";
+import { OfferingInformation } from "./offering-information";
+import { SponsorInformationDocs } from "./sponsor-information-docs";
+import ScreeningNotice from "./screening-notice";
+import BudgetTabs from "./budget-tabs";
 
 type FormData = Record<string, FormFieldValue>;
 
@@ -63,6 +78,18 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         return true;
       },
     }));
+
+    // Helper function to render label with optional tooltip
+    const renderLabel = (label: string) => {
+      if (field.tooltip) {
+        return (
+          <Tooltip content={field.tooltip}>
+            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{label}</span>
+          </Tooltip>
+        );
+      }
+      return <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{label}</span>;
+    };
 
     const renderField = () => {
       switch (field.type) {
@@ -96,12 +123,23 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         case "select":
           // Handle special currency select case
           if (field.options === "currencies") {
+            // Use CurrencyDropdown for currency_of_account field, CurrencySelect for others
+            if (field.key === "currency_of_account" || field.key === "company_currency") {
+              return (
+                <CurrencyDropdown
+                  value={(value as string) || ""}
+                  onChange={onChange}
+                  error={error}
+                  className={spans2Columns ? "w-auto min-w-[120px]" : ""}
+                  placeholder={field.placeholder}
+                />
+              );
+            }
             return (
               <CurrencySelect
                 value={(value as string) || ""}
                 onChange={onChange}
                 error={error}
-                placeholder={field.placeholder}
                 className={spans2Columns ? "w-auto min-w-[120px]" : ""}
               />
             );
@@ -446,8 +484,80 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
               />
             );
           }
+          if (field.customComponent === "SponsorLogoUpload") {
+            return <SponsorLogoUpload value={value as File[]} onChange={onChange} error={error} />;
+          }
           if (field.key === "supporting_documents") {
             return <SupportingDocuments value={value as never} onChange={onChange} />;
+          }
+          if (field.customComponent === "CurrencySelect") {
+            return <CurrencySelect value={(value as string) || ""} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "FundsModificationNotice") {
+            return <FundsModificationNotice value={Boolean(value)} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "SponsorBackgroundSection") {
+            return <SponsorBackgroundSection value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "SponsorAboutSection") {
+            return <SponsorAboutSection value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "PhysicalDescriptionsTabs") {
+            return <PhysicalDescriptionsTabs value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "SiteDocumentsSection") {
+            return <SiteDocumentsSection value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "SiteDocumentsUpload") {
+            return <SiteDocumentsUpload value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "DocumentsSection") {
+            return <DocumentsSection value={value as never} onChange={onChange} error={error} label={field.label} />;
+          }
+          if (field.customComponent === "ClosingDocuments") {
+            return <ClosingDocuments value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "OfferingInformation") {
+            return <OfferingInformation value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "SponsorInformationDocs") {
+            return <SponsorInformationDocs value={value as never} onChange={onChange} error={error} />;
+          }
+          if (field.customComponent === "ScreeningNotice") {
+            return <ScreeningNotice />;
+          }
+          if (field.customComponent === "BudgetTabs") {
+            return <BudgetTabs value={value as never} onChange={onChange as never} error={error} />;
+          }
+          if (field.customComponent === "SponsorMetricsTable") {
+            return <SponsorMetricsTable value={value as never} onChange={onChange as never} error={error} />;
+          }
+          if (field.customComponent === "OfferDetailsTable") {
+            return <OfferDetailsTable value={value as never} onChange={onChange} />;
+          }
+          if (field.customComponent === "DebtDetailsForm") {
+            return <DebtDetailsForm value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "EquityDetailsForm") {
+            return <EquityDetailsForm value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "BudgetTable") {
+            return <BudgetTable value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "ExpensesRevenueForm") {
+            return <ExpensesRevenueForm value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "SizeInput") {
+            return (
+              <SizeInput
+                value={value as { size: string; unit: string } | string}
+                onChange={onChange}
+                label={field.label}
+                placeholder={field.placeholder}
+                error={error}
+                required={field.validation?.required}
+              />
+            );
           }
           return (
             <div className='rounded-lg border-2 border-dashed border-gray-300 p-4 text-center'>
@@ -485,7 +595,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         <div className='space-y-2'>
           <div className='flex items-center gap-4'>
             <div className='flex-1'>
-              <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>{field.label}</Label>
+              <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>{renderLabel(field.label)}</Label>
             </div>
             <div className='flex-1'>{renderField()}</div>
           </div>
@@ -498,7 +608,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
     return (
       <div className='space-y-6'>
         <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>
-          {field.label}
+          {renderLabel(field.label)}
           {field.description && <p className='mt-1 text-sm -tracking-[3%] text-text-muted/70'>{field.description}</p>}
         </Label>
         {renderField()}

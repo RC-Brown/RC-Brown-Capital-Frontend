@@ -9,8 +9,8 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ label }: SectionHeaderProps) {
   return (
-    <div className='space-y-4 rounded-lg px-8 py-6 shadow-lg'>
-      <h4 className='font-medium'>{label}</h4>
+    <div className='hidden py-2'>
+      <h4 className='font-semibold text-text-muted'>{label}</h4>
     </div>
   );
 }

@@ -234,7 +234,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     </SelectTrigger>
                     <SelectContent className='bg-white'>
                       {projectTypeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
+                        <SelectItem key={option.value} value={option.value} className="hover:bg-primary hover:text-white cursor-pointer">
                           {option.label}
                         </SelectItem>
                       ))}
