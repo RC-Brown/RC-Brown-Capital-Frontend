@@ -26,10 +26,10 @@ export function DefinitionsDocument({
         type='button'
         variant='outline'
         onClick={handleViewDocument}
-        className='flex items-center gap-2 border-blue-600 text-blue-600 hover:bg-blue-50'
+        className='flex items-center gap-2 border-blue-600 bg-blue-200/30 text-blue-600 hover:bg-blue-50'
       >
         View Definitions Document
-        <ArrowRight className='h-4 w-4' />
+        <ArrowRight className='size-4 -rotate-12' />
       </Button>
       {error && <p className='text-sm text-red-500'>{error}</p>}
     </div>

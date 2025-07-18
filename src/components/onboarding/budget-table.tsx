@@ -1,7 +1,7 @@
 import React from "react";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
-import { Info } from "lucide-react";
+import { Tooltip } from "../ui/tooltip";
 
 interface BudgetLineItem {
   description?: string;
@@ -86,52 +86,47 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
 
   return (
     <div className='w-full'>
-      <div className='overflow-x-auto'>
+      <div className=''>
         <table className='w-full border-collapse'>
           <thead>
             <tr className='bg-gray-50'>
-              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>
-                Line Item
-              </th>
-              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>
-                <div className='flex items-center space-x-2'>
+              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm text-text-muted'>Line Item</th>
+              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm text-text-muted'>
+                <Tooltip content='Please go into detail about the materials being used, if this is a repair or a replacement, and quantities.  The more details the better, sell it to the inspector.'>
                   <span>Description</span>
-                  <Info className='h-4 w-4 text-gray-400' />
-                </div>
+                </Tooltip>
               </th>
-              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>
-                Scope of Work
-              </th>
-              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>$ Budget</th>
+              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm text-text-muted'>Scope of Work</th>
+              <th className='w-1/4 border border-gray-200 p-4 text-left text-sm text-text-muted'>$ Budget</th>
             </tr>
           </thead>
           <tbody>
             {budgetLineItems.map((lineItem, index) => (
-              <tr key={index} className='hover:bg-gray-50'>
-                <td className='border border-gray-200 bg-gray-50 p-4 text-sm font-medium text-gray-700'>{lineItem}</td>
-                <td className='border border-gray-200 p-4'>
+              <tr key={index} className=''>
+                <td className='border border-gray-200 bg-gray-50 p-4 text-xs text-text-muted'>{lineItem}</td>
+                <td className='border border-gray-200 p-1'>
                   <Textarea
                     placeholder='Enter description...'
                     value={value[lineItem]?.description || ""}
                     onChange={(e) => handleInputChange(lineItem, "description", e.target.value)}
-                    className='min-h-[80px] w-full resize-y'
+                    className='min-h-[80px] w-full resize-y border-none text-xs text-text-muted shadow-none placeholder:text-xs'
                   />
                 </td>
-                <td className='border border-gray-200 p-4'>
+                <td className='border border-gray-200 p-1'>
                   <Textarea
                     placeholder='Enter scope of work...'
                     value={value[lineItem]?.scope || ""}
                     onChange={(e) => handleInputChange(lineItem, "scope", e.target.value)}
-                    className='min-h-[80px] w-full resize-y'
+                    className='min-h-[80px] w-full resize-y border-none text-xs text-text-muted shadow-none placeholder:text-xs'
                   />
                 </td>
-                <td className='border border-gray-200 p-4'>
+                <td className='border border-gray-200 p-1'>
                   <Input
                     type='text'
                     placeholder='$0.00'
                     value={value[lineItem]?.budget || ""}
                     onChange={(e) => handleInputChange(lineItem, "budget", e.target.value)}
-                    className='w-full'
+                    className='w-full border-none text-xs text-text-muted shadow-none placeholder:text-xs'
                   />
                 </td>
               </tr>
@@ -139,10 +134,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
 
             {/* Total Construction Cost Row */}
             <tr className='bg-gray-100 font-semibold'>
-              <td className='border border-gray-200 p-4 text-sm font-bold text-gray-900' colSpan={3}>
+              <td className='border border-gray-200 p-4 text-sm font-medium text-text-muted' colSpan={3}>
                 Total Construction Cost
               </td>
-              <td className='border border-gray-200 p-4 text-sm font-bold text-gray-900'>
+              <td className='border border-gray-200 p-4 text-sm font-medium text-text-muted'>
                 ${calculateTotalCost().toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </td>
             </tr>

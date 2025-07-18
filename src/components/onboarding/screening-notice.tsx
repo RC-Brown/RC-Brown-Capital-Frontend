@@ -1,13 +1,9 @@
 import React from "react";
 
-interface ScreeningNoticeProps {
-  label?: string;
-}
-
-const ScreeningNotice: React.FC<ScreeningNoticeProps> = () => {
+const ScreeningNotice: React.FC = () => {
   return (
-    <div className='mt-8 text-center'>
-      <p className='text-sm italic text-gray-600'>
+    <div className='mt-8'>
+      <p className='text-sm italic text-text-muted'>
         RC Brown Capital diligently assesses every deal and sponsor through a thorough and comprehensive screening
         process.
       </p>

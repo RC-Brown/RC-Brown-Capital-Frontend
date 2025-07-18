@@ -37,7 +37,7 @@ export default function PhasePage({ params }: PhasePageProps) {
   };
 
   return (
-    <div className='h-full bg-background-secondary'>
+    <div className='h-fit bg-background-secondary'>
       <div className='mx-auto max-w-7xl px-4 pb-8 pt-4 sm:px-6 lg:px-8'>
         <div className='grid grid-cols-1 gap-4 lg:grid-cols-3'>
           {/* Left Sidebar - Progress Tracker */}
@@ -56,7 +56,20 @@ export default function PhasePage({ params }: PhasePageProps) {
           <div className='flex items-start gap-2 rounded-2xl bg-white pb-8 pl-10 pr-4 pt-20 lg:col-span-2 lg:gap-5'>
             <div>
               <h1 className='mb-7 mt-7 text-4xl font-semibold leading-[100%] -tracking-[3%] text-primary'>
-                {phase.slug === "business-information" ? "Let's get to know about your Business!" : phase.title}
+                {phase.slug === "business-information" ? (
+                  "Let's get to know about your Business!"
+                ) : phase.slug === "project-upload" ? (
+                  <span className='leading-[140%]'>
+                    Upload Your <br /> Project
+                  </span>
+                ) : (
+                  <span className='leading-[140%]'>{phase.title}</span>
+                )}
+                {phase.slug === "project-upload" && (
+                  <span className='relative bottom-2 ml-3 rounded-md bg-[#B073FF] px-2 py-1 text-xs font-medium text-white'>
+                    FINAL STEP
+                  </span>
+                )}
               </h1>
               <p className='max-w-[80%] text-sm text-text-muted/70'>
                 {phase.slug === "business-information"
@@ -85,11 +98,11 @@ export default function PhasePage({ params }: PhasePageProps) {
               {phase.slug === "project-upload" && (
                 <div className='relative'>
                   <Image
-                    src='/images/onboarding-phase-4.png'
+                    src='/images/onboarding-phase-final.png'
                     alt='Project upload'
-                    width={500}
-                    height={500}
-                    className='rounded-lg'
+                    width={300}
+                    height={300}
+                    className=''
                   />
                 </div>
               )}
