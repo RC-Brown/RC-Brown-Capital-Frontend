@@ -1,7 +1,16 @@
 export interface OnboardingField {
   key: string;
   label: string;
-  type: "text" | "textarea" | "select" | "radio" | "file" | "multi-file" | "multi-text" | "custom-component";
+  type:
+    | "text"
+    | "textarea"
+    | "enhanced-textarea"
+    | "select"
+    | "radio"
+    | "file"
+    | "multi-file"
+    | "multi-text"
+    | "custom-component";
   placeholder?: string;
   description?: string;
   tooltip?: string; // Tooltip content to display on hover
@@ -62,6 +71,7 @@ export type FormFieldValue =
   | Record<string, string> // multi-text fields, social media, etc.
   | Record<string, unknown> // complex custom components
   | unknown[] // arrays for various custom components
+  | { text: string; files: File[] } // enhanced-textarea with both text and files
   | null
   | undefined;
 

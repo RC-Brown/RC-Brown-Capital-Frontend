@@ -39,12 +39,19 @@ export function CountrySelect({
           <SelectItem
             key={country.value}
             value={country.value}
-            className='cursor-pointer hover:bg-primary hover:text-white'
+            disabled={!country.isSupported}
+            className={cn(
+              "cursor-pointer",
+              country.isSupported ? "hover:bg-primary hover:text-white" : "cursor-not-allowed opacity-50"
+            )}
           >
-            <span className='flex items-center gap-2'>
-              <span className='text-base'>{country.emoji}</span>
-              <span>{country.value}</span>
-            </span>
+            <div className='flex w-full items-center justify-between'>
+              <span className='flex items-center gap-2'>
+                <span className='text-base'>{country.emoji}</span>
+                <span>{country.value}</span>
+              </span>
+              {!country.isSupported && <span className='ml-2 text-xs text-red-500'>(not supported)</span>}
+            </div>
           </SelectItem>
         ))}
       </SelectContent>

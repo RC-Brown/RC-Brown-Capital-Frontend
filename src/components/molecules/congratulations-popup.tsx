@@ -64,14 +64,23 @@ export function CongratulationsPopup({
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", duration: 0.5 }}
           >
-            <Card className='w-full max-w-lg rounded-3xl bg-white'>
+            <Card className='w-full max-w-lg overflow-hidden rounded-3xl bg-white'>
               <CardContent className='p-8 text-center'>
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring" }}
-                  className='mb-6'
+                  className='relative mb-6'
                 >
+                  {gifData.src === "/images/confetti.gif" && (
+                    <Image
+                      src='/images/confetti-strips.gif'
+                      alt='confetti'
+                      className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2'
+                      width={200}
+                      height={600}
+                    />
+                  )}
                   <Image
                     src={gifData.src}
                     alt={gifData.alt}

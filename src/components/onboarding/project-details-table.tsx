@@ -203,7 +203,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     onChange={(e) => updateProject(project.id, "projectName", e.target.value)}
                     className={cn(
                       fieldErrors[project.id]?.projectName && "border-red-500",
-                      "border border-black/60 py-6 shadow-none placeholder:text-xs"
+                      "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs md:text-xs"
                     )}
                   />
                   {fieldErrors[project.id]?.projectName && (
@@ -224,7 +224,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     <SelectTrigger
                       className={cn(
                         fieldErrors[project.id]?.projectType && "border-red-500",
-                        "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs"
+                        "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs md:text-xs"
                       )}
                     >
                       <SelectValue
@@ -234,7 +234,11 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     </SelectTrigger>
                     <SelectContent className='bg-white'>
                       {projectTypeOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value} className="hover:bg-primary hover:text-white cursor-pointer">
+                        <SelectItem
+                          key={option.value}
+                          value={option.value}
+                          className='cursor-pointer hover:bg-primary hover:text-white'
+                        >
                           {option.label}
                         </SelectItem>
                       ))}
@@ -258,7 +262,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     onChange={(e) => updateProject(project.id, "address", e.target.value)}
                     className={cn(
                       fieldErrors[project.id]?.address && "border-red-500",
-                      "border border-black/60 py-6 shadow-none placeholder:text-xs"
+                      "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs md:text-xs"
                     )}
                   />
                   {fieldErrors[project.id]?.address && (
@@ -294,7 +298,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     onChange={(e) => updateProject(project.id, "totalCost", e.target.value)}
                     className={cn(
                       fieldErrors[project.id]?.totalCost && "border-red-500",
-                      "border border-black/60 py-6 shadow-none placeholder:text-xs"
+                      "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs md:text-xs"
                     )}
                   />
                   {fieldErrors[project.id]?.totalCost && (
@@ -315,7 +319,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     onChange={(e) => updateProject(project.id, "startDate", e.target.value)}
                     className={cn(
                       fieldErrors[project.id]?.startDate && "border-red-500",
-                      "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs"
+                      "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs md:text-xs"
                     )}
                   />
                   {fieldErrors[project.id]?.startDate && (
@@ -336,7 +340,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                     onChange={(e) => updateProject(project.id, "completedDate", e.target.value)}
                     className={cn(
                       fieldErrors[project.id]?.completedDate && "border-red-500",
-                      "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs"
+                      "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs md:text-xs"
                     )}
                   />
                   {fieldErrors[project.id]?.completedDate && (

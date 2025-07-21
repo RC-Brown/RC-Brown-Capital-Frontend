@@ -35,7 +35,7 @@ interface KeyDealPointsProps {
   error?: string;
 }
 
-export function KeyDealPoints({ value = {}, onChange }: KeyDealPointsProps) {
+export function KeyDealPoints({ value = {}, onChange, error }: KeyDealPointsProps) {
   const updateField = (field: keyof KeyDealPointsData, newValue: string) => {
     onChange({ ...value, [field]: newValue });
   };
@@ -188,6 +188,9 @@ export function KeyDealPoints({ value = {}, onChange }: KeyDealPointsProps) {
         </div>
       </div>
       <div className='mt-8 font-semibold text-text-muted'> Business Plan: The Property</div>
+
+      {/* Error Display */}
+      {error && <p className='mt-2 text-sm text-red-500'>{error}</p>}
     </div>
   );
 }

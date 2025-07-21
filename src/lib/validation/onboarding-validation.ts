@@ -185,16 +185,59 @@ const ExpensesRevenueSchema = z
       return true;
     }, "Invalid expenses/revenue data");
 
+const BudgetTabsSchema = z.object({
+  "property-address": z.object({
+    address: z.string().min(1, "Property address is required"),
+    city: z.string().min(1, "City is required"),
+    state: z.string().min(1, "State is required"),
+    zipCode: z.string().min(1, "Zip code is required"),
+  }),
+  "description-work": z.object({
+    description: z.string().min(10, "Description must be at least 10 characters"),
+  }),
+  "project-timeline": z.object({
+    projectMonths: z.string().min(1, "Project months is required"),
+    addingSquareFootage: z.string().min(1, "Square footage information is required"),
+    expansionMethod: z.string().min(1, "Expansion method is required"),
+  }),
+});
+
+const KeyDealPointsSchema = z.object({
+  projected_valuation: z.string().min(1, "Projected valuation is required"),
+  timeline_completion: z.string().min(1, "Timeline completion is required"),
+  total_capital_required: z.string().min(1, "Total capital required is required"),
+  total_debt_allocation: z.string().min(1, "Total debt allocation is required"),
+  debt_investment_tenure: z.enum(
+    ["1_year", "2_years", "3_years", "4_years", "5_years", "6_years", "7_years", "8_years", "9_years", "10_years"],
+    { required_error: "Debt investment tenure is required" }
+  ),
+  percentage_yield_debt: z.string().min(1, "Percentage yield debt is required"),
+  equity_investment_tenure: z.string().min(1, "Equity investment tenure is required"),
+  projected_returns_equity: z.string().min(1, "Projected returns equity is required"),
+  total_equity: z.string().min(1, "Total equity is required"),
+});
+
 // Phase schemas
 export const BusinessInformationSchema = z.object({
   // Company Overview
   company_currency: z.string().min(1, "Please select a currency"),
   business_type: z.string().min(1, "Please select a business type"),
   years_in_business: z.string().min(1, "Please select years in business"),
-  company_description: z
-    .string()
-    .min(50, "Description must be at least 50 characters")
-    .max(500, "Description must not exceed 500 characters"),
+  company_description: z.union([
+    // Backward compatibility: string format
+    z
+      .string()
+      .min(50, "Description must be at least 50 characters")
+      .max(500, "Description must not exceed 500 characters"),
+    // New enhanced format with text and files
+    z.object({
+      text: z
+        .string()
+        .min(50, "Description must be at least 50 characters")
+        .max(500, "Description must not exceed 500 characters"),
+      files: z.array(z.any()).optional(),
+    }),
+  ]),
   primary_focus: z.string().min(1, "Please select your primary focus"),
 
   // Project Track Record
@@ -262,7 +305,7 @@ export const ProjectUploadSchema = z.object({
     .string()
     .min(2, "Sponsor name must be at least 2 characters")
     .max(100, "Sponsor name must not exceed 100 characters"),
-  sponsor_logo: z.any().optional(),
+  sponsor_logo: z.any().refine((val) => val && Array.isArray(val) && val.length > 0, "Sponsor logo is required"),
 
   // Project Overview
   project_name: z.string().min(1, "Project name is required"),
@@ -276,12 +319,12 @@ export const ProjectUploadSchema = z.object({
 
   // Project Consideration
   business_plan_rating: BusinessPlanRatingSchema,
-  definitions_document: z.boolean().optional(),
+  definitions_document: z.boolean().refine((val) => val === true, "Definitions document must be accepted"),
   deal_snapshot: DealSnapshotSchema,
   risk_considerations: RiskConsiderationsSchema,
 
   // The Deal
-  key_deal_points: z.any().optional(),
+  key_deal_points: KeyDealPointsSchema,
   business_plan_property_title: z.string().optional(),
   property_address: AddressInputSchema,
   location_description: z
@@ -301,8 +344,8 @@ export const ProjectUploadSchema = z.object({
   anchor_tenant_details: z.string().optional(),
   anchor_buyer: z.string().min(1, "Anchor buyer information is required"),
   anchor_buyer_details: z.string().optional(),
-  percentage_leased: z.string().optional(),
-  sq_ft_leased: z.string().optional(),
+  percentage_leased: z.string().min(1, "Percentage leased is required"),
+  sq_ft_leased: z.string().min(1, "Square feet leased is required"),
 
   // Investment Returns
   investment_hold_period: z.string().min(1, "Investment hold period is required"),
@@ -350,7 +393,7 @@ export const ProjectUploadSchema = z.object({
   screening_notice: z.boolean().optional(),
 
   // Budget Sheet
-  budget_tabs: z.any().optional(),
+  budget_tabs: BudgetTabsSchema,
   budget_table: BudgetTableSchema,
 
   // Expenses & Revenue
@@ -382,6 +425,8 @@ export {
   DebtDetailsSchema,
   EquityDetailsSchema,
   BudgetTableSchema,
+  BudgetTabsSchema,
+  KeyDealPointsSchema,
   ExpensesRevenueSchema,
 };
 

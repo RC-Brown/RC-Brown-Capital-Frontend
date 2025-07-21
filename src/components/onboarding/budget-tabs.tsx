@@ -31,7 +31,7 @@ interface BudgetTabsProps {
   error?: string;
 }
 
-const BudgetTabs: React.FC<BudgetTabsProps> = ({ value = {}, onChange }) => {
+const BudgetTabs: React.FC<BudgetTabsProps> = ({ value = {}, onChange, error }) => {
   const [activeTab, setActiveTab] = useState("property-address");
   const [isModalOpen, setIsModalOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -233,6 +233,9 @@ const BudgetTabs: React.FC<BudgetTabsProps> = ({ value = {}, onChange }) => {
           </div>
         </div>
       )}
+
+      {/* Error Display */}
+      {error && <p className='mt-2 text-sm text-red-500'>{error}</p>}
     </div>
   );
 };

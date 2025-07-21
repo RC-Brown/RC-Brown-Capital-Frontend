@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Button } from "@/src/components/ui/button";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, X, User } from "lucide-react";
 import Link from "next/link";
 import { useMediaQuery } from "@/src/lib/hooks/use-mobile";
 import {
@@ -18,6 +18,8 @@ import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -28,93 +30,138 @@ export default function Navbar() {
   const authPaths = ["login", "register-investor", "register-sponsor"];
   const isAuthPath = authPaths.some((authPath) => pathname.includes(authPath));
 
-  const menu = [
-    {
-      name: "Invest",
-      subMenu: [
-        {
-          name: "Start Investing",
-          href: "#",
-        },
-        {
-          name: "How it works",
-          href: "#",
-        },
-        {
-          name: "Screening Process",
-          href: "#",
-        },
-      ],
-      hidden: false,
-    },
-    {
-      name: "About Us",
-      subMenu: [
-        {
-          name: "Who we are",
-          href: "#",
-        },
-        {
-          name: "Careers",
-          href: "#",
-        },
-        {
-          name: "Contacts",
-          href: "#",
-        },
-        {
-          name: "In the News",
-          href: "#",
-        },
-      ],
-      hidden: false,
-    },
-    {
-      name: "Resources",
-      subMenu: [
-        {
-          name: "Blogs",
-          href: "#",
-        },
-        {
-          name: "Videos",
-          href: "#",
-        },
-        {
-          name: "FAQ's",
-          href: "#",
-        },
-        {
-          name: "Glossary terms",
-          href: "#",
-        },
-      ],
-      hidden: false,
-    },
-    {
-      name: "Sponsor",
-      subMenu: [
-        {
-          name: "Raise capital",
-          href: "#",
-        },
-        {
-          name: "Post Fundraise",
-          href: "#",
-        },
-        {
-          name: "Request Info",
-          href: "#",
-        },
-      ],
-      hidden: false,
-    },
-    {
-      name: "Testimonials",
-      href: "#",
-      hidden: false,
-    },
-  ];
+  const menu =
+    session?.user?.role?.toLowerCase() === "investor"
+      ? [
+          {
+            name: "Invest",
+            subMenu: [
+              {
+                name: "Start Investing",
+                href: "#",
+              },
+              {
+                name: "How it works",
+                href: "#",
+              },
+              {
+                name: "Screening Process",
+                href: "#",
+              },
+            ],
+            hidden: false,
+          },
+          {
+            name: "About Us",
+            subMenu: [
+              {
+                name: "Who we are",
+                href: "#",
+              },
+              {
+                name: "Careers",
+                href: "#",
+              },
+              {
+                name: "Contacts",
+                href: "#",
+              },
+              {
+                name: "In the News",
+                href: "#",
+              },
+            ],
+            hidden: false,
+          },
+          {
+            name: "Resources",
+            subMenu: [
+              {
+                name: "Blogs",
+                href: "#",
+              },
+              {
+                name: "Videos",
+                href: "#",
+              },
+              {
+                name: "FAQ's",
+                href: "#",
+              },
+              {
+                name: "Glossary terms",
+                href: "#",
+              },
+            ],
+            hidden: false,
+          },
+          {
+            name: "Sponsor",
+            subMenu: [
+              {
+                name: "Raise capital",
+                href: "#",
+              },
+              {
+                name: "Post Fundraise",
+                href: "#",
+              },
+              {
+                name: "Request Info",
+                href: "#",
+              },
+            ],
+            hidden: false,
+          },
+          {
+            name: "Testimonials",
+            href: "#",
+            hidden: false,
+          },
+        ]
+      : [
+          {
+            name: "Marketplace",
+            href: "#",
+            hidden: false,
+          },
+          {
+            name: "Sponsor",
+            subMenu: [
+              {
+                name: "Raise capital",
+                href: "#",
+              },
+              {
+                name: "Post Fundraise",
+                href: "#",
+              },
+              {
+                name: "Request Info",
+                href: "#",
+              },
+            ],
+            hidden: false,
+          },
+          {
+            name: "Learn",
+            subMenu: [
+              {
+                name: "Blogs",
+                href: "#",
+              },
+              {
+                name: "Videos",
+                href: "#",
+              },
+              {
+                name: "FAQ's",
+                href: "#",
+              },
+            ],
+            hidden: false,
+          },
+        ];
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -133,6 +180,7 @@ export default function Navbar() {
   };
 
   const queryClient = useQueryClient();
+  const resetOnboarding = useOnboardingStore((state) => state.resetOnboarding);
 
   async function onSignOut() {
     try {
@@ -141,9 +189,11 @@ export default function Navbar() {
         redirect: true,
         callbackUrl: "/login",
       });
+
       toast.dismiss();
       toast.success("See you soon!");
       queryClient.clear();
+      resetOnboarding();
     } catch {
       toast.error("An error occured");
     }
@@ -239,17 +289,77 @@ export default function Navbar() {
               </div>
             )}
 
+            {/* Desktop User Profile Section */}
             {!isMobile && session && (
-              <Button
-                variant='link'
-                className='px-0 text-sm font-normal'
-                onClick={() => {
-                  onSignOut();
-                }}
-              >
-                {/* profile pic ideally here */}
-                Log Out
-              </Button>
+              <div className='flex items-center space-x-4'>
+                {/* Notifications Button */}
+                <Button
+                  variant='outline'
+                  size='sm'
+                  className='flex items-center gap-2 rounded-full border-none bg-background-secondary px-4 py-2 text-xs font-semibold text-text-muted'
+                >
+                  <Image src='/icons/bell.svg' alt='bell' width={16} height={16} />
+                  <span>Notifications</span>
+                </Button>
+
+                {/* Separator */}
+                <div className='h-6 w-px bg-gray-200' />
+
+                {/* User Profile Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className='flex items-center gap-3 rounded-lg border-none px-3 py-2 ring-0 focus:outline-none'>
+                    {/* Profile Picture */}
+                    <div className='size-8 overflow-hidden rounded-full bg-background-secondary'>
+                      {session.user?.image ? (
+                        <Image
+                          src={session.user.image}
+                          alt={session.user.name || "Profile"}
+                          width={40}
+                          height={40}
+                          className='h-full w-full object-cover'
+                        />
+                      ) : (
+                        <div className='flex h-full w-full items-center justify-center bg-background-secondary'>
+                          <User className='h-5 w-5 text-text-muted' />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* User Info */}
+                    <div className='text-left'>
+                      <div className='text-sm font-semibold text-text-muted'>{session.user?.name || "User"}</div>
+                      <div className='text-xs text-[#858585]'>{session.user?.role || "User"}</div>
+                    </div>
+                    <Image src='/icons/arrow-down.svg' alt='arrow-down' width={10} height={6} />
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent
+                    className='min-w-[200px] rounded-lg bg-white p-0 shadow-md'
+                    align='end'
+                    side='top'
+                  >
+                    <div className='py-1'>
+                      <DropdownMenuItem className='cursor-pointer px-4 py-3 text-xs font-medium text-text-muted hover:bg-primary hover:text-white'>
+                        Profile & Settings
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className='cursor-pointer px-4 py-3 text-xs font-medium text-text-muted hover:bg-primary hover:text-white'>
+                        Schedule Calls
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className='cursor-pointer px-4 py-3 text-xs font-medium text-text-muted hover:bg-primary hover:text-white'>
+                        Refer a Friend
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={async () => {
+                          await onSignOut();
+                        }}
+                        className='cursor-pointer px-4 py-3 text-xs font-medium text-text-muted hover:bg-primary hover:text-white'
+                      >
+                        Log Out
+                      </DropdownMenuItem>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             )}
 
             {/* Mobile Menu Button */}

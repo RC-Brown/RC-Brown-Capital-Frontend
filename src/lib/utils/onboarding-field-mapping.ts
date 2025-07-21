@@ -8,7 +8,7 @@ import { BusinessInformationInput, CompanyRepresentativeInput } from "@/src/serv
 export const BUSINESS_INFO_FIELD_MAPPING = {
   // Company Overview (Step 1)
   company_currency: "preferred_currency",
-  company_description: "company_history.text", // Nested field
+  company_description: "company_history", // Enhanced field with text and files
   primary_focus: "primary_focus", // Array field
 
   // Project Track Record (Step 2)
@@ -97,6 +97,13 @@ export function transformFormDataToApi(
         }
         (apiData as any)[parentKey][childKey] = value;
       }
+      // Handle enhanced-textarea fields (text + files)
+      else if (frontendKey === "company_description" && typeof value === "object" && value?.text) {
+        (apiData as any)[backendKey] = {
+          text: value.text,
+          files: value.files || [],
+        };
+      }
       // Handle array fields
       else if (frontendKey === "primary_focus" && typeof value === "string") {
         (apiData as any)[backendKey] = [value];
@@ -128,6 +135,7 @@ export function transformFormDataToApi(
 // Type definitions for better type safety
 interface CompanyHistory {
   text?: string;
+  files?: File[];
 }
 
 interface TypeCustomObject {
@@ -160,7 +168,17 @@ export function transformApiDataToForm(apiData: Record<string, unknown>): Record
 
     if (formKey) {
       if (apiKey === "company_history" && isCompanyHistory(value)) {
-        formData["company_description"] = value.text;
+        // Handle enhanced format with text and files
+        const companyHistory = value as CompanyHistory & { files?: File[] };
+        if (companyHistory.files && Array.isArray(companyHistory.files)) {
+          formData["company_description"] = {
+            text: companyHistory.text || "",
+            files: companyHistory.files,
+          };
+        } else {
+          // Backward compatibility: just text
+          formData["company_description"] = companyHistory.text || "";
+        }
       }
       // Handle array fields
       else if (apiKey === "primary_focus" && Array.isArray(value) && value.length > 0) {
