@@ -141,14 +141,16 @@ export function BusinessPlanRating({ value = {}, onChange, error }: BusinessPlan
                     value={ratings[category.key] || ""}
                     onValueChange={(value) => handleRatingChange(category.key, value)}
                   >
-                    <SelectTrigger className={cn("w-full shadow-none ", error && "border-red-500")}>
+                    <SelectTrigger className={cn("w-full shadow-none", error && "border-red-500")}>
                       <SelectValue placeholder='Medium' />
                     </SelectTrigger>
-                    <SelectContent
-                    className="bg-white hover:bg-primary hover:text-white"
-                    >
+                    <SelectContent className='bg-white'>
                       {ratingOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
+                        <SelectItem
+                          className='hover:bg-primary hover:text-white'
+                          key={option.value}
+                          value={option.value}
+                        >
                           {option.label}
                         </SelectItem>
                       ))}

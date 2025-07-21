@@ -36,6 +36,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               }
             );
 
+            console.log({ res });
+
             if (res.status !== 200 || !res.data.token) {
               return null;
             }
@@ -68,6 +70,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user?.token) {
         token.accessToken = user.token;
+        token.role = user.role;
       }
 
       return token;
@@ -77,6 +80,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       session.user = session.user || {};
       session.user.id = token.sub ?? "";
       session.user.email = token.email ?? "";
+      session.user.role = token.role as string;
       session.accessToken = token.accessToken as string;
       return session;
     },

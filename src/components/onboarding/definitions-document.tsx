@@ -11,13 +11,14 @@ interface DefinitionsDocumentProps {
 
 export function DefinitionsDocument({
   // value,
-  onChange,
+  // onChange,
   error,
 }: DefinitionsDocumentProps) {
   const handleViewDocument = () => {
-    // This would typically open a modal or navigate to the document
-    // For now, we'll just mark it as viewed
-    onChange(true);
+    window.open(
+      "https://docs.google.com/document/d/15IyZ16KRus_1U3cLNWltG3WxEo4WEUnUKgC0Hjjw7l4/edit?usp=sharing",
+      "_blank"
+    );
   };
 
   return (

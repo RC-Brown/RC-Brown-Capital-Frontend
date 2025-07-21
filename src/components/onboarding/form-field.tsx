@@ -49,6 +49,7 @@ import { OfferingInformation } from "./offering-information";
 import { SponsorInformationDocs } from "./sponsor-information-docs";
 import ScreeningNotice from "./screening-notice";
 import BudgetTabs from "./budget-tabs";
+import { EnhancedTextarea } from "./enhanced-textarea";
 
 type FormData = Record<string, FormFieldValue>;
 
@@ -117,6 +118,30 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                 error && "border-red-500",
                 "text-sm shadow-none placeholder:text-text-muted/50"
               )}
+            />
+          );
+
+        case "enhanced-textarea":
+          // Handle backward compatibility - if value is a string, convert to new format
+          const textValue =
+            typeof value === "object" && value !== null && "text" in value
+              ? (value as { text: string; files: File[] }).text
+              : (value as string) || "";
+          const filesValue =
+            typeof value === "object" && value !== null && "files" in value
+              ? (value as { text: string; files: File[] }).files
+              : [];
+
+          return (
+            <EnhancedTextarea
+              placeholder={field.placeholder}
+              value={textValue}
+              onChange={(text) => onChange({ text, files: filesValue })}
+              uploadedFiles={filesValue}
+              onFilesChange={(files) => onChange({ text: textValue, files })}
+              acceptedFileTypes={field.validation.fileTypes || [".pdf", ".doc", ".docx", ".jpg", ".png"]}
+              multiple={field.validation.maxFiles !== 1}
+              error={!!error}
             />
           );
 
