@@ -18,7 +18,7 @@ import { signOut, useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 
 export default function Navbar() {
@@ -180,11 +180,18 @@ export default function Navbar() {
   };
 
   const queryClient = useQueryClient();
-  const resetOnboarding = useOnboardingStore((state) => state.resetOnboarding);
+  const resetOnboarding = useOnboardingStoreWithUser().resetOnboarding;
 
   async function onSignOut() {
     try {
       toast.loading("Signing you out...");
+
+      // Clear user-specific onboarding data before signing out
+      // if (session?.user?.email) {
+      //   const { clearUserOnboardingStorage } = await import("@/src/lib/store/onboarding-store");
+      //   clearUserOnboardingStorage(session.user.email);
+      // }
+
       await signOut({
         redirect: true,
         callbackUrl: "/login",

@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSession } from "next-auth/react";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 import { useBusinessInformation, useSaveAndContinue, useSaveAsDraft } from "./use-onboarding-mutations";
 import { BusinessInformationInput } from "@/src/services/onboarding";
 import { useEffect } from "react";
@@ -86,7 +86,7 @@ export function useOnboardingForm<T extends Record<string, FormFieldValue>>(
   defaultValues?: Partial<T>
 ) {
   const { data: session } = useSession();
-  const { formData, updateFormData } = useOnboardingStore();
+  const { formData, updateFormData } = useOnboardingStoreWithUser();
   const { data: businessInfo } = useBusinessInformation();
   const saveAndContinue = useSaveAndContinue();
   const saveAsDraft = useSaveAsDraft();

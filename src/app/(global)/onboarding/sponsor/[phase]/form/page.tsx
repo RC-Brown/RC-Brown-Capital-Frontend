@@ -13,7 +13,7 @@ import { SaveAndExitPopup } from "@/src/components/molecules/save-and-exit-popup
 import { SponsorInfoPopup } from "@/src/components/molecules/sponsor-info-popup";
 import { SponsorWelcomePopup } from "@/src/components/molecules/sponsor-welcome-popup";
 import { sponsorOnboardingSchema } from "@/src/lib/data/sponsor-onboarding-schema";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 import {
   useSaveBusinessInformationStep,
   useSaveCompanyRepresentativeStep,
@@ -46,6 +46,7 @@ export default function FormPage({ params }: FormPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
   const { data: session } = useSession();
+  const store = useOnboardingStoreWithUser();
   const {
     currentSection,
     formData,
@@ -54,7 +55,7 @@ export default function FormPage({ params }: FormPageProps) {
     markSectionCompleted,
     setCurrentSection,
     setCurrentPhase,
-  } = useOnboardingStore();
+  } = store;
 
   // Backend integration hooks
   const saveBusinessStepMutation = useSaveBusinessInformationStep();

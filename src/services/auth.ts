@@ -82,7 +82,7 @@ const signUpSponsorSchema = z
     lastName: z.string().min(1, { message: "Last name is required" }),
     email: z.string().email({ message: "Enter a valid email" }),
     companyName: z.string().min(1, { message: "Company name is required" }),
-    website: z.string().url({ message: "Enter a valid website URL" }).optional(),
+    website: z.string().optional(),
     country: z.string().min(1, { message: "Country is required" }),
     phoneNumber: z.string().min(1, { message: "Phone number is required" }),
     password: z.string().min(8, { message: "Password must be at least 8 characters" }),
