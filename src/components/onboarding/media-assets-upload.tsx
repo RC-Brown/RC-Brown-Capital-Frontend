@@ -1,6 +1,6 @@
 import React, { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/src/components/ui/button";
-import { Monitor, FileText, Image } from "lucide-react";
 
 interface MediaAssetsData {
   video?: File[];
@@ -44,7 +44,7 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
   const uploadAreas = [
     {
       key: "video",
-      icon: Monitor,
+      src: "/images/video.gif",
       title: "Video File",
       description: "Select and upload a video file (MP4, MOV). Max size: 500 MB.",
       acceptedTypes: ".mp4,.mov",
@@ -53,7 +53,7 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
     },
     {
       key: "slides",
-      icon: FileText,
+      src: "/images/slide.gif",
       title: "Slides File",
       description: "Upload presentation slides (PDF, PPTX). Max size: 20 MB",
       acceptedTypes: ".pdf,.pptx",
@@ -62,7 +62,7 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
     },
     {
       key: "pictures",
-      icon: Image,
+      src: "/images/photo-gallery.gif",
       title: "Pictures File",
       description: "Choose image files (JPG, PNG). You can upload multiple. Max size per file: 10 MB",
       acceptedTypes: ".jpg,.jpeg,.png",
@@ -73,34 +73,31 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
 
   return (
     <div className='mb-6 w-full'>
-      <h3 className='mb-4 text-lg font-semibold text-gray-900'>Media Assets Upload</h3>
+      <h3 className='mb-4 text-base font-medium text-text-muted'>Media Assets Upload</h3>
 
       {/* Horizontal Carousel */}
-      <div className='overflow-x-auto pb-4'>
+      <div className='overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
         <div className='flex min-w-max space-x-6'>
           {uploadAreas.map((area) => {
-            const Icon = area.icon;
             const isDragOver = dragOver === area.key;
             const hasFiles = value[area.key] && value[area.key]!.length > 0;
 
             return (
               <div
                 key={area.key}
-                className={`w-80 flex-shrink-0 rounded-lg border-2 border-dashed bg-white p-6 ${isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-200"} ${hasFiles ? "border-green-500 bg-green-50" : ""} transition-colors`}
+                className={`w-[344px] flex-shrink-0 rounded-2xl border border-text-muted/10 bg-white p-6 shadow-lg ${isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-200"} ${hasFiles ? "border-green-500 bg-green-50" : ""} transition-colors`}
                 onDragOver={(e) => handleDragOver(e, area.key)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, area.key)}
               >
                 <div className='text-center'>
                   <div className='mb-4 flex justify-center'>
-                    <div className='rounded-full bg-gray-100 p-3'>
-                      <Icon className='h-8 w-8 text-gray-600' />
-                    </div>
+                    <Image src={area.src} alt={area.title} width={50} height={50} />
                   </div>
 
-                  <h4 className='mb-2 text-lg font-medium text-gray-900'>{area.title}</h4>
+                  <h4 className='mb-4 text-base font-medium text-primary'>{area.title}</h4>
 
-                  <p className='mb-4 text-sm leading-relaxed text-gray-600'>{area.description}</p>
+                  <p className='mb-8 text-sm leading-relaxed text-[#898989]'>{area.description}</p>
 
                   {hasFiles && value[area.key] && (
                     <div className='mb-4 rounded bg-green-100 p-2'>
@@ -118,7 +115,11 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
                       onChange={(e) => handleFileUpload(area.key, e.target.files)}
                       className='absolute inset-0 h-full w-full cursor-pointer opacity-0'
                     />
-                    <Button type='button' variant='outline' className='w-full border-gray-300 hover:bg-gray-50'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      className='h-[43px] w-full rounded-md border-none bg-[#F5F5F5] font-medium text-text-muted hover:bg-gray-50'
+                    >
                       Upload
                     </Button>
                   </div>
@@ -128,9 +129,6 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
           })}
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <div className='mt-2 text-center text-xs text-gray-500'>Scroll horizontally to view all upload options</div>
     </div>
   );
 };
