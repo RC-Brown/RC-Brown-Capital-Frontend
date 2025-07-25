@@ -610,7 +610,12 @@ export default function FormPage({ params }: FormPageProps) {
                       </>
                     ) : (
                       <>
-                        <span className='mr-2'>Next</span> <ArrowRightIcon className='size-4 stroke-[3px]' />
+                        <span className='mr-2'>
+                          {resolvedParams.phase === "project-upload" && currentSectionData?.key === "expenses-revenue"
+                            ? "Submit project"
+                            : "Next"}
+                        </span>
+                        <ArrowRightIcon className='size-4 stroke-[3px]' />
                       </>
                     )}
                   </Button>
@@ -629,7 +634,9 @@ export default function FormPage({ params }: FormPageProps) {
       />
 
       {/* Congratulations Popup */}
-      {currentSectionData?.key === "sponsor-info" || currentSectionData?.key === "the-deal" ? (
+      {currentSectionData?.key === "sponsor-info" ||
+      currentSectionData?.key === "the-deal" ||
+      currentSectionData?.key === "expenses-revenue" ? (
         <SponsorInfoPopup
           isOpen={showCongrats}
           title={currentCongratsMessage?.title || ""}
@@ -642,6 +649,7 @@ export default function FormPage({ params }: FormPageProps) {
           onClose={() => {
             setShowCongrats(false);
           }}
+          currentSectionData={currentSectionData}
         />
       ) : (
         <CongratulationsPopup

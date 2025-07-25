@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/src/components/ui/button";
-import { Download, Paperclip } from "lucide-react";
+import { Paperclip } from "lucide-react";
+import { CloudArrowDownIcon } from "@heroicons/react/24/outline";
 
 interface DocumentAcknowledgment {
   acknowledged?: boolean;
@@ -26,10 +27,10 @@ const AcknowledgeSignDocs: React.FC<AcknowledgeSignDocsProps> = () =>
 
     return (
       <div className='mb-6 w-full'>
-        <div className='rounded-lg border border-gray-200 bg-gray-50 p-6'>
-          <h3 className='mb-4 text-lg font-semibold text-gray-900'>Acknowledge & Sign Docs</h3>
+        <div className='rounded-lg border border-b-4 border-[#407BFF] bg-[#407BFF]/5 p-6'>
+          <h3 className='mb-4 text-base font-medium text-text-muted'>Acknowledge & Sign Docs</h3>
 
-          <p className='mb-6 text-sm leading-relaxed text-gray-600'>
+          <p className='mb-10 text-base leading-normal text-text-muted'>
             Please review and accept all acknowledgements and disclaimers. After completing the form, you will be
             required to download and sign the necessary document(s), then reattach the signed copy to finalize your
             submission
@@ -39,9 +40,9 @@ const AcknowledgeSignDocs: React.FC<AcknowledgeSignDocsProps> = () =>
             <Button
               type='button'
               onClick={handleDownloadDocument}
-              className='flex items-center space-x-2 rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700'
+              className='flex items-center space-x-2 rounded-[10px] border border-[#55A2F0] bg-[#407BFF]/5 px-3 py-2 text-base font-semibold text-[#407BFF] hover:bg-[#407BFF]/5'
             >
-              <Download className='h-4 w-4' />
+              <CloudArrowDownIcon className='size-6 stroke-[2.3px]' />
               <span>Download document</span>
             </Button>
 
@@ -49,10 +50,10 @@ const AcknowledgeSignDocs: React.FC<AcknowledgeSignDocsProps> = () =>
               type='button'
               onClick={handleReattachDocument}
               variant='outline'
-              className='flex items-center space-x-2 rounded-md border-gray-300 px-6 py-2 text-gray-700 hover:bg-gray-50'
+              className='flex items-center space-x-2 rounded-[10px] border-none bg-[#ECF2FF] px-3 py-2 text-base font-semibold text-text-muted'
             >
-              <Paperclip className='h-4 w-4' />
               <span>Reattach document</span>
+              <Paperclip className='size-4 -rotate-45 stroke-[2.3px]' />
             </Button>
           </div>
         </div>

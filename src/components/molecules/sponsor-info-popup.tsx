@@ -5,6 +5,7 @@ import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import Link from "next/link";
 import Image from "next/image";
+import { useParams } from "next/navigation";
 
 interface SponsorInfoPopupProps {
   isOpen: boolean;
@@ -13,9 +14,19 @@ interface SponsorInfoPopupProps {
   ctaText: string;
   onContinue: () => void;
   onClose: () => void;
+  currentSectionData?: { key: string };
 }
 
-export function SponsorInfoPopup({ isOpen, title, description, ctaText, onContinue, onClose }: SponsorInfoPopupProps) {
+export function SponsorInfoPopup({
+  isOpen,
+  title,
+  description,
+  ctaText,
+  onContinue,
+  onClose,
+  currentSectionData,
+}: SponsorInfoPopupProps) {
+  const { phase } = useParams();
   return (
     <AnimatePresence>
       {isOpen && (
@@ -23,7 +34,7 @@ export function SponsorInfoPopup({ isOpen, title, description, ctaText, onContin
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className='fixed inset-0 z-50 flex items-end justify-end bg-black/30 pb-36 pr-4'
+          className='fixed inset-0 z-50 flex items-end justify-end bg-black/30 pb-16 pr-4'
         >
           <motion.div
             initial={{ opacity: 0, x: 100 }}
@@ -66,7 +77,7 @@ export function SponsorInfoPopup({ isOpen, title, description, ctaText, onContin
                   <Button
                     onClick={onContinue}
                     variant='outline'
-                    className='h-[51px] flex-1 rounded-md border-[1.5px] border-black/10 border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50'
+                    className={`${phase === "project-upload" && currentSectionData?.key === "expenses-revenue" ? "hidden" : ""} h-[51px] flex-1 rounded-md border-[1.5px] border-black/10 border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50`}
                   >
                     Next Page
                   </Button>

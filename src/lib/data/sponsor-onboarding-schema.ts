@@ -1270,7 +1270,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           fields: [
             {
               key: "media_assets_upload",
-              label: "Media Assets Upload",
+              label: "",
               type: "custom-component",
               customComponent: "MediaAssetsUpload",
               gridSpan: 2,
@@ -1278,7 +1278,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             },
             {
               key: "fund_wallet",
-              label: "Fund Wallet",
+              label: "",
               type: "custom-component",
               customComponent: "FundWallet",
               gridSpan: 2,
@@ -1286,26 +1286,18 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             },
             {
               key: "acknowledge_sign_docs",
-              label: "Acknowledge & Sign Docs",
+              label: "",
               type: "custom-component",
               customComponent: "AcknowledgeSignDocs",
               gridSpan: 2,
               validation: { required: false },
             },
-            {
-              key: "submit_project",
-              label: "",
-              type: "custom-component",
-              customComponent: "SubmitProject",
-              gridSpan: 2,
-              validation: { required: false },
-            },
           ],
           congratsMessage: {
-            title: "Congratulations! 🎉",
+            title: "Fund Wallet",
             description:
-              "You've successfully completed your project upload. Our team will review your submission and you'll start receiving investor interest soon!",
-            ctaText: "Go to Dashboard",
+              "A ₦1,000,000 non-refundable wallet funding is required for due diligence before final submission.",
+            ctaText: "Fund Now",
           },
         },
       ],
