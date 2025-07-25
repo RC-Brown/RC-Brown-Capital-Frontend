@@ -53,6 +53,10 @@ import { EnhancedTextarea } from "./enhanced-textarea";
 import { CurrencyInput } from "./currency-input";
 import { PercentageInput } from "./percentage-input";
 import { NumberInput } from "./number-input";
+import MediaAssetsUpload from "./media-assets-upload";
+import FundWallet from "./fund-wallet";
+import AcknowledgeSignDocs from "./acknowledge-sign-docs";
+import SubmitProject from "./submit-project";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 import { getInvestmentSizeOptions } from "@/src/lib/utils/currency-options";
 
@@ -593,6 +597,18 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
           if (field.customComponent === "ExpensesRevenueForm") {
             return <ExpensesRevenueForm value={value as never} onChange={onChange as never} />;
           }
+          if (field.customComponent === "MediaAssetsUpload") {
+            return <MediaAssetsUpload value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "FundWallet") {
+            return <FundWallet value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "AcknowledgeSignDocs") {
+            return <AcknowledgeSignDocs value={value as never} onChange={onChange as never} />;
+          }
+          if (field.customComponent === "SubmitProject") {
+            return <SubmitProject value={value as never} onChange={onChange as never} />;
+          }
           if (field.customComponent === "SizeInput") {
             return (
               <SizeInput
@@ -718,9 +734,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         <div className='space-y-2'>
           <div className='flex items-center gap-4'>
             <div className='flex-1'>
-              <Label className='whitespace-nowrap text-sm font-normal -tracking-[3%] text-text-muted'>
-                {renderLabel(field.label)}
-              </Label>
+              <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>{renderLabel(field.label)}</Label>
             </div>
             <div className='flex-1'>{renderField()}</div>
           </div>
