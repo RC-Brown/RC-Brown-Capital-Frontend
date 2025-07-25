@@ -49,7 +49,19 @@ export const RegisterSponsorSchema = z
       message: "You must agree to the terms and conditions",
     }),
     companyName: z.string().min(1, { message: "Company name is required" }),
-    website: z.string().url({ message: "Please enter a valid website URL" }).optional(),
+    website: z
+      .string()
+      .refine(
+        (val) => {
+          if (!val || val.trim() === "") return true; // Allow empty strings
+          // Accept URLs with or without protocol
+          const urlPattern = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9-]+(\.[a-zA-Z]{2,})+(\/.*)?$/;
+          return urlPattern.test(val);
+        },
+        { message: "Please enter a valid website URL (e.g., www.example.com or https://example.com)" }
+      )
+      .optional()
+      .or(z.literal("")),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",

@@ -10,6 +10,8 @@ import { SectionProgressTracker } from "@/src/components/molecules/progress-trac
 import { FormField, FormFieldRef } from "@/src/components/onboarding/form-field";
 import { CongratulationsPopup } from "@/src/components/molecules/congratulations-popup";
 import { SaveAndExitPopup } from "@/src/components/molecules/save-and-exit-popup";
+import { SponsorInfoPopup } from "@/src/components/molecules/sponsor-info-popup";
+import { SponsorWelcomePopup } from "@/src/components/molecules/sponsor-welcome-popup";
 import { sponsorOnboardingSchema } from "@/src/lib/data/sponsor-onboarding-schema";
 import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
 import {
@@ -64,6 +66,7 @@ export default function FormPage({ params }: FormPageProps) {
   const [currentCongratsMessage, setCurrentCongratsMessage] = useState<CongratsMessage | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [showSaveAndExit, setShowSaveAndExit] = useState(false);
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false);
   const formFieldRefs = useRef<Record<string, FormFieldRef | null>>({});
 
   // Find phase and current section data
@@ -78,6 +81,13 @@ export default function FormPage({ params }: FormPageProps) {
   }, [phase, currentSection, setCurrentSection]);
 
   const currentSectionData = phase?.sections[currentSection];
+
+  // Show welcome popup when entering sponsor-info section
+  useEffect(() => {
+    if (resolvedParams.phase === "project-upload" && currentSectionData?.key === "sponsor-info") {
+      setShowWelcomePopup(true);
+    }
+  }, [resolvedParams.phase, currentSectionData?.key]);
 
   // Function to check if a field should be shown based on conditions
   const shouldShowField = useCallback(
@@ -610,18 +620,41 @@ export default function FormPage({ params }: FormPageProps) {
         </div>
       </div>
 
-      {/* Congratulations Popup */}
-      <CongratulationsPopup
-        isOpen={showCongrats}
-        title={currentCongratsMessage?.title || ""}
-        description={currentCongratsMessage?.description || ""}
-        ctaText={currentCongratsMessage?.ctaText || "Continue"}
-        sectionKey={currentSectionData?.key}
-        onContinue={() => {
-          setShowCongrats(false);
-          proceedToNext();
-        }}
+      {/* Welcome Popup for Sponsor Info Section */}
+      <SponsorWelcomePopup
+        isOpen={showWelcomePopup}
+        onContinue={() => setShowWelcomePopup(false)}
+        onClose={() => setShowWelcomePopup(false)}
       />
+
+      {/* Congratulations Popup */}
+      {currentSectionData?.key === "sponsor-info" || currentSectionData?.key === "the-deal" ? (
+        <SponsorInfoPopup
+          isOpen={showCongrats}
+          title={currentCongratsMessage?.title || ""}
+          description={currentCongratsMessage?.description || ""}
+          ctaText={currentCongratsMessage?.ctaText || "Continue"}
+          onContinue={() => {
+            setShowCongrats(false);
+            proceedToNext();
+          }}
+          onClose={() => {
+            setShowCongrats(false);
+          }}
+        />
+      ) : (
+        <CongratulationsPopup
+          isOpen={showCongrats}
+          title={currentCongratsMessage?.title || ""}
+          description={currentCongratsMessage?.description || ""}
+          ctaText={currentCongratsMessage?.ctaText || "Continue"}
+          sectionKey={currentSectionData?.key}
+          onContinue={() => {
+            setShowCongrats(false);
+            proceedToNext();
+          }}
+        />
+      )}
 
       {/* Save and Exit Popup */}
       <SaveAndExitPopup isOpen={showSaveAndExit} onConfirm={handleSaveAndExitConfirm} />
