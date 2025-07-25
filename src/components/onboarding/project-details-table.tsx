@@ -8,7 +8,7 @@ import { Button } from "@/src/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { SizeInput } from "./size-input";
-import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { CurrencyInput } from "./currency-input";
 
 interface ProjectDetail {
   id: string;
@@ -35,7 +35,6 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
   ({ value = [], onChange, error }, ref) => {
     const [projects, setProjects] = useState<ProjectDetail[]>(value.length > 0 ? value : [createEmptyProject()]);
     const [fieldErrors, setFieldErrors] = useState<Record<string, Record<string, string>>>({});
-    const { formatCurrency } = useCurrencySafe();
 
     useEffect(() => {
       const initialErrors: Record<string, Record<string, string>> = {};
@@ -293,19 +292,17 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                   Total Project Cost *
                 </Label>
                 <div className='md:col-span-2'>
-                  <Input
-                    id={`total-cost-${project.id}`}
-                    placeholder={formatCurrency("250,000,000")}
+                  <CurrencyInput
                     value={project.totalCost}
-                    onChange={(e) => updateProject(project.id, "totalCost", e.target.value)}
+                    onChange={(value) => updateProject(project.id, "totalCost", value)}
+                    placeholder='e.g. 250,000,000'
+                    error={fieldErrors[project.id]?.totalCost}
                     className={cn(
                       fieldErrors[project.id]?.totalCost && "border-red-500",
                       "border border-black/60 py-6 text-xs shadow-none placeholder:text-xs md:text-xs"
                     )}
+                    required={true}
                   />
-                  {fieldErrors[project.id]?.totalCost && (
-                    <p className='mt-1 text-sm text-red-500'>{fieldErrors[project.id].totalCost}</p>
-                  )}
                 </div>
               </div>
 

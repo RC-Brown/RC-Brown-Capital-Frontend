@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Input } from "@/src/components/ui/input";
 import { cn } from "@/src/lib/utils";
+import { CurrencyInput } from "./currency-input";
+import { NumberInput } from "./number-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 interface SponsorMetricsData {
@@ -43,23 +45,24 @@ const metricsConfig = [
   },
   {
     key: "historicalPortfolioActivity",
-    label: "Historical Portfolio Activity ($)",
-    type: "text",
-    placeholder: "e.g $25,000,000",
+    label: "Historical Portfolio Activity (${currencySymbol})",
+    type: "currency",
+    placeholder: "",
     info: "Total past investment volume handled across all projects",
   },
   {
     key: "projectsUnderManagement",
     label: "Projects currently under Management",
-    type: "text",
-    placeholder: "e.g $100,000,000",
+    type: "currency",
+    placeholder: "",
     info: "Current total value of properties/assets the sponsor manages.",
   },
   {
     key: "totalSquareFeetManaged",
     label: "Total Square Feet Managed",
-    type: "text",
-    placeholder: "e.g 500,000 SQ FT",
+    type: "number",
+    placeholder: "",
+    unit: "sq ft",
     info: "Combined size of all properties under the sponsor's management.",
   },
   {
@@ -134,9 +137,9 @@ const metricsConfig = [
   },
   {
     key: "highestBudgetProject",
-    label: "Highest Budget for a Project $",
-    type: "text",
-    placeholder: "e.g $100,000,000",
+    label: "Highest Budget for a Project ${currencySymbol}",
+    type: "currency",
+    placeholder: "",
     info: "The largest single-project budget the sponsor has worked with.",
   },
   {
@@ -157,20 +160,26 @@ const metricsConfig = [
 
 export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetricsTableProps) {
   const [metrics, setMetrics] = useState<SponsorMetricsData>(value);
-  const { formatCurrency } = useCurrencySafe();
+  const { formatCurrency, currencySymbol } = useCurrencySafe();
 
-  // Create dynamic metrics config with currency-aware placeholders
+  // Create dynamic metrics config with currency-aware placeholders and labels
   const dynamicMetricsConfig = metricsConfig.map((metric) => {
+    const updatedMetric = { ...metric };
+
+    // Handle currency placeholders
     if (metric.placeholder && metric.placeholder.includes("$")) {
-      return {
-        ...metric,
-        placeholder: metric.placeholder.replace(/\$[0-9,]+/g, (match) => {
-          const amount = match.replace("$", "");
-          return formatCurrency(amount);
-        }),
-      };
+      updatedMetric.placeholder = metric.placeholder.replace(/\$[0-9,]+/g, (match) => {
+        const amount = match.replace("$", "");
+        return formatCurrency(amount);
+      });
     }
-    return metric;
+
+    // Handle currency labels - replace template strings with actual currency symbols
+    if (metric.type === "currency" && metric.label.includes("${currencySymbol}")) {
+      updatedMetric.label = metric.label.replace("${currencySymbol}", currencySymbol);
+    }
+
+    return updatedMetric;
   });
 
   const handleMetricChange = (key: string, newValue: string) => {
@@ -240,6 +249,27 @@ export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetr
                         ))}
                       </SelectContent>
                     </Select>
+                  ) : metric.type === "currency" ? (
+                    <CurrencyInput
+                      value={metrics[metric.key as keyof SponsorMetricsData] || ""}
+                      onChange={(value) => handleMetricChange(metric.key, value)}
+                      placeholder={metric.placeholder || "Enter value"}
+                      className={cn(
+                        error && "border-red-500",
+                        "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
+                      )}
+                    />
+                  ) : metric.type === "number" ? (
+                    <NumberInput
+                      value={metrics[metric.key as keyof SponsorMetricsData] || ""}
+                      onChange={(value) => handleMetricChange(metric.key, value)}
+                      placeholder={metric.placeholder || "Enter value"}
+                      unit={metric.unit}
+                      className={cn(
+                        error && "border-red-500",
+                        "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
+                      )}
+                    />
                   ) : (
                     <Input
                       type='text'

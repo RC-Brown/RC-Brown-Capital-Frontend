@@ -633,7 +633,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               label: "Sponsor Name (Company)",
               type: "text",
               gridSpan: 2,
-              placeholder: "e.g Roland Emmanuel",
+              placeholder: "e.g RC Brown Capital",
               validation: { required: true, minLength: 2, maxLength: 100 },
             },
             {

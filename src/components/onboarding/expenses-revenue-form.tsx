@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 import { Plus } from "lucide-react";
-import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { CurrencyInput } from "./currency-input";
 
 interface AdditionalExpense {
   name: string;
@@ -30,7 +30,6 @@ interface ExpensesRevenueFormProps {
 
 const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, onChange }) => {
   const [additionalExpenses, setAdditionalExpenses] = useState<AdditionalExpense[]>(value.additionalExpenses || []);
-  const { formatCurrency } = useCurrencySafe();
 
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
@@ -73,11 +72,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Taxes <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.taxes || ""}
-              onChange={(e) => handleInputChange("taxes", e.target.value)}
+              onChange={(value) => handleInputChange("taxes", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -86,11 +84,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Management <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.management || ""}
-              onChange={(e) => handleInputChange("management", e.target.value)}
+              onChange={(value) => handleInputChange("management", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -99,11 +96,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Utilities <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.utilities || ""}
-              onChange={(e) => handleInputChange("utilities", e.target.value)}
+              onChange={(value) => handleInputChange("utilities", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -112,11 +108,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Total Expense <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.totalExpense || ""}
-              onChange={(e) => handleInputChange("totalExpense", e.target.value)}
+              onChange={(value) => handleInputChange("totalExpense", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -125,11 +120,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Total Equity Appreciation <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.totalEquityAppreciation || ""}
-              onChange={(e) => handleInputChange("totalEquityAppreciation", e.target.value)}
+              onChange={(value) => handleInputChange("totalEquityAppreciation", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -141,11 +135,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Insurance <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.insurance || ""}
-              onChange={(e) => handleInputChange("insurance", e.target.value)}
+              onChange={(value) => handleInputChange("insurance", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -154,11 +147,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Repairs <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.repairs || ""}
-              onChange={(e) => handleInputChange("repairs", e.target.value)}
+              onChange={(value) => handleInputChange("repairs", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -167,11 +159,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Interest <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.interest || ""}
-              onChange={(e) => handleInputChange("interest", e.target.value)}
+              onChange={(value) => handleInputChange("interest", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -180,11 +171,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             <label className='mb-2 block text-sm font-medium text-gray-700'>
               Total Rental Income <span className='text-red-500'>*</span>
             </label>
-            <Input
-              type='text'
-              placeholder={formatCurrency("0.00")}
+            <CurrencyInput
               value={value.totalRentalIncome || ""}
-              onChange={(e) => handleInputChange("totalRentalIncome", e.target.value)}
+              onChange={(value) => handleInputChange("totalRentalIncome", value)}
+              placeholder=''
               className='w-full'
             />
           </div>
@@ -216,11 +206,10 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
                   onChange={(e) => handleExpenseChange(index, "name", e.target.value)}
                   className='w-full'
                 />
-                <Input
-                  type='text'
-                  placeholder='$0.00'
+                <CurrencyInput
                   value={expense.amount || ""}
-                  onChange={(e) => handleExpenseChange(index, "amount", e.target.value)}
+                  onChange={(value) => handleExpenseChange(index, "amount", value)}
+                  placeholder=''
                   className='w-full'
                 />
               </div>

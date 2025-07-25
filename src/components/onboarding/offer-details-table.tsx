@@ -1,6 +1,7 @@
 import React from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { CurrencyInput } from "./currency-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 type SponsorCoInvestPercentage = "5.0" | "6.0" | "7.0" | "8.0" | "9.0" | "10.0";
@@ -81,23 +82,23 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
   const tableData = [
     {
       category: `Total Capitalization (${formatCurrency("")})`,
-      inputType: "text",
+      inputType: "currency",
       field: "total_capitalization",
-      placeholder: formatCurrency(""),
+      placeholder: "",
       briefInfo: "Enter the total amount of capital required for the investment",
     },
     {
       category: `Debt Allocation (${formatCurrency("")})`,
-      inputType: "text",
+      inputType: "currency",
       field: "debt_allocation",
-      placeholder: formatCurrency("25,000,000"),
+      placeholder: "",
       briefInfo: "Specify the portion of the total capitalization that will be funded through debt.",
     },
     {
       category: `Equity Allocation (${formatCurrency("")})`,
-      inputType: "text",
+      inputType: "currency",
       field: "equity_allocation",
-      placeholder: formatCurrency("25,000,000"),
+      placeholder: "",
       briefInfo: "Specify the amount of equity funding being raised as part of the total capitalization",
     },
     {
@@ -218,6 +219,13 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
                       placeholder={item.placeholder}
                       value={value[item.field] || ""}
                       onChange={(e) => handleInputChange(item.field, e.target.value)}
+                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                    />
+                  ) : item.inputType === "currency" ? (
+                    <CurrencyInput
+                      value={value[item.field] || ""}
+                      onChange={(value) => handleInputChange(item.field, value)}
+                      placeholder={item.placeholder}
                       className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
                     />
                   ) : item.inputType === "date-picker" ? (
