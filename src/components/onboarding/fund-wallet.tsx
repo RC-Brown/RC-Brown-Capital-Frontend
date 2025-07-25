@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/src/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 interface WalletFundingData {
   funded?: boolean;
@@ -18,6 +19,8 @@ interface FundWalletProps {
 const FundWallet: React.FC<FundWalletProps> = () =>
   // { value, onChange }
   {
+    const { formatCurrency } = useCurrencySafe();
+
     const handleFundWallet = () => {
       // Fund wallet logic
     };
@@ -28,8 +31,8 @@ const FundWallet: React.FC<FundWalletProps> = () =>
           <h3 className='mb-4 text-lg font-semibold text-gray-900'>Fund Wallet</h3>
 
           <p className='mb-6 text-sm leading-relaxed text-gray-600'>
-            To proceed with submission, please note that a ₦1,000,000 non-refundable fee is required. This covers your
-            profile due diligence and onboarding checks.
+            To proceed with submission, please note that a {formatCurrency("1,000,000")} non-refundable fee is required.
+            This covers your profile due diligence and onboarding checks.
           </p>
 
           <Button

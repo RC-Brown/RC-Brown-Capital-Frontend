@@ -2,6 +2,7 @@ import React from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Tooltip } from "../ui/tooltip";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 type DistributionPeriod = "monthly" | "quarterly" | "semi_annually" | "annually";
 type TargetHoldPeriod = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
@@ -16,6 +17,7 @@ interface DebtDetailsData {
   expected_min_annual_return?: string;
   exit_date?: string;
   target_hold_period?: TargetHoldPeriod;
+  return_on_investment?: string;
 }
 
 interface DebtDetailsFormProps {
@@ -24,6 +26,8 @@ interface DebtDetailsFormProps {
 }
 
 const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange }) => {
+  const { formatCurrency } = useCurrencySafe();
+
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
   };
@@ -59,6 +63,39 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
     { label: "8", value: "8" },
     { label: "9", value: "9" },
     { label: "10", value: "10" },
+    { label: "11", value: "11" },
+    { label: "12", value: "12" },
+    { label: "13", value: "13" },
+    { label: "14", value: "14" },
+    { label: "15", value: "15" },
+    { label: "16", value: "16" },
+    { label: "17", value: "17" },
+    { label: "18", value: "18" },
+    { label: "19", value: "19" },
+    { label: "20", value: "20" },
+  ];
+
+  const returnOnInvestmentOptions = [
+    { label: "1", value: "1" },
+    { label: "2", value: "2" },
+    { label: "3", value: "3" },
+    { label: "4", value: "4" },
+    { label: "5", value: "5" },
+    { label: "6", value: "6" },
+    { label: "7", value: "7" },
+    { label: "8", value: "8" },
+    { label: "9", value: "9" },
+    { label: "10", value: "10" },
+    { label: "11", value: "11" },
+    { label: "12", value: "12" },
+    { label: "13", value: "13" },
+    { label: "14", value: "14" },
+    { label: "15", value: "15" },
+    { label: "16", value: "16" },
+    { label: "17", value: "17" },
+    { label: "18", value: "18" },
+    { label: "19", value: "19" },
+    { label: "20", value: "20" },
   ];
 
   return (
@@ -157,11 +194,12 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           </Tooltip>
           <Input
             id='target_distribution_start'
-            type='text'
+            type='date'
             placeholder='DD/MM/YY'
             value={value.target_distribution_start || ""}
             onChange={(e) => handleInputChange("target_distribution_start", e.target.value)}
-            className='w-full py-5 text-sm shadow-none'
+            className='w-full py-5 text-sm shadow-none placeholder:text-sm md:text-sm'
+            data-placeholder='DD/MM/YY'
           />
         </div>
 
@@ -173,7 +211,7 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Input
             id='max_investment_amount'
             type='text'
-            placeholder='$950'
+            placeholder={formatCurrency("950")}
             value={value.max_investment_amount || ""}
             onChange={(e) => handleInputChange("max_investment_amount", e.target.value)}
             className='w-full py-5 text-sm shadow-none'
@@ -188,7 +226,7 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Input
             id='min_investment_amount'
             type='text'
-            placeholder='$950'
+            placeholder={formatCurrency("950")}
             value={value.min_investment_amount || ""}
             onChange={(e) => handleInputChange("min_investment_amount", e.target.value)}
             className='w-full py-5 text-sm shadow-none'
@@ -203,7 +241,7 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Input
             id='expected_max_annual_return'
             type='text'
-            placeholder='$950'
+            placeholder={formatCurrency("950")}
             value={value.expected_max_annual_return || ""}
             onChange={(e) => handleInputChange("expected_max_annual_return", e.target.value)}
             className='w-full py-5 text-sm shadow-none'
@@ -218,7 +256,7 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Input
             id='expected_min_annual_return'
             type='text'
-            placeholder='$950'
+            placeholder={formatCurrency("950")}
             value={value.expected_min_annual_return || ""}
             onChange={(e) => handleInputChange("expected_min_annual_return", e.target.value)}
             className='w-full py-5 text-sm shadow-none'
@@ -232,11 +270,12 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           </Tooltip>
           <Input
             id='exit_date'
-            type='text'
+            type='date'
             placeholder='1/3/27'
             value={value.exit_date || ""}
             onChange={(e) => handleInputChange("exit_date", e.target.value)}
-            className='w-full py-5 text-sm shadow-none'
+              className='w-full py-5 text-sm shadow-none placeholder:text-sm md:text-sm'
+            data-placeholder='DD/MM/YY'
           />
         </div>
 
@@ -254,6 +293,26 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
             </SelectTrigger>
             <SelectContent className='bg-white'>
               {targetHoldPeriodOptions.map((option) => (
+                <SelectItem className='hover:bg-primary hover:text-white' key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Return on Investment (% ) */}
+        <div className='space-y-2'>
+          <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Return on Investment (%) *</span>
+          <Select
+            value={value.return_on_investment || ""}
+            onValueChange={(selectedValue) => handleInputChange("return_on_investment", selectedValue)}
+          >
+            <SelectTrigger className='w-full py-5 text-sm shadow-none'>
+              <SelectValue placeholder='1' />
+            </SelectTrigger>
+            <SelectContent className='bg-white'>
+              {returnOnInvestmentOptions.map((option) => (
                 <SelectItem className='hover:bg-primary hover:text-white' key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>

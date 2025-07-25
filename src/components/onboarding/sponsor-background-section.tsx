@@ -63,7 +63,7 @@ export function SponsorBackgroundSection({ value, onChange, error }: SponsorBack
       </div>
       <Textarea
         placeholder='Background, mission, vision, and business model'
-        className='mt-4 min-h-[100px] border-text-muted shadow-none placeholder:text-text-muted/80'
+        className='mt-4 min-h-[145px] border-black/10 shadow-none placeholder:text-text-muted/80'
         value={value}
         onChange={(e) => onChange(e.target.value)}
       />

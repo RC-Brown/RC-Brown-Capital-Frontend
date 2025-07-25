@@ -4,6 +4,8 @@ import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { cn } from "@/src/lib/utils";
 import countriesData from "@/src/data/countries.json";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
 
 interface CurrencyDropdownProps {
   value?: string;
@@ -11,6 +13,7 @@ interface CurrencyDropdownProps {
   error?: string;
   className?: string;
   placeholder?: string;
+  fieldKey?: string;
 }
 
 // Supported currencies
@@ -38,9 +41,22 @@ const CURRENCY_OPTIONS = countriesData
     return a.value.localeCompare(b.value);
   });
 
-export function CurrencyDropdown({ value, onChange, error, className, placeholder }: CurrencyDropdownProps) {
+export function CurrencyDropdown({ value, onChange, error, className, placeholder, fieldKey }: CurrencyDropdownProps) {
+  const { updateCurrency } = useCurrencySafe();
+  const { updateFormData } = useOnboardingStore();
+
+  const handleCurrencyChange = (currencyValue: string) => {
+    onChange(currencyValue);
+    updateCurrency(currencyValue);
+
+    // Also update the store directly for immediate effect
+    if (fieldKey) {
+      updateFormData({ [fieldKey]: currencyValue });
+    }
+  };
+
   return (
-    <Select value={value || ""} onValueChange={onChange}>
+    <Select value={value || ""} onValueChange={handleCurrencyChange}>
       <SelectTrigger
         className={cn(
           error && "border-red-500",

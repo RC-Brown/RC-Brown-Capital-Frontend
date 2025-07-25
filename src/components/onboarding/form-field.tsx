@@ -50,6 +50,8 @@ import { SponsorInformationDocs } from "./sponsor-information-docs";
 import ScreeningNotice from "./screening-notice";
 import BudgetTabs from "./budget-tabs";
 import { EnhancedTextarea } from "./enhanced-textarea";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { getInvestmentSizeOptions } from "@/src/lib/utils/currency-options";
 
 type FormData = Record<string, FormFieldValue>;
 
@@ -69,6 +71,7 @@ export interface FormFieldRef {
 export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
   ({ field, value, onChange, error, formData = {}, spans2Columns = false }, ref) => {
     const projectDetailsTableRef = useRef<ProjectDetailsTableRef>(null);
+    const { currencySymbol, formatCurrency } = useCurrencySafe();
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
@@ -95,14 +98,35 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
     const renderField = () => {
       switch (field.type) {
         case "text":
+          // Replace currency symbols in placeholder with dynamic currency
+          const dynamicPlaceholder =
+            field.placeholder?.replace(/\$[0-9]|\$[A-Z]|\₦|\€|\£/g, (match) => {
+              // Extract the amount part and format with current currency
+              const amount = match.replace(/[\$₦€£]/g, "");
+              return formatCurrency(amount);
+            }) || field.placeholder;
+
           return (
             <Input
-              placeholder={field.placeholder}
+              placeholder={dynamicPlaceholder}
               value={(value as string | number) || ""}
               onChange={(e) => onChange(e.target.value)}
               className={cn(
                 error && "border-red-500",
-                "max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+                "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+              )}
+            />
+          );
+
+        case "date":
+          return (
+            <Input
+              type='date'
+              value={(value as string) || ""}
+              onChange={(e) => onChange(e.target.value)}
+              className={cn(
+                error && "border-red-500",
+                "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-sm data-[placeholder]:text-sm"
               )}
             />
           );
@@ -155,8 +179,9 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                   value={(value as string) || ""}
                   onChange={onChange}
                   error={error}
-                  className={spans2Columns ? "w-auto min-w-[120px]" : ""}
+                  className={spans2Columns ? "w-auto min-w-[330px]" : ""}
                   placeholder={field.placeholder}
+                  fieldKey={field.key}
                 />
               );
             }
@@ -165,7 +190,8 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                 value={(value as string) || ""}
                 onChange={onChange}
                 error={error}
-                className={spans2Columns ? "w-auto min-w-[120px]" : ""}
+                className={spans2Columns ? "w-auto min-w-[330px]" : ""}
+                fieldKey={field.key}
               />
             );
           }
@@ -178,7 +204,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                 onChange={onChange}
                 error={error}
                 placeholder={field.placeholder}
-                className={spans2Columns ? "w-auto min-w-[120px]" : ""}
+                className={spans2Columns ? "w-auto min-w-[330px]" : ""}
               />
             );
           }
@@ -210,8 +236,8 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                   <SelectTrigger
                     className={cn(
                       error && "border-red-500",
-                      "text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
-                      spans2Columns && "w-auto min-w-[120px]" // Auto-width only for 2-column spans
+                      "h-[51px] text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
+                      spans2Columns && "w-auto min-w-[330px]" // Auto-width only for 2-column spans
                     )}
                   >
                     <SelectValue
@@ -243,7 +269,10 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                       placeholder='Enter your custom option'
                       value={otherValue}
                       onChange={(e) => onChange({ selectedValue: selectValue, otherValue: e.target.value })}
-                      className={cn(error && "border-red-500", "text-sm shadow-none placeholder:text-text-muted/50")}
+                      className={cn(
+                        error && "border-red-500",
+                        "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+                      )}
                     />
                   </div>
                 )}
@@ -251,27 +280,35 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             );
           }
 
+          // Handle dynamic currency options for investment size
+          const dynamicOptions =
+            field.key === "investment_size" ? getInvestmentSizeOptions(currencySymbol) : field.options;
+
           return (
-            <Select value={(value as string | number)?.toString() || ""} onValueChange={onChange}>
+            <Select
+              key={`${field.key}-${currencySymbol}`}
+              value={(value as string | number)?.toString() || ""}
+              onValueChange={onChange}
+            >
               <SelectTrigger
                 className={cn(
                   error && "border-red-500",
-                  "text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
-                  spans2Columns && "w-auto min-w-[120px]" // Auto-width only for 2-column spans
+                  "h-[51px] text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
+                  spans2Columns && "w-auto min-w-[330px]" // Auto-width only for 2-column spans
                 )}
               >
                 <SelectValue
                   placeholder={
-                    field.placeholder || (Array.isArray(field.options) ? field.options[0]?.label : "Select an option")
+                    field.placeholder || (Array.isArray(dynamicOptions) ? dynamicOptions[0]?.label : "Select an option")
                   }
                   className='text-xs text-text-muted/80 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'
                 />
               </SelectTrigger>
               <SelectContent className='bg-white text-text-muted/80'>
-                {Array.isArray(field.options) &&
-                  field.options.map((option) => (
+                {Array.isArray(dynamicOptions) &&
+                  dynamicOptions.map((option) => (
                     <SelectItem
-                      key={option.value}
+                      key={`${currencySymbol}-${option.value}`}
                       value={option.value}
                       className='cursor-pointer hover:bg-primary hover:text-white'
                     >
@@ -350,7 +387,10 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                       placeholder='Enter your custom option'
                       value={otherValue}
                       onChange={(e) => onChange({ selectedValue: selectedValue, otherValue: e.target.value })}
-                      className={cn(error && "border-red-500", "text-sm shadow-none placeholder:text-text-muted/50")}
+                      className={cn(
+                        error && "border-red-500",
+                        "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+                      )}
                     />
                   </div>
                 )}
@@ -395,7 +435,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                     placeholder={`${option}`}
                     value={multiTextValue[option] || ""}
                     onChange={(e) => onChange({ ...multiTextValue, [option]: e.target.value })}
-                    className={cn("text-sm shadow-none placeholder:text-text-muted/50")}
+                    className={cn("h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50")}
                   />
                 </div>
               ))}
@@ -516,7 +556,9 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             return <SupportingDocuments value={value as never} onChange={onChange} />;
           }
           if (field.customComponent === "CurrencySelect") {
-            return <CurrencySelect value={(value as string) || ""} onChange={onChange} error={error} />;
+            return (
+              <CurrencySelect value={(value as string) || ""} onChange={onChange} error={error} fieldKey={field.key} />
+            );
           }
           if (field.customComponent === "FundsModificationNotice") {
             return <FundsModificationNotice value={Boolean(value)} onChange={onChange} error={error} />;
@@ -620,7 +662,9 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         <div className='space-y-2'>
           <div className='flex items-center gap-4'>
             <div className='flex-1'>
-              <Label className='text-sm font-normal -tracking-[3%] text-text-muted'>{renderLabel(field.label)}</Label>
+              <Label className='whitespace-nowrap text-sm font-normal -tracking-[3%] text-text-muted'>
+                {renderLabel(field.label)}
+              </Label>
             </div>
             <div className='flex-1'>{renderField()}</div>
           </div>

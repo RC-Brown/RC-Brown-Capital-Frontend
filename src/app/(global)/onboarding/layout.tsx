@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/src/lib/utils";
 import { DocumentTextIcon, Squares2X2Icon } from "@heroicons/react/24/outline";
+import { CurrencyProvider } from "@/src/lib/context/currency-context";
 
 // Icons for the navigation tabs
 const OnboardingIcon = () => <Squares2X2Icon className='size-4' />;
@@ -117,7 +118,9 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
       )}
 
       {/* Main Content */}
-      <div className='h-full'>{children}</div>
+      <div className='h-full'>
+        <CurrencyProvider>{children}</CurrencyProvider>
+      </div>
     </div>
   );
 }

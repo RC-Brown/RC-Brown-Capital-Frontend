@@ -403,12 +403,6 @@ export default function FormPage({ params }: FormPageProps) {
   };
 
   const proceedToNext = () => {
-    console.log({
-      currentSection,
-      phase,
-      phaseIndex,
-      phaseSectionsLength: phase.sections.length,
-    });
     if (currentSection < phase.sections.length - 1) {
       // Move to next section
       setCurrentSection(currentSection + 1);
@@ -537,14 +531,14 @@ export default function FormPage({ params }: FormPageProps) {
                 <div
                   className={`flex items-center justify-between pb-6 ${
                     resolvedParams.phase === "project-upload"
-                      ? "rounded-t-lg bg-primary px-6 py-4 text-white"
+                      ? "rounded-t-2xl bg-primary px-6 py-4 text-white"
                       : "border-b border-black/10"
                   }`}
                 >
                   <div>
                     <CardTitle
                       className={`text-xl font-semibold -tracking-[3%] ${
-                        resolvedParams.phase === "project-upload" ? "text-white" : "text-primary"
+                        resolvedParams.phase === "project-upload" ? "px-7 py-3 text-white" : "text-primary"
                       }`}
                     >
                       {currentSectionData.title}

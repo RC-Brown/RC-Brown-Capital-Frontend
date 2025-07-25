@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
 import { Plus } from "lucide-react";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 interface AdditionalExpense {
   name: string;
@@ -29,6 +30,7 @@ interface ExpensesRevenueFormProps {
 
 const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, onChange }) => {
   const [additionalExpenses, setAdditionalExpenses] = useState<AdditionalExpense[]>(value.additionalExpenses || []);
+  const { formatCurrency } = useCurrencySafe();
 
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
@@ -73,7 +75,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.taxes || ""}
               onChange={(e) => handleInputChange("taxes", e.target.value)}
               className='w-full'
@@ -86,7 +88,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.management || ""}
               onChange={(e) => handleInputChange("management", e.target.value)}
               className='w-full'
@@ -99,7 +101,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.utilities || ""}
               onChange={(e) => handleInputChange("utilities", e.target.value)}
               className='w-full'
@@ -112,7 +114,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.totalExpense || ""}
               onChange={(e) => handleInputChange("totalExpense", e.target.value)}
               className='w-full'
@@ -125,7 +127,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.totalEquityAppreciation || ""}
               onChange={(e) => handleInputChange("totalEquityAppreciation", e.target.value)}
               className='w-full'
@@ -141,7 +143,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.insurance || ""}
               onChange={(e) => handleInputChange("insurance", e.target.value)}
               className='w-full'
@@ -154,7 +156,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.repairs || ""}
               onChange={(e) => handleInputChange("repairs", e.target.value)}
               className='w-full'
@@ -167,7 +169,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.interest || ""}
               onChange={(e) => handleInputChange("interest", e.target.value)}
               className='w-full'
@@ -180,7 +182,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             </label>
             <Input
               type='text'
-              placeholder='$0.00'
+              placeholder={formatCurrency("0.00")}
               value={value.totalRentalIncome || ""}
               onChange={(e) => handleInputChange("totalRentalIncome", e.target.value)}
               className='w-full'

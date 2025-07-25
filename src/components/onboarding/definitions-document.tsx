@@ -27,7 +27,7 @@ export function DefinitionsDocument({
         type='button'
         variant='outline'
         onClick={handleViewDocument}
-        className='flex items-center gap-2 border-blue-600 bg-blue-200/30 text-blue-600 hover:bg-blue-50'
+        className='flex items-center gap-2 rounded-xl border-[#55A2F0] bg-[#407BFF]/5 text-[#407BFF] hover:bg-blue-50'
       >
         View Definitions Document
         <ArrowRight className='size-4 -rotate-12' />

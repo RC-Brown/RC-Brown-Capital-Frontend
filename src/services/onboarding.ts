@@ -250,6 +250,36 @@ const companyRepresentativeSchema = z.object({
 function validateCompanyRepresentativeStep(step: number, data: any): { success: boolean; errors?: any } {
   // Step 1: Personal Details (using backend field names since data is already transformed)
   if (step === 1) {
+    // Check if we have the minimum required data for step 1
+    const requiredFields = [
+      "user_id",
+      "relationship",
+      "identification_type",
+      "first_name",
+      "last_name",
+      "country",
+      "address",
+    ];
+    const missingFields = requiredFields.filter((field) => {
+      const value = data[field];
+      return !value || (typeof value === "string" && value.trim() === "");
+    });
+
+    if (missingFields.length > 0) {
+      return {
+        success: false,
+        errors: {
+          fieldErrors: missingFields.reduce(
+            (acc, field) => {
+              acc[field] = [`${field.replace(/_/g, " ")} is required`];
+              return acc;
+            },
+            {} as Record<string, string[]>
+          ),
+        },
+      };
+    }
+
     const stepSchema = z.object({
       user_id: z.number().positive("User ID is required"),
       relationship: z.string().min(1, "Relationship with company is required"),
@@ -264,9 +294,19 @@ function validateCompanyRepresentativeStep(step: number, data: any): { success: 
           useCompanyAddress: z.boolean().optional(),
         }),
       ]),
-      utility_bill: z.any().refine((val) => val !== null && val !== undefined, {
-        message: "Utility bill is required",
-      }),
+      utility_bill: z.any().refine(
+        (val) => {
+          // More flexible validation for utility bill
+          if (val === null || val === undefined) return false;
+          if (val instanceof File) return true;
+          if (typeof val === "object" && val.file instanceof File) return true;
+          if (typeof val === "string" && val.trim() !== "") return true;
+          return false;
+        },
+        {
+          message: "Utility bill is required",
+        }
+      ),
       bvn: z.string().optional(),
       nin: z.string().optional(),
       ssn: z.string().optional(),
@@ -278,6 +318,37 @@ function validateCompanyRepresentativeStep(step: number, data: any): { success: 
 
   // Step 2: Bank Details (using backend field names since data is already transformed)
   if (step === 2) {
+    // Check if we have the minimum required data for step 2
+    const requiredFields = [
+      "user_id",
+      "account_currency",
+      "bank_name",
+      "bank_branch",
+      "swift_code",
+      "routing_number",
+      "sort_code",
+      "account_number",
+    ];
+    const missingFields = requiredFields.filter((field) => {
+      const value = data[field];
+      return !value || (typeof value === "string" && value.trim() === "");
+    });
+
+    if (missingFields.length > 0) {
+      return {
+        success: false,
+        errors: {
+          fieldErrors: missingFields.reduce(
+            (acc, field) => {
+              acc[field] = [`${field.replace(/_/g, " ")} is required`];
+              return acc;
+            },
+            {} as Record<string, string[]>
+          ),
+        },
+      };
+    }
+
     // Create conditional schema based on country
     const baseSchema = {
       user_id: z.number().positive("User ID is required"),

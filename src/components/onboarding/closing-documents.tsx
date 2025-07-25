@@ -15,13 +15,11 @@ interface ClosingDocumentsProps {
 }
 
 const documentTypes = [
-  { value: "purchase_agreement", label: "Purchase Agreement" },
-  { value: "title_documents", label: "Title Documents" },
-  { value: "loan_documents", label: "Loan Documents" },
-  { value: "insurance_documents", label: "Insurance Documents" },
-  { value: "inspection_reports", label: "Inspection Reports" },
-  { value: "appraisal_report", label: "Appraisal Report" },
-  { value: "other", label: "Other" },
+  { value: "private_placement_memorandum", label: "Private Placement Memorandum" },
+  { value: "operating_agreement", label: "Operating Agreement" },
+  { value: "subscription_agreement", label: "Subscription Agreement" },
+  { value: "llc_company_agreement", label: "LLC Company Agreement" },
+  { value: "tenants_in_common_agreement", label: "Tenants in Common Agreement" },
 ];
 
 export function ClosingDocuments({ value = { documentType: "" }, onChange, error }: ClosingDocumentsProps) {
@@ -104,9 +102,9 @@ export function ClosingDocuments({ value = { documentType: "" }, onChange, error
             >
               <SelectValue placeholder='Closing Document Type' />
             </SelectTrigger>
-            <SelectContent className="bg-white">
+            <SelectContent className='bg-white'>
               {documentTypes.map((type) => (
-                <SelectItem key={type.value} value={type.value} className="hover:bg-primary hover:text-white">
+                <SelectItem key={type.value} value={type.value} className='hover:bg-primary hover:text-white'>
                   {type.label}
                 </SelectItem>
               ))}
@@ -126,7 +124,7 @@ export function ClosingDocuments({ value = { documentType: "" }, onChange, error
           )}
         >
           Upload
-          <Plus className='h-4 w-4 text-black' />
+          <Plus className='size-3 text-black' />
         </Button>
       </div>
 

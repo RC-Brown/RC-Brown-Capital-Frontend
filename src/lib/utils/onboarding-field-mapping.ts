@@ -227,6 +227,11 @@ export function transformCompanyRepDataToApi(
       return;
     }
 
+    // Skip empty values for required fields to avoid validation issues
+    if (value === "" || value === null || value === undefined) {
+      return;
+    }
+
     const backendKey =
       COMPANY_REPRESENTATIVE_FIELD_MAPPING[frontendKey as keyof typeof COMPANY_REPRESENTATIVE_FIELD_MAPPING];
 
@@ -269,26 +274,6 @@ export function transformCompanyRepDataToApi(
   if (formData.routing_number) {
     (apiData as any)["sort_code"] = formData.routing_number;
   }
-
-  // Ensure required fields are present (even if empty) to avoid backend validation errors
-  const requiredFields = [
-    "relationship",
-    "identification_type",
-    "address",
-    // Bank details fields that backend requires
-    "bank_name",
-    "swift_code",
-    "sort_code",
-    "iban",
-    "routing_number",
-    "account_currency",
-  ];
-  requiredFields.forEach((field) => {
-    const apiDataRecord = apiData as Record<string, unknown>;
-    if (!(field in apiData) || apiDataRecord[field] === undefined || apiDataRecord[field] === null) {
-      apiDataRecord[field] = "";
-    }
-  });
 
   // Pre-validate critical required fields before sending to API
   const missingFields: string[] = [];

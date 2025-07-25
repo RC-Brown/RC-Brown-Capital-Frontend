@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Input } from "@/src/components/ui/input";
 import { cn } from "@/src/lib/utils";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 interface SponsorMetricsData {
   yearsInOperation?: string;
@@ -156,6 +157,21 @@ const metricsConfig = [
 
 export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetricsTableProps) {
   const [metrics, setMetrics] = useState<SponsorMetricsData>(value);
+  const { formatCurrency } = useCurrencySafe();
+
+  // Create dynamic metrics config with currency-aware placeholders
+  const dynamicMetricsConfig = metricsConfig.map((metric) => {
+    if (metric.placeholder && metric.placeholder.includes("$")) {
+      return {
+        ...metric,
+        placeholder: metric.placeholder.replace(/\$[0-9,]+/g, (match) => {
+          const amount = match.replace("$", "");
+          return formatCurrency(amount);
+        }),
+      };
+    }
+    return metric;
+  });
 
   const handleMetricChange = (key: string, newValue: string) => {
     const updatedMetrics = { ...metrics, [key]: newValue };
@@ -175,7 +191,7 @@ export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetr
             </tr>
           </thead>
           <tbody>
-            {metricsConfig.map((metric) => (
+            {dynamicMetricsConfig.map((metric) => (
               <tr key={metric.key} className='border-b'>
                 <td className='p-3 text-sm text-text-muted/80'>{metric.label}</td>
                 <td className='p-3'>
@@ -188,10 +204,11 @@ export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetr
                         className={cn(
                           "w-full",
                           error && "border-red-500",
-                          "border border-black/10 py-6 shadow-none placeholder:text-xs"
+                          "h-[51px] border border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-sm data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80"
                         )}
                       >
                         <SelectValue
+                          className='text-sm text-text-muted/80 data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80'
                           placeholder={
                             metric.key === "yearsInOperation"
                               ? "2 years"
@@ -231,7 +248,7 @@ export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetr
                       onChange={(e) => handleMetricChange(metric.key, e.target.value)}
                       className={cn(
                         error && "border-red-500",
-                        "border border-black/10 py-6 shadow-none placeholder:text-xs"
+                        "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
                       )}
                     />
                   )}

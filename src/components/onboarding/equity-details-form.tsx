@@ -1,6 +1,7 @@
 import React from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 type DistributionFrequency = "monthly" | "quarterly" | "semi_annually" | "annually";
 type TargetHoldPeriod = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
@@ -24,6 +25,8 @@ interface EquityDetailsFormProps {
 }
 
 const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onChange }) => {
+  const { formatCurrency } = useCurrencySafe();
+
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
   };
@@ -46,6 +49,39 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     { label: "8", value: "8" },
     { label: "9", value: "9" },
     { label: "10", value: "10" },
+    { label: "11", value: "11" },
+    { label: "12", value: "12" },
+    { label: "13", value: "13" },
+    { label: "14", value: "14" },
+    { label: "15", value: "15" },
+    { label: "16", value: "16" },
+    { label: "17", value: "17" },
+    { label: "18", value: "18" },
+    { label: "19", value: "19" },
+    { label: "20", value: "20" },
+  ];
+
+  const returnOnInvestmentOptions = [
+    { label: "1", value: "1" },
+    { label: "2", value: "2" },
+    { label: "3", value: "3" },
+    { label: "4", value: "4" },
+    { label: "5", value: "5" },
+    { label: "6", value: "6" },
+    { label: "7", value: "7" },
+    { label: "8", value: "8" },
+    { label: "9", value: "9" },
+    { label: "10", value: "10" },
+    { label: "11", value: "11" },
+    { label: "12", value: "12" },
+    { label: "13", value: "13" },
+    { label: "14", value: "14" },
+    { label: "15", value: "15" },
+    { label: "16", value: "16" },
+    { label: "17", value: "17" },
+    { label: "18", value: "18" },
+    { label: "19", value: "19" },
+    { label: "20", value: "20" },
   ];
 
   const tableData = [
@@ -53,7 +89,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       category: "Equity % Allocation",
       inputType: "text",
       field: "equity_allocation",
-      placeholder: "$10m",
+      placeholder: formatCurrency("10m"),
       briefInfo: "This is automatically calculated and reflects the portion of equity offered to investors",
       isReadOnly: true,
     },
@@ -67,34 +103,34 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     },
     {
       category: "Target Distribution Start",
-      inputType: "text",
+      inputType: "date-picker",
       field: "target_distribution_start",
       placeholder: "(DD/MM/YY)",
       briefInfo: "Enter the date when equity return distributions are expected to begin",
     },
     {
-      category: "Minimum Investment ($)",
+      category: `Minimum Investment (${formatCurrency("")})`,
       inputType: "text",
       field: "minimum_investment",
-      placeholder: "$10m",
+      placeholder: formatCurrency(""),
       briefInfo: "Enter the lowest amount an investor can contribute toward the equity portion of this deal.",
     },
     {
-      category: "Maximum Investment ($)",
+      category: `Maximum Investment (${formatCurrency("")})`,
       inputType: "text",
       field: "maximum_investment",
-      placeholder: "$10m",
+      placeholder: formatCurrency(""),
       briefInfo: "Enter the highest amount a single investor is allowed to invest in equity",
     },
     {
-      category: "Expected Min Return (%)",
+      category: `Expected Min Return (%)`,
       inputType: "text",
       field: "expected_min_return",
       placeholder: "2%",
       briefInfo: "This is automatically calculated based on projected performance.",
     },
     {
-      category: "Expected Max Return (%)",
+      category: `Expected Max Return (%)`,
       inputType: "text",
       field: "expected_max_return",
       placeholder: "4%",
@@ -110,15 +146,23 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     },
     {
       category: "Exit Date",
-      inputType: "text",
+      inputType: "date-picker",
       field: "exit_date",
       placeholder: "2/5/27",
+      briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
+    },
+    {
+      category: "Return on Investment (%)",
+      inputType: "select",
+      field: "return_on_investment",
+      placeholder: "%",
+      options: returnOnInvestmentOptions,
       briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
     },
   ];
 
   return (
-    <div className='w-full'>
+    <div className='mb-0 w-full pb-0'>
       <h3 className='mb-7 flex items-center'>
         <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
           <g clip-path='url(#clip0_1802_3396)'>
@@ -165,21 +209,21 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
             </clipPath>
           </defs>
         </svg>
-        <span className='ml-2'>3. Equity Details</span>
+        <span className='ml-2 font-semibold text-text-muted'>4. Equity Details</span>
       </h3>
       <div className='overflow-x-auto'>
         <table className='w-full border-collapse'>
           <thead>
             <tr className=''>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Category</th>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Input</th>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Brief Info</th>
+              <th className='border-b border-black/10 p-4 text-left text-sm font-medium text-text-muted'>Category</th>
+              <th className='border-b border-black/10 p-4 text-left text-sm font-medium text-text-muted'>Input</th>
+              <th className='border-b border-black/10 p-4 text-left text-sm font-medium text-text-muted'>Brief Info</th>
             </tr>
           </thead>
           <tbody>
             {tableData.map((item, index) => (
-              <tr key={index} className='hover:bg-gray-50'>
-                <td className='p-4 text-sm text-text-muted/80'>{item.category}</td>
+              <tr key={index} className='border-b border-black/10'>
+                <td className='whitespace-nowrap p-4 text-xs text-text-muted/80'>{item.category}</td>
                 <td className='p-4'>
                   {item.isReadOnly ? (
                     <Input
@@ -194,22 +238,30 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
                       placeholder={item.placeholder}
                       value={value[item.field] || ""}
                       onChange={(e) => handleInputChange(item.field, e.target.value)}
-                      className='w-full py-6 text-sm shadow-none'
+                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                    />
+                  ) : item.inputType === "date-picker" ? (
+                    <Input
+                      type='date'
+                      placeholder={item.placeholder}
+                      value={value[item.field] || ""}
+                      onChange={(e) => handleInputChange(item.field, e.target.value)}
+                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs md:text-xs'
                     />
                   ) : (
                     <Select
                       value={value[item.field] || ""}
                       onValueChange={(selectedValue) => handleInputChange(item.field, selectedValue)}
                     >
-                      <SelectTrigger className='w-full py-6 text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80'>
+                      <SelectTrigger className='h-[51px] w-full text-xs shadow-none data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'>
                         <SelectValue placeholder={item.placeholder} />
                       </SelectTrigger>
-                      <SelectContent className='bg-white text-sm text-text-muted/80'>
+                      <SelectContent className='bg-white text-xs text-text-muted/80'>
                         {item.options?.map((option) => (
                           <SelectItem
                             key={option.value}
                             value={option.value}
-                            className='hover:bg-primary hover:text-white'
+                            className='text-xs font-medium text-text-muted hover:bg-primary hover:text-white'
                           >
                             {option.label}
                           </SelectItem>
@@ -218,12 +270,16 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
                     </Select>
                   )}
                 </td>
-                <td className='p-4 text-sm text-text-muted/80'>{item.briefInfo}</td>
+                <td className='p-4 text-xs text-text-muted/80'>{item.briefInfo}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <p className='mt-2 text-sm font-light italic text-text-muted'>
+        RC Brown Capital diligently assesses every deal and sponsor through a thorough and comprehensive screening
+        process.
+      </p>
     </div>
   );
 };

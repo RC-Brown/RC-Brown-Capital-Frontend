@@ -1,6 +1,7 @@
 import React from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 type SponsorCoInvestPercentage = "5.0" | "6.0" | "7.0" | "8.0" | "9.0" | "10.0";
 type AssetType = "residential" | "commercial" | "industrial" | "retail" | "office" | "hospitality" | "mixed_use";
@@ -26,6 +27,8 @@ interface OfferDetailsTableProps {
 }
 
 const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onChange }) => {
+  const { formatCurrency } = useCurrencySafe();
+
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
   };
@@ -45,60 +48,56 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
   // };
 
   const sponsorCoInvestOptions = [
-    { label: "5.0%", value: "5.0" },
-    { label: "6.0%", value: "6.0" },
-    { label: "7.0%", value: "7.0" },
-    { label: "8.0%", value: "8.0" },
-    { label: "9.0%", value: "9.0" },
-    { label: "10.0%", value: "10.0" },
+    { label: "5.0% - 10.0%", value: "5.0-10.0" },
+    { label: "< = 5.0%", value: "<=5.0" },
+    { label: "10.0% - 20.0%", value: "10.0-20.0" },
+    { label: "20.0% - 30.0%", value: "20.0-30.0" },
+    { label: "> = 30.0%", value: ">=30.0" },
   ];
 
   const assetTypeOptions = [
     { label: "Residential", value: "residential" },
     { label: "Commercial", value: "commercial" },
     { label: "Industrial", value: "industrial" },
-    { label: "Retail", value: "retail" },
-    { label: "Office", value: "office" },
     { label: "Hospitality", value: "hospitality" },
     { label: "Mixed Use", value: "mixed_use" },
+    { label: "Retail", value: "retail" },
+    { label: "Office", value: "office" },
   ];
 
   const strategyOptions = [
     { label: "Core", value: "core" },
     { label: "Core Plus", value: "core_plus" },
-    { label: "Value Add", value: "value_add" },
+    { label: "Value-Added", value: "value_add" },
     { label: "Opportunistic", value: "opportunistic" },
-    { label: "Development", value: "development" },
   ];
 
   const objectiveOptions = [
-    { label: "Income", value: "income" },
-    { label: "Appreciation", value: "appreciation" },
-    { label: "Balanced", value: "balanced" },
     { label: "Growth", value: "growth" },
-    { label: "Preservation", value: "preservation" },
+    { label: "Equity Appreciation", value: "equity_appreciation" },
+    { label: "Cash Flow", value: "cash_flow" },
   ];
 
   const tableData = [
     {
-      category: "Total Capitalization ($)",
+      category: `Total Capitalization (${formatCurrency("")})`,
       inputType: "text",
       field: "total_capitalization",
-      placeholder: "$10m",
+      placeholder: formatCurrency(""),
       briefInfo: "Enter the total amount of capital required for the investment",
     },
     {
-      category: "Debt Allocation ($)",
+      category: `Debt Allocation (${formatCurrency("")})`,
       inputType: "text",
       field: "debt_allocation",
-      placeholder: "e.g $25,000,000",
+      placeholder: formatCurrency("25,000,000"),
       briefInfo: "Specify the portion of the total capitalization that will be funded through debt.",
     },
     {
-      category: "Equity Allocation ($)",
+      category: `Equity Allocation (${formatCurrency("")})`,
       inputType: "text",
       field: "equity_allocation",
-      placeholder: "e.g $25,000,000",
+      placeholder: formatCurrency("25,000,000"),
       briefInfo: "Specify the amount of equity funding being raised as part of the total capitalization",
     },
     {
@@ -111,7 +110,7 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
     },
     {
       category: "Offer Deadline",
-      inputType: "text",
+      inputType: "date-picker",
       field: "offer_deadline",
       placeholder: "(DD/MM/YY)",
       briefInfo: "Set the final date by which investors must commit to the offering",
@@ -151,10 +150,6 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
 
   return (
     <div className='w-full'>
-      <p className='mb-4 text-text-muted/80'>
-        Provide a breakdown of the financial structure for this opportunity. Include key details about the offering,
-        such as the total amount being raised, the debt and equity components, and how the capital will be allocated.
-      </p>
       <h3 className='mb-7 flex items-center'>
         <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
           <g clip-path='url(#clip0_1802_3396)'>
@@ -201,21 +196,21 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
             </clipPath>
           </defs>
         </svg>
-        <span className='ml-2'>1. Offer Details</span>
+        <span className='ml-2 font-semibold text-text-muted'>1. Offer Details</span>
       </h3>
       <div className='overflow-x-auto'>
         <table className='w-full border-collapse'>
           <thead>
             <tr className=''>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Category</th>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Input</th>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Brief Info</th>
+              <th className='border-b border-black/10 p-4 text-left text-sm font-medium text-gray-700'>Category</th>
+              <th className='border-b border-black/10 p-4 text-left text-sm font-medium text-gray-700'>Input</th>
+              <th className='border-b border-black/10 p-4 text-left text-sm font-medium text-gray-700'>Brief Info</th>
             </tr>
           </thead>
           <tbody>
             {tableData.map((item, index) => (
-              <tr key={index} className='hover:bg-gray-50'>
-                <td className='p-4 text-sm text-text-muted/80'>{item.category}</td>
+              <tr key={index} className='border-b border-black/10'>
+                <td className='whitespace-nowrap p-4 text-xs text-text-muted/80'>{item.category}</td>
                 <td className='p-4'>
                   {item.inputType === "text" ? (
                     <Input
@@ -223,22 +218,30 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
                       placeholder={item.placeholder}
                       value={value[item.field] || ""}
                       onChange={(e) => handleInputChange(item.field, e.target.value)}
-                      className='w-full py-6 text-sm shadow-none'
+                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                    />
+                  ) : item.inputType === "date-picker" ? (
+                    <Input
+                      type='date'
+                      placeholder={item.placeholder}
+                      value={value[item.field] || ""}
+                      onChange={(e) => handleInputChange(item.field, e.target.value)}
+                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80 md:text-xs'
                     />
                   ) : (
                     <Select
                       value={value[item.field] || ""}
                       onValueChange={(selectedValue) => handleInputChange(item.field, selectedValue)}
                     >
-                      <SelectTrigger className='w-full py-6 text-sm shadow-none data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80'>
+                      <SelectTrigger className='h-[51px] w-full text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'>
                         <SelectValue placeholder={item.placeholder} />
                       </SelectTrigger>
-                      <SelectContent className='bg-white text-sm text-text-muted/80'>
+                      <SelectContent className='bg-white text-xs text-text-muted/80'>
                         {item.options?.map((option) => (
                           <SelectItem
                             key={option.value}
                             value={option.value}
-                            className='hover:bg-primary hover:text-white'
+                            className='text-xs font-medium hover:bg-primary hover:text-white'
                           >
                             {option.label}
                           </SelectItem>
@@ -247,7 +250,7 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
                     </Select>
                   )}
                 </td>
-                <td className='p-4 text-sm text-text-muted/80'>{item.briefInfo}</td>
+                <td className='p-4 text-xs text-text-muted/80'>{item.briefInfo}</td>
               </tr>
             ))}
           </tbody>

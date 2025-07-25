@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { cn } from "@/src/lib/utils";
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
+import { Tooltip } from "../ui/tooltip";
+import { Input } from "../ui/input";
 
 interface BusinessPlanRatingProps {
   value?: Record<string, string>;
@@ -60,7 +62,7 @@ export function BusinessPlanRating({ value = {}, onChange, error }: BusinessPlan
         <div className='flex items-center space-x-2'>
           <div className='flex items-center justify-center'>
             <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-              <g clip-path='url(#clip0_1683_2417)'>
+              <g clipPath='url(#clip0_1683_2417)'>
                 <path
                   d='M12.4168 0.664391L13.0504 1.93679L14.4068 2.17199C14.782 2.23719 14.9312 2.71599 14.6644 2.99839L13.6996 4.01959L13.9044 5.43719C13.9612 5.82919 13.5704 6.12519 13.23 5.94799L12 5.30679L10.77 5.94799C10.4296 6.12519 10.0392 5.82959 10.0956 5.43719L10.3004 4.01959L9.3356 2.99839C9.0688 2.71599 9.218 2.23719 9.5932 2.17199L10.9496 1.93679L11.5832 0.664391C11.7584 0.312391 12.2416 0.312391 12.4168 0.664391Z'
                   fill='#F9C82B'
@@ -110,7 +112,7 @@ export function BusinessPlanRating({ value = {}, onChange, error }: BusinessPlan
       </div>
 
       {/* Instruction */}
-      <p className='mb-4 text-sm text-text-muted'>
+      <p className='mb-4 text-base -tracking-[3%] text-text-muted'>
         Instruction: Select the most appropriate rating level for each item below.
       </p>
 
@@ -123,25 +125,34 @@ export function BusinessPlanRating({ value = {}, onChange, error }: BusinessPlan
       </div>
 
       {/* Table */}
-      <div className='overflow-x-auto'>
+      <div className=''>
         <table className='w-full'>
           <thead>
             <tr className=''>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Category</th>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Input</th>
-              <th className='border border-gray-200 p-4 text-left text-sm font-medium text-gray-700'>Brief Info</th>
+              <th className='p-4 text-left font-medium text-text-muted'>Category</th>
+              <th className='p-4 text-left font-medium text-text-muted'>Input</th>
+              <th className='p-4 text-left font-medium text-text-muted'>Brief Info</th>
             </tr>
           </thead>
           <tbody>
             {categories.map((category) => (
-              <tr key={category.key} className='hover:bg-gray-50'>
-                <td className='border border-gray-200 p-4 text-sm font-medium text-gray-700'>{category.label}</td>
-                <td className='border border-gray-200 p-4'>
+              <tr key={category.key} className=''>
+                <td className='whitespace-nowrap py-4 text-sm text-text-muted/80'>
+                  <Tooltip content={category.info}>
+                    <span className='cursor-pointer text-sm text-text-muted/80'>{category.label}</span>
+                  </Tooltip>
+                </td>
+                <td className='p-4'>
                   <Select
                     value={ratings[category.key] || ""}
                     onValueChange={(value) => handleRatingChange(category.key, value)}
                   >
-                    <SelectTrigger className={cn("w-full shadow-none", error && "border-red-500")}>
+                    <SelectTrigger
+                      className={cn(
+                        "h-[51px] w-full border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-text-muted/80",
+                        error && "border-red-500"
+                      )}
+                    >
                       <SelectValue placeholder='Medium' />
                     </SelectTrigger>
                     <SelectContent className='bg-white'>
@@ -157,7 +168,12 @@ export function BusinessPlanRating({ value = {}, onChange, error }: BusinessPlan
                     </SelectContent>
                   </Select>
                 </td>
-                <td className='border border-gray-200 p-4 text-sm text-gray-600'>{category.info}</td>
+                <td className='p-4 text-sm text-gray-600'>
+                  <Input
+                    placeholder='Brief info'
+                    className='h-[51px] border-black/10 bg-background-secondary text-sm shadow-none placeholder:text-sm placeholder:text-[#787878CC]/80'
+                  />
+                </td>
               </tr>
             ))}
           </tbody>

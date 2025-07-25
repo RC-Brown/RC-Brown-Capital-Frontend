@@ -10,7 +10,8 @@ export interface OnboardingField {
     | "file"
     | "multi-file"
     | "multi-text"
-    | "custom-component";
+    | "custom-component"
+    | "date";
   placeholder?: string;
   description?: string;
   tooltip?: string; // Tooltip content to display on hover

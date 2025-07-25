@@ -35,12 +35,12 @@ export function PropertyAddressInput({ value = "", onChange, error }: PropertyAd
           value={address}
           onChange={handleChange}
           className={cn(
-            "border border-text-muted py-4 pl-10 shadow-none placeholder:text-xs focus-visible:ring-0",
+            "h-[51px] border border-black/10 py-4 pl-10 shadow-none placeholder:text-xs focus-visible:ring-0",
             error && "border-red-500"
           )}
         />
       </div>
-      {error && <p className='text-sm text-red-500'>{error}</p>}
+      {error && <p className='hidden text-sm text-red-500'>{error}</p>}
     </div>
   );
 }
