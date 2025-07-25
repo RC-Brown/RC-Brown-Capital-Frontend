@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { sponsorOnboardingSchema } from "@/src/lib/data/sponsor-onboarding-schema";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 import { ProgressTracker } from "@/src/components/molecules/progress-tracker";
 import Footer from "@/src/components/molecules/footer";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/solid";
@@ -68,7 +68,7 @@ function SegmentedProgressCircle({ completed, total, currentPhase }: SegmentedPr
 
 export default function OnboardingLandingPage() {
   const router = useRouter();
-  const { currentPhase, setCurrentPhase } = useOnboardingStore();
+  const { currentPhase, setCurrentPhase } = useOnboardingStoreWithUser();
 
   const handlePhaseClick = (phaseIndex: number) => {
     const phase = sponsorOnboardingSchema.phases[phaseIndex];

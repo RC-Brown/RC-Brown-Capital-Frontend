@@ -10,7 +10,7 @@ import {
   BusinessInformationInput,
   CompanyRepresentativeInput,
 } from "@/src/services/onboarding";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 import { toast } from "sonner";
 
 // Query keys for React Query
@@ -27,7 +27,7 @@ export const onboardingKeys = {
 export function useSaveBusinessInformationStep() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
-  const { updateFormData, markSectionCompleted } = useOnboardingStore();
+  const { updateFormData, markSectionCompleted } = useOnboardingStoreWithUser();
 
   return useMutation({
     mutationFn: async ({
@@ -107,7 +107,7 @@ export function useBusinessInformation() {
 export function useSaveCompanyRepresentativeStep() {
   const queryClient = useQueryClient();
   const { data: session } = useSession();
-  const { updateFormData, markSectionCompleted } = useOnboardingStore();
+  const { updateFormData, markSectionCompleted } = useOnboardingStoreWithUser();
 
   return useMutation({
     mutationFn: async ({
@@ -272,7 +272,7 @@ export function useOnboardingMutations() {
  * Hook for saving and continuing to next section
  */
 export function useSaveAndContinue() {
-  const { currentSection, setCurrentSection } = useOnboardingStore();
+  const { currentSection, setCurrentSection } = useOnboardingStoreWithUser();
   const saveStep = useSaveBusinessInformationStep();
 
   const saveAndContinue = async (
@@ -310,7 +310,7 @@ export function useSaveAndContinue() {
  */
 export function useSaveAsDraft() {
   const saveStep = useSaveBusinessInformationStep();
-  const { updateFormData } = useOnboardingStore();
+  const { updateFormData } = useOnboardingStoreWithUser();
 
   const saveAsDraft = async (step: number, data: BusinessInformationInput) => {
     try {

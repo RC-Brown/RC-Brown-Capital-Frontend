@@ -4,7 +4,7 @@ import React from "react";
 import { cn } from "@/src/lib/utils";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useCurrency } from "@/src/lib/context/currency-context";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 
 interface CurrencyOption {
   value: string;
@@ -71,7 +71,7 @@ interface CurrencySelectProps {
 
 export function CurrencySelect({ value, onChange, error, className, fieldKey }: CurrencySelectProps) {
   const { updateCurrency } = useCurrency();
-  const { updateFormData } = useOnboardingStore();
+  const { updateFormData } = useOnboardingStoreWithUser();
 
   const handleCurrencyChange = (currencyValue: string) => {
     onChange(currencyValue);

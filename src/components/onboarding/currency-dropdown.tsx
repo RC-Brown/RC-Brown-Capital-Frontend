@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/src/lib/utils";
 import countriesData from "@/src/data/countries.json";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 
 interface CurrencyDropdownProps {
   value?: string;
@@ -43,7 +43,7 @@ const CURRENCY_OPTIONS = countriesData
 
 export function CurrencyDropdown({ value, onChange, error, className, placeholder, fieldKey }: CurrencyDropdownProps) {
   const { updateCurrency } = useCurrencySafe();
-  const { updateFormData } = useOnboardingStore();
+  const { updateFormData } = useOnboardingStoreWithUser();
 
   const handleCurrencyChange = (currencyValue: string) => {
     onChange(currencyValue);

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 
 interface CurrencyContextType {
   selectedCurrency: string;
@@ -22,7 +22,7 @@ const CURRENCY_SYMBOLS: Record<string, string> = {
 };
 
 export function CurrencyProvider({ children }: { children: React.ReactNode }) {
-  const { formData } = useOnboardingStore();
+  const { formData } = useOnboardingStoreWithUser();
   const [selectedCurrency, setSelectedCurrency] = useState<string>("USD"); // Default fallback
 
   // Get currency from form data - prioritize company_currency over project_currency for Business Information phase
