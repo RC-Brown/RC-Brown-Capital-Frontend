@@ -31,7 +31,7 @@ export default function Navbar() {
   const isAuthPath = authPaths.some((authPath) => pathname.includes(authPath));
 
   const menu =
-    session?.user?.role?.toLowerCase() === "investor"
+    session?.user?.role?.toLowerCase() !== "sponsor"
       ? [
           {
             name: "Invest",

@@ -648,9 +648,10 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             },
           ],
           congratsMessage: {
-            title: "Sponsor Information Complete!",
-            description: "Great start! Now let's get into the project details and overview.",
-            ctaText: "Continue to Project Overview",
+            title: "Fund Wallet",
+            description:
+              "A ₦1,000,000 non-refundable wallet funding is required for due diligence before final submission.",
+            ctaText: "Fund Now",
           },
         },
         {
@@ -758,11 +759,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               validation: { required: true },
             },
           ],
-          congratsMessage: {
-            title: "Project Overview Complete!",
-            description: "Excellent! Now let's dive into the project considerations and investment structure.",
-            ctaText: "Continue to Project Consideration",
-          },
         },
         {
           key: "project-consideration",
@@ -912,6 +908,12 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               validation: { required: true },
             },
           ],
+          congratsMessage: {
+            title: "Fund Wallet",
+            description:
+              "A ₦1,000,000 non-refundable wallet funding is required for due diligence before final submission.",
+            ctaText: "Fund Now",
+          },
         },
         {
           key: "investment-returns",
@@ -1223,6 +1225,14 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               validation: { required: true },
             },
             {
+              key: "expenses_revenue_form",
+              label: "",
+              type: "custom-component",
+              customComponent: "ExpensesRevenueForm",
+              gridSpan: 2,
+              validation: { required: true },
+            },
+            {
               key: "equity_details_form",
               label: "",
               type: "custom-component",
@@ -1258,14 +1268,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           key: "expenses-revenue",
           title: "Expenses & Revenue",
           fields: [
-            {
-              key: "expenses_revenue_form",
-              label: "",
-              type: "custom-component",
-              customComponent: "ExpensesRevenueForm",
-              gridSpan: 2,
-              validation: { required: true },
-            },
             {
               key: "media_assets_upload",
               label: "Media Assets Upload",

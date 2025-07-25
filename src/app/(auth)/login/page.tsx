@@ -52,7 +52,12 @@ export default function LoginPage() {
       }
 
       toast.success("Welcome Back");
-      router.push("/");
+      if (session.user?.role === "investor") {
+        router.push("/");
+      } else {
+        // temporary redirect to sponsor onboarding
+        router.push("/onboarding/sponsor");
+      }
     } catch (error) {
       if (error instanceof Error) {
         toast(error.message);

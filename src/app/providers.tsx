@@ -16,7 +16,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
       <SessionProvider>{children}</SessionProvider>
       {/* </NuqsAdapter> */}
       <ScrollToTop />
-      <ReactQueryDevtools buttonPosition='bottom-right' />
+      <ReactQueryDevtools buttonPosition='top-right' />
     </QueryClientProvider>
   );
 }
