@@ -3,6 +3,8 @@
 import React from "react";
 import { cn } from "@/src/lib/utils";
 import { CheckIcon } from "@heroicons/react/24/solid";
+import { useCurrency } from "@/src/lib/context/currency-context";
+import { useOnboardingStore } from "@/src/lib/store/onboarding-store";
 
 interface CurrencyOption {
   value: string;
@@ -64,9 +66,23 @@ interface CurrencySelectProps {
   onChange: (value: string) => void;
   error?: string;
   className?: string;
+  fieldKey?: string;
 }
 
-export function CurrencySelect({ value, onChange, error, className }: CurrencySelectProps) {
+export function CurrencySelect({ value, onChange, error, className, fieldKey }: CurrencySelectProps) {
+  const { updateCurrency } = useCurrency();
+  const { updateFormData } = useOnboardingStore();
+
+  const handleCurrencyChange = (currencyValue: string) => {
+    onChange(currencyValue);
+    updateCurrency(currencyValue);
+
+    // Also update the store directly for immediate effect
+    if (fieldKey) {
+      updateFormData({ [fieldKey]: currencyValue });
+    }
+  };
+
   return (
     <div className={cn("space-y-4", className)}>
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
@@ -83,7 +99,7 @@ export function CurrencySelect({ value, onChange, error, className }: CurrencySe
                 currency.value === "NGN" ? "border-[#82D361]" : "border-[#F33A3A]",
                 isDisabled && "cursor-not-allowed opacity-50"
               )}
-              onClick={() => !isDisabled && onChange(currency.value)}
+              onClick={() => !isDisabled && handleCurrencyChange(currency.value)}
             >
               {/* Selection Indicator */}
               <div className='absolute left-3 top-3'>

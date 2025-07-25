@@ -191,11 +191,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               placeholder: "Select Invest Range",
               layout: "inline",
               gridSpan: 2,
-              options: [
-                { label: "$500K - $1M", value: "$500K-$1M" },
-                { label: "$1M - $5M", value: "$1M-$5M" },
-                { label: "$5M+", value: "$5M+" },
-              ],
+              options: [], // Dynamic options handled in FormField component
               validation: { required: true },
             },
             {
@@ -624,8 +620,11 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "project_currency",
               label: "Select the currency in which this project is being raised.",
               description: "Only USD and NGN are currently supported",
-              type: "custom-component",
-              customComponent: "CurrencySelect",
+              type: "select",
+              options: [
+                { label: "NGN", value: "NGN" },
+                { label: "USD", value: "USD" },
+              ],
               gridSpan: 2,
               validation: { required: true },
             },
@@ -740,6 +739,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "rc_brown_capital_offerings",
               label: "RC Brown Capital Offerings",
               type: "select",
+              gridSpan: 2,
               options: [
                 { label: "0", value: "0" },
                 { label: "1", value: "1" },
@@ -782,7 +782,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "custom-component",
               customComponent: "DefinitionsDocument",
               gridSpan: 2,
-              validation: { required: true },
+              validation: { required: false },
             },
             {
               key: "deal_snapshot",
@@ -812,7 +812,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "custom-component",
               customComponent: "KeyDealPoints",
               gridSpan: 2,
-              validation: { required: true },
+              validation: { required: false },
             },
             {
               key: "property_address",
@@ -958,7 +958,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "closing_date",
               label: "Closing Date *",
               tooltip: "When will this offer stop been available to investors?",
-              type: "text",
+              type: "date",
               placeholder: "15/04/2025",
               validation: { required: true },
             },
@@ -1002,44 +1002,40 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "offer_live_date",
               label: "Offer Live Date *",
               tooltip: "Date when the investment offer is first made available.",
-              type: "text",
+              type: "date",
               gridSpan: 1,
-              placeholder: "15/04/2025",
               validation: { required: true },
             },
             {
               key: "offer_closing_date",
               label: "Offer Closing Date *",
               tooltip: "Deadline for submitting offers",
-              type: "text",
+              type: "date",
               gridSpan: 1,
-              placeholder: "15/04/2025",
               validation: { required: true },
             },
             {
               key: "funds_due_date",
               label: "Funds Due Date *",
               tooltip: "When funds are required from investors",
-              type: "text",
+              type: "date",
               gridSpan: 1,
-              placeholder: "15/04/2026",
               validation: { required: true },
             },
             {
               key: "target_escrow_closing_date",
               label: "Target Escrow Closing Date *",
               tooltip: "When are you expecting to wrap up the purchase or JV agreements?",
-              type: "text",
+              type: "date",
               gridSpan: 1,
-              placeholder: "15/04/2026",
               validation: { required: true },
             },
             {
               key: "targeted_distribution_start_date",
               tooltip: "When distributions to investors are expected to begin",
               label: "Targeted Distribution Start Date *",
-              type: "text",
-              placeholder: "15/04/2026",
+              type: "date",
+              gridSpan: 1,
               validation: { required: true },
             },
             {
@@ -1060,7 +1056,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "distributions_begin_date",
               label: "Distributions are anticipated to begin *",
               tooltip: "The estimated date when the investor will start receiving returns",
-              type: "text",
+              type: "date",
               placeholder: "15/04/2026",
               validation: { required: true },
             },
@@ -1082,7 +1078,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
         {
           key: "the-sponsor",
           title: "The Sponsor",
-          description: "Detailed sponsor information and credentials",
           fields: [
             {
               key: "sponsor_background_section",
@@ -1191,6 +1186,27 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           title: "Investment Structure",
           fields: [
             {
+              key: "investment_structure_preamble",
+              label: "",
+              type: "custom-component",
+              customComponent: "ScreeningNotice",
+              gridSpan: 2,
+              validation: { required: false },
+            },
+            {
+              key: "what_are_you_offering",
+              label: "What are you offering?",
+              type: "select",
+              gridSpan: 1,
+              layout: "inline",
+              options: [
+                { label: "Equity", value: "equity" },
+                { label: "Debt", value: "debt" },
+                { label: "Both Equity & Debt", value: "both_equity_and_debt" },
+              ],
+              validation: { required: false },
+            },
+            {
               key: "offer_details_table",
               label: "",
               type: "custom-component",
@@ -1213,14 +1229,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               customComponent: "EquityDetailsForm",
               gridSpan: 2,
               validation: { required: true },
-            },
-            {
-              key: "screening_notice",
-              label: "",
-              type: "custom-component",
-              customComponent: "ScreeningNotice",
-              gridSpan: 2,
-              validation: { required: false },
             },
           ],
         },
@@ -1249,7 +1257,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
         {
           key: "expenses-revenue",
           title: "Expenses & Revenue",
-          description: "Easily enter your expenses, income, and equity to see how your property is performing.",
           fields: [
             {
               key: "expenses_revenue_form",

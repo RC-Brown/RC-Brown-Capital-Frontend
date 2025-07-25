@@ -8,6 +8,7 @@ import { Button } from "@/src/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { SizeInput } from "./size-input";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 interface ProjectDetail {
   id: string;
@@ -34,6 +35,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
   ({ value = [], onChange, error }, ref) => {
     const [projects, setProjects] = useState<ProjectDetail[]>(value.length > 0 ? value : [createEmptyProject()]);
     const [fieldErrors, setFieldErrors] = useState<Record<string, Record<string, string>>>({});
+    const { formatCurrency } = useCurrencySafe();
 
     useEffect(() => {
       const initialErrors: Record<string, Record<string, string>> = {};
@@ -293,7 +295,7 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
                 <div className='md:col-span-2'>
                   <Input
                     id={`total-cost-${project.id}`}
-                    placeholder='e.g. ₦250,000,000'
+                    placeholder={formatCurrency("250,000,000")}
                     value={project.totalCost}
                     onChange={(e) => updateProject(project.id, "totalCost", e.target.value)}
                     className={cn(

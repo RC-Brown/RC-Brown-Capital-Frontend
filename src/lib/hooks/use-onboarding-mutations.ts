@@ -126,6 +126,13 @@ export function useSaveCompanyRepresentativeStep() {
       const result = await saveCompanyRepresentativeStep(step, data, session.accessToken);
 
       if (result.error) {
+        // If we have field errors, create a more detailed error message
+        if (result.fieldErrors) {
+          const fieldErrorMessages = Object.entries(result.fieldErrors)
+            .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+            .join("; ");
+          throw new Error(`Validation failed: ${fieldErrorMessages}`);
+        }
         throw new Error(result.error);
       }
 
@@ -147,7 +154,7 @@ export function useSaveCompanyRepresentativeStep() {
     },
     onError: (error: Error) => {
       if (error instanceof Error) {
-        toast(error.message);
+        toast.error(error.message);
       }
     },
   });

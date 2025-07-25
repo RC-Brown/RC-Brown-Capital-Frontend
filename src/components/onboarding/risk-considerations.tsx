@@ -5,6 +5,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Plus, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/src/components/ui/dialog";
 import { cn } from "@/src/lib/utils";
 
 interface RiskConsiderationItem {
@@ -34,6 +35,11 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
     }
     return [{ id: "1", risk: "", severity: "", mitigation: "" }];
   });
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [newItem, setNewItem] = useState<{ risk: string; mitigation: string }>({
+    risk: "",
+    mitigation: "",
+  });
 
   const handleAddNew = () => {
     const newItem: RiskConsiderationItem = {
@@ -45,6 +51,24 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
     const newItems = [...items, newItem];
     setItems(newItems);
     onChange(newItems);
+  };
+
+  const handleConfirmAdd = () => {
+    if (newItem.risk.trim() && newItem.mitigation.trim()) {
+      const newItemWithId: RiskConsiderationItem = {
+        id: Date.now().toString(),
+        risk: newItem.risk,
+        mitigation: newItem.mitigation,
+        severity: "",
+      };
+      const newItems = [...items, newItemWithId];
+      setItems(newItems);
+      onChange(newItems);
+
+      // Reset form and close modal
+      setNewItem({ risk: "", mitigation: "" });
+      setIsModalOpen(false);
+    }
   };
 
   const handleRemove = (id: string) => {
@@ -128,31 +152,31 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
           <table className='w-full border-collapse'>
             <thead>
               <tr className='border-b border-gray-200'>
-                <th className='w-1/4 p-4 text-left text-sm font-medium text-text-muted'>Potential Risk</th>
-                <th className='w-1/2 p-4 text-left text-sm font-medium text-text-muted'>Assessment / Mitigation</th>
+                <th className='w-1/4 p-4 text-left text-sm text-text-muted/80'>Potential Risk</th>
+                <th className='w-1/2 p-4 text-left text-sm text-text-muted/80'>Assessment / Mitigation</th>
                 <th className='w-1/12 p-4'></th>
               </tr>
             </thead>
             <tbody>
               {items.map((item) => (
                 <tr key={item.id} className='border-b border-black/10'>
-                  <td className='p-4'>
+                  <td className='p-4 align-top'>
                     <Input
                       placeholder='e.g. Rising construction costs'
                       value={item.risk}
                       onChange={(e) => handleItemChange(item.id, "risk", e.target.value)}
                       className={cn(
-                        "w-full rounded-none border-b-[1px] border-l-0 border-r-0 border-t-0 border-black/40 shadow-none focus-visible:ring-0",
+                        "w-full rounded-none border-b-[1px] border-l-0 border-r-0 border-t-0 border-black/20 text-sm text-text-muted/80 shadow-none placeholder:text-sm focus-visible:ring-0",
                         error && "border-red-500"
                       )}
                     />
                   </td>
-                  <td className='p-4'>
+                  <td className='p-4 align-top'>
                     <Textarea
                       placeholder='e.g. Secured fixed-rate contracts to lock pricing in early phases.'
                       value={item.mitigation}
                       onChange={(e) => handleItemChange(item.id, "mitigation", e.target.value)}
-                      className={cn("min-h-[80px] w-full shadow-none", error && "border-red-500")}
+                      className={cn("min-h-[145px] w-full shadow-none", error && "border-red-500")}
                       rows={3}
                     />
                   </td>
@@ -176,10 +200,49 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
         </div>
       </div>
 
-      <Button type='button' onClick={handleAddNew} className='flex items-center gap-2 px-3 py-6 has-[>svg]:px-3'>
-        Add New
-        <Plus className='size-4 stroke-[3px] text-white' />
-      </Button>
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogTrigger asChild>
+          <Button type='button' onClick={handleAddNew} className='flex items-center gap-2 px-3 py-6 has-[>svg]:px-3'>
+            Add New
+            <Plus className='size-4 stroke-[3px] text-white' />
+          </Button>
+        </DialogTrigger>
+        <DialogContent className='border-none px-12 py-14 outline-none sm:max-w-[525px]'>
+          <DialogHeader className='sm:text-center'>
+            <DialogTitle className='text-primary'>Deal Snapshot</DialogTitle>
+          </DialogHeader>
+          <div className='grid grid-cols-4 gap-4'>
+            <div className='col-span-1 flex flex-col gap-2'>
+              <label className='text-sm text-text-muted/80'>Potential Risk</label>
+              <label className='text-sm text-text-muted/80'>Mitigations</label>
+            </div>
+            <div className='col-span-3 space-y-2'>
+              <Input
+                placeholder='Enter header'
+                value={newItem.risk}
+                onChange={(e) => setNewItem({ ...newItem, risk: e.target.value })}
+                className='w-full border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-sm'
+              />
+              <Textarea
+                placeholder='Enter description'
+                value={newItem.mitigation}
+                onChange={(e) => setNewItem({ ...newItem, mitigation: e.target.value })}
+                className='min-h-[175px] w-full border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-sm'
+                rows={4}
+              />
+            </div>
+          </div>
+          <div className='flex justify-end pt-4'>
+            <Button
+              onClick={handleConfirmAdd}
+              disabled={!newItem.risk.trim() || !newItem.mitigation.trim()}
+              className='bg-primary text-white hover:bg-primary/90'
+            >
+              Confirm
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {error && <p className='text-sm text-red-500'>{error}</p>}
     </div>

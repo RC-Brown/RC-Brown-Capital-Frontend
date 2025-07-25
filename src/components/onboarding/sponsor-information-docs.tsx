@@ -154,7 +154,7 @@ export function SponsorInformationDocs({
           )}
         >
           Upload
-          <Plus className='h-4 w-4 text-black' />
+          <Plus className='size-3 text-black' />
         </Button>
       </div>
 
@@ -200,7 +200,7 @@ export function SponsorInformationDocs({
                 )}
               >
                 Upload
-                <Plus className='h-4 w-4 text-black' />
+                <Plus className='size-3 text-black' />
               </Button>
             </div>
           ))}
@@ -237,7 +237,7 @@ export function SponsorInformationDocs({
 
       {/* Add More Section */}
       <div className='space-y-3'>
-        <h5 className='text-text-muted'>Add More</h5>
+        <h5 className='text-sm text-text-muted'>Add More</h5>
 
         <div className='flex items-center gap-4'>
           <div className='flex-1'>
@@ -259,8 +259,8 @@ export function SponsorInformationDocs({
             disabled={!newDocName.trim()}
             className='flex items-center gap-2 py-6 text-sm text-text-muted/80'
           >
-            Add
-            <Plus className='h-4 w-4 text-black' />
+            Upload
+            <Plus className='size-3 text-black' />
           </Button>
         </div>
       </div>

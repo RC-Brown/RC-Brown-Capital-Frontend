@@ -16,12 +16,12 @@ interface OfferingInformationProps {
 
 const informationTypes = [
   { value: "offering_memorandum", label: "Offering Memorandum" },
-  { value: "private_placement", label: "Private Placement Memorandum" },
-  { value: "investment_summary", label: "Investment Summary" },
-  { value: "financial_projections", label: "Financial Projections" },
-  { value: "market_analysis", label: "Market Analysis" },
-  { value: "term_sheet", label: "Term Sheet" },
-  { value: "other", label: "Other" },
+  { value: "rcb_capital_due_diligence", label: "RCB Capital Due Diligence" },
+  { value: "2025_progress_update", label: "2025 Progress Update" },
+  { value: "quaterly_investors_report", label: "Quaterly Investors Report - (QQ/YYYY)" },
+  { value: "renovation_update", label: "Renovation Update" },
+  { value: "webinar_transcript", label: "Webinar Transcript" },
+  { value: "offering_update", label: "Offering Update" },
 ];
 
 export function OfferingInformation({ value = { informationType: "" }, onChange, error }: OfferingInformationProps) {
@@ -123,7 +123,7 @@ export function OfferingInformation({ value = { informationType: "" }, onChange,
           className={cn("flex items-center gap-2 py-6 text-sm text-text-muted/80")}
         >
           Upload
-          <Plus className='h-4 w-4 text-black' />
+          <Plus className='size-3 text-black' />
         </Button>
       </div>
 
