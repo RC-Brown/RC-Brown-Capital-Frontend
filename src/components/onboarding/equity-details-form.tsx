@@ -1,6 +1,8 @@
 import React from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
+import { CurrencyInput } from "./currency-input";
+import { PercentageInput } from "./percentage-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 type DistributionFrequency = "monthly" | "quarterly" | "semi_annually" | "annually";
@@ -89,7 +91,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       category: "Equity % Allocation",
       inputType: "text",
       field: "equity_allocation",
-      placeholder: formatCurrency("10m"),
+      placeholder: "",
       briefInfo: "This is automatically calculated and reflects the portion of equity offered to investors",
       isReadOnly: true,
     },
@@ -110,30 +112,30 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     },
     {
       category: `Minimum Investment (${formatCurrency("")})`,
-      inputType: "text",
+      inputType: "currency",
       field: "minimum_investment",
-      placeholder: formatCurrency(""),
+      placeholder: "",
       briefInfo: "Enter the lowest amount an investor can contribute toward the equity portion of this deal.",
     },
     {
       category: `Maximum Investment (${formatCurrency("")})`,
-      inputType: "text",
+      inputType: "currency",
       field: "maximum_investment",
-      placeholder: formatCurrency(""),
+      placeholder: "",
       briefInfo: "Enter the highest amount a single investor is allowed to invest in equity",
     },
     {
       category: `Expected Min Return (%)`,
-      inputType: "text",
+      inputType: "percentage",
       field: "expected_min_return",
-      placeholder: "2%",
+      placeholder: "",
       briefInfo: "This is automatically calculated based on projected performance.",
     },
     {
       category: `Expected Max Return (%)`,
-      inputType: "text",
+      inputType: "percentage",
       field: "expected_max_return",
-      placeholder: "4%",
+      placeholder: "",
       briefInfo: "This is automatically calculated to show the highest possible return investors might earn on equity",
     },
     {
@@ -238,6 +240,20 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
                       placeholder={item.placeholder}
                       value={value[item.field] || ""}
                       onChange={(e) => handleInputChange(item.field, e.target.value)}
+                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                    />
+                  ) : item.inputType === "currency" ? (
+                    <CurrencyInput
+                      value={value[item.field] || ""}
+                      onChange={(value) => handleInputChange(item.field, value)}
+                      placeholder={item.placeholder}
+                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                    />
+                  ) : item.inputType === "percentage" ? (
+                    <PercentageInput
+                      value={value[item.field] || ""}
+                      onChange={(value) => handleInputChange(item.field, value)}
+                      placeholder={item.placeholder}
                       className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
                     />
                   ) : item.inputType === "date-picker" ? (

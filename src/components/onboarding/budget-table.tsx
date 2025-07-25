@@ -1,7 +1,7 @@
 import React from "react";
-import { Input } from "@/src/components/ui/input";
 import { Textarea } from "@/src/components/ui/textarea";
 import { Tooltip } from "../ui/tooltip";
+import { CurrencyInput } from "./currency-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 interface BudgetLineItem {
@@ -20,7 +20,7 @@ interface BudgetTableProps {
 }
 
 const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
-  const { formatCurrency } = useCurrencySafe();
+  const { formatCurrency, currencySymbol } = useCurrencySafe();
 
   const handleInputChange = (lineItem: string, field: string, inputValue: string) => {
     const updatedValue = {
@@ -97,7 +97,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
               <th className='w-1/4 border border-black/10 p-4 text-left text-sm font-medium text-text-muted'>
                 Line Item
               </th>
-              <th className='w-1/4 border border-black/10 p-4 text-left text-sm font-medium text-text-muted'>
+              <th className='w-[35%] border border-black/10 p-4 text-left text-sm font-medium text-text-muted'>
                 <Tooltip content='Please go into detail about the materials being used, if this is a repair or a replacement, and quantities.  The more details the better, sell it to the inspector.'>
                   <span>Description</span>
                 </Tooltip>
@@ -105,8 +105,8 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
               <th className='w-1/4 border border-black/10 p-4 text-left text-sm font-medium text-text-muted'>
                 Scope of Work
               </th>
-              <th className='w-1/4 border border-black/10 p-4 text-left text-sm font-medium text-text-muted'>
-                $ Budget
+              <th className='w-[15%] border border-black/10 p-4 text-left text-sm font-medium text-text-muted'>
+                {currencySymbol} Budget
               </th>
             </tr>
           </thead>
@@ -133,11 +133,10 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
                   />
                 </td>
                 <td className='border border-black/10 p-1'>
-                  <Input
-                    type='text'
-                    placeholder={formatCurrency("0.00")}
+                  <CurrencyInput
                     value={value[lineItem]?.budget || ""}
-                    onChange={(e) => handleInputChange(lineItem, "budget", e.target.value)}
+                    onChange={(value) => handleInputChange(lineItem, "budget", value)}
+                    placeholder='0.00'
                     className='w-full border-none text-xs text-text-muted shadow-none placeholder:text-xs'
                   />
                 </td>
@@ -149,7 +148,7 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
               <td className='border border-black/10 p-4 text-sm font-medium text-text-muted' colSpan={3}>
                 Total Construction Cost
               </td>
-                <td className='border border-black/10 p-4 text-sm font-medium text-text-muted'>
+              <td className='border border-black/10 p-4 text-sm font-medium text-text-muted'>
                 {formatCurrency(
                   calculateTotalCost().toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                 )}

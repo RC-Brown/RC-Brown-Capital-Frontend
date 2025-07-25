@@ -2,7 +2,8 @@ import React from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Tooltip } from "../ui/tooltip";
-import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { CurrencyInput } from "./currency-input";
+import { PercentageInput } from "./percentage-input";
 
 type DistributionPeriod = "monthly" | "quarterly" | "semi_annually" | "annually";
 type TargetHoldPeriod = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
@@ -26,7 +27,6 @@ interface DebtDetailsFormProps {
 }
 
 const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange }) => {
-  const { formatCurrency } = useCurrencySafe();
 
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
@@ -155,12 +155,10 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Tooltip content='This is automatically calculated and shows what percentage of the total capital is allocated as debt'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Debt % Allocation *</span>
           </Tooltip>
-          <Input
-            id='debt_allocation'
-            type='text'
-            placeholder='Enter allocation'
+          <PercentageInput
             value={value.debt_allocation || ""}
-            onChange={(e) => handleInputChange("debt_allocation", e.target.value)}
+            onChange={(value) => handleInputChange("debt_allocation", value)}
+            placeholder='Enter allocation'
             className='w-full py-5 text-sm shadow-none'
           />
         </div>
@@ -208,12 +206,10 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Tooltip content='Enter the maximum allowable investment from a single investor for the debt allocation.'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Maximum Investment Amount *</span>
           </Tooltip>
-          <Input
-            id='max_investment_amount'
-            type='text'
-            placeholder={formatCurrency("950")}
+          <CurrencyInput
             value={value.max_investment_amount || ""}
-            onChange={(e) => handleInputChange("max_investment_amount", e.target.value)}
+            onChange={(value) => handleInputChange("max_investment_amount", value)}
+            placeholder=''
             className='w-full py-5 text-sm shadow-none'
           />
         </div>
@@ -223,12 +219,10 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Tooltip content='Enter the minimum amount an investor can contribute toward the debt portion of the offering'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Minimum Investment Amount *</span>
           </Tooltip>
-          <Input
-            id='min_investment_amount'
-            type='text'
-            placeholder={formatCurrency("950")}
+          <CurrencyInput
             value={value.min_investment_amount || ""}
-            onChange={(e) => handleInputChange("min_investment_amount", e.target.value)}
+            onChange={(value) => handleInputChange("min_investment_amount", value)}
+            placeholder=''
             className='w-full py-5 text-sm shadow-none'
           />
         </div>
@@ -238,12 +232,10 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Tooltip content='Input the projected highest annual return investors could potentially earn from the debt investment.'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Expected Max Annual Return (%) *</span>
           </Tooltip>
-          <Input
-            id='expected_max_annual_return'
-            type='text'
-            placeholder={formatCurrency("950")}
+          <PercentageInput
             value={value.expected_max_annual_return || ""}
-            onChange={(e) => handleInputChange("expected_max_annual_return", e.target.value)}
+            onChange={(value) => handleInputChange("expected_max_annual_return", value)}
+            placeholder=''
             className='w-full py-5 text-sm shadow-none'
           />
         </div>
@@ -253,12 +245,10 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <Tooltip content='Input the projected lowest annual return investors can expect from the debt investment'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Expected Min Annual Return (%) *</span>
           </Tooltip>
-          <Input
-            id='expected_min_annual_return'
-            type='text'
-            placeholder={formatCurrency("950")}
+          <PercentageInput
             value={value.expected_min_annual_return || ""}
-            onChange={(e) => handleInputChange("expected_min_annual_return", e.target.value)}
+            onChange={(value) => handleInputChange("expected_min_annual_return", value)}
+            placeholder=''
             className='w-full py-5 text-sm shadow-none'
           />
         </div>
@@ -274,7 +264,7 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
             placeholder='1/3/27'
             value={value.exit_date || ""}
             onChange={(e) => handleInputChange("exit_date", e.target.value)}
-              className='w-full py-5 text-sm shadow-none placeholder:text-sm md:text-sm'
+            className='w-full py-5 text-sm shadow-none placeholder:text-sm md:text-sm'
             data-placeholder='DD/MM/YY'
           />
         </div>

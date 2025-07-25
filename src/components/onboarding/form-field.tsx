@@ -50,6 +50,9 @@ import { SponsorInformationDocs } from "./sponsor-information-docs";
 import ScreeningNotice from "./screening-notice";
 import BudgetTabs from "./budget-tabs";
 import { EnhancedTextarea } from "./enhanced-textarea";
+import { CurrencyInput } from "./currency-input";
+import { PercentageInput } from "./percentage-input";
+import { NumberInput } from "./number-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 import { getInvestmentSizeOptions } from "@/src/lib/utils/currency-options";
 
@@ -98,6 +101,59 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
     const renderField = () => {
       switch (field.type) {
         case "text":
+          // Handle currency fields
+          if (field.key === "historical_portfolio_activity" || field.key === "assets_under_management") {
+            return (
+              <CurrencyInput
+                value={value as string | number}
+                onChange={onChange}
+                placeholder={field.placeholder}
+                error={error}
+                className={cn(
+                  error && "border-red-500",
+                  "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+                )}
+                required={field.validation?.required}
+              />
+            );
+          }
+
+          // Handle percentage fields
+          if (field.key === "average_roi" || field.key === "percentage_leased") {
+            return (
+              <PercentageInput
+                value={value as string | number}
+                onChange={onChange}
+                placeholder={field.placeholder}
+                error={error}
+                className={cn(
+                  error && "border-red-500",
+                  "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+                )}
+                required={field.validation?.required}
+              />
+            );
+          }
+
+          // Handle number fields with units
+          if (field.key === "sq_ft_leased") {
+            return (
+              <NumberInput
+                value={value as string | number}
+                onChange={onChange}
+                placeholder={field.placeholder}
+                error={error}
+                className={cn(
+                  error && "border-red-500",
+                  "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
+                )}
+                required={field.validation?.required}
+                unit='sq ft'
+              />
+            );
+          }
+
+          // Default text input for other fields
           // Replace currency symbols in placeholder with dynamic currency
           const dynamicPlaceholder =
             field.placeholder?.replace(/\$[0-9]|\$[A-Z]|\₦|\€|\£/g, (match) => {
