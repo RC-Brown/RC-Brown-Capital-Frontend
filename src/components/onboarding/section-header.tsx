@@ -7,10 +7,12 @@ interface SectionHeaderProps {
   label?: string;
 }
 
-export function SectionHeader({ label }: SectionHeaderProps) {
+export function SectionHeader({ 
+  // label
+}: SectionHeaderProps) {
   return (
-    <div className='hidden py-2'>
-      <h4 className='font-semibold text-text-muted'>{label}</h4>
+    <div className='py-2'>
+      <h4 className='font-semibold -tracking-[3%] text-text-muted'>Investment Return Structure</h4>
     </div>
   );
 }

@@ -68,12 +68,15 @@ export function SponsorInfoPopup({
 
                 {/* Action Buttons */}
                 <div className='flex gap-3 p-6 pt-0'>
-                  <Button
-                    asChild
-                    className='h-[51px] flex-1 rounded-md bg-primary px-4 py-3 text-sm font-semibold text-white hover:bg-primary/90'
-                  >
-                    <Link href='#'>{ctaText}</Link>
-                  </Button>
+                  <Link href='#' className='flex-1 no-underline hover:no-underline'>
+                    <Button
+                      asChild
+                      variant='link'
+                      className='h-[51px] w-full rounded-md bg-primary px-4 py-3 text-sm font-semibold text-white no-underline hover:bg-primary/90 hover:no-underline'
+                    >
+                      <span className='w-full'>{ctaText}</span>
+                    </Button>
+                  </Link>
                   <Button
                     onClick={onContinue}
                     variant='outline'

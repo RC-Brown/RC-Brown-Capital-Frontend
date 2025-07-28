@@ -285,7 +285,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
                 label: `${i + 10}%`,
                 value: `${i + 10}`,
               })),
-              validation: { required: false },
+              validation: { required: true },
             },
             {
               key: "investment_interests",
@@ -530,7 +530,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
         {
           key: "company-bank-details",
           title: "Company Bank Details",
-          description: "Banking information for transactions",
           fields: [
             {
               key: "currency_of_account",
@@ -968,37 +967,25 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "target_exit_date_debt",
               tooltip: "When will the investor receive full and final payment?",
               label: "Target Exit Date - Debt *",
-              type: "select",
+              type: "date",
               gridSpan: 1,
-              options: [
-                { label: "Q1 2025", value: "q1_2025" },
-                { label: "Q2 2025", value: "q2_2025" },
-                { label: "Q3 2025", value: "q3_2025" },
-                { label: "Q4 2025", value: "q4_2025" },
-                { label: "Q1 2026", value: "q1_2026" },
-                { label: "Q2 2026", value: "q2_2026" },
-                { label: "Q3 2026", value: "q3_2026" },
-                { label: "Q4 2026", value: "q4_2026" },
-              ],
               validation: { required: true },
             },
             {
               key: "target_exit_date_equity",
               label: "Target Exit Date - Equity *",
               tooltip: "When will the investor receive full and final payment?",
-              type: "select",
+              type: "date",
               gridSpan: 1,
-              options: [
-                { label: "Q1 2025", value: "q1_2025" },
-                { label: "Q2 2025", value: "q2_2025" },
-                { label: "Q3 2025", value: "q3_2025" },
-                { label: "Q4 2025", value: "q4_2025" },
-                { label: "Q1 2026", value: "q1_2026" },
-                { label: "Q2 2026", value: "q2_2026" },
-                { label: "Q3 2026", value: "q3_2026" },
-                { label: "Q4 2026", value: "q4_2026" },
-              ],
               validation: { required: true },
+            },
+            {
+              key: "business_plan_the_property",
+              label: "",
+              type: "custom-component",
+              customComponent: "BusinessPlanTheProperty",
+              gridSpan: 2,
+              validation: { required: false },
             },
             {
               key: "offer_live_date",
@@ -1033,9 +1020,17 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               validation: { required: true },
             },
             {
-              key: "targeted_distribution_start_date",
+              key: "targeted_distribution_start_date_debt",
               tooltip: "When distributions to investors are expected to begin",
-              label: "Targeted Distribution Start Date *",
+              label: "Targeted Distribution Start Date (Debt)*",
+              type: "date",
+              gridSpan: 1,
+              validation: { required: true },
+            },
+            {
+              key: "targeted_distribution_start_date_equity",
+              tooltip: "When distributions to investors are expected to begin",
+              label: "Targeted Distribution Start Date (Equity)*",
               type: "date",
               gridSpan: 1,
               validation: { required: true },
@@ -1049,7 +1044,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             },
             {
               key: "investment_return_structure_section",
-              label: "Investment Return Structure",
+              label: "",
               type: "custom-component",
               customComponent: "SectionHeader",
               validation: { required: false },
@@ -1086,7 +1081,11 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               label: "",
               type: "custom-component",
               customComponent: "SponsorBackgroundSection",
-              validation: { required: false },
+              validation: {
+                required: true,
+                minLength: 100,
+                maxLength: 2000,
+              },
             },
             {
               key: "about_sponsor_section",
@@ -1148,7 +1147,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "custom-component",
               customComponent: "SiteDocumentsUpload",
               gridSpan: 1,
-              validation: { required: false },
+              validation: { required: true },
             },
             {
               key: "documents_section",
@@ -1163,7 +1162,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "custom-component",
               customComponent: "ClosingDocuments",
               gridSpan: 2,
-              validation: { required: false },
+              validation: { required: true },
             },
             {
               key: "offering_information",
@@ -1171,7 +1170,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "custom-component",
               customComponent: "OfferingInformation",
               gridSpan: 2,
-              validation: { required: false },
+              validation: { required: true },
             },
             {
               key: "sponsor_information_docs",

@@ -365,7 +365,11 @@ export const ProjectUploadSchema = z.object({
   distribution_frequency: z.string().min(1, "Distribution frequency is required"),
 
   // The Sponsor
-  sponsor_background_section: z.string().optional(),
+  sponsor_background_section: z
+    .string()
+    .min(1, "Sponsor background is required")
+    .min(100, "Sponsor background must be at least 100 characters")
+    .max(2000, "Sponsor background must not exceed 2000 characters"),
   sponsor_background: z
     .string()
     .min(100, "Sponsor background must be at least 100 characters")
@@ -377,11 +381,15 @@ export const ProjectUploadSchema = z.object({
   // Physical Descriptions
   physical_descriptions_tabs: z.any().optional(),
   site_documents_section: z.string().optional(),
-  site_documents: z.any().optional(),
+  site_documents: z.any().refine((val) => val && Array.isArray(val) && val.length > 0, "Site documents are required"),
   documents_section: z.string().optional(),
-  closing_documents: z.any().optional(),
-  offering_information: z.any().optional(),
-  sponsor_information_docs: z.any().optional(),
+  closing_documents: z.any().refine((val) => val && val.documentType && val.file, "Closing document is required"),
+  offering_information: z
+    .any()
+    .refine((val) => val && val.informationType && val.file, "Offering information is required"),
+  sponsor_information_docs: z
+    .any()
+    .refine((val) => val && val.trackRecord, "Sponsor information documents are required"),
 
   // Investment Structure
   offer_details_section: z.string().optional(),

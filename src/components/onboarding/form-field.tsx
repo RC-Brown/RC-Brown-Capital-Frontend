@@ -26,9 +26,10 @@ import { DefinitionsDocument } from "./definitions-document";
 import { DealSnapshot } from "./deal-snapshot";
 import { RiskConsiderations } from "./risk-considerations";
 import { SectionHeader } from "./section-header";
-import { KeyDealPoints } from "./key-deal-points";
+import { KeyDealPoints, KeyDealPointsRef } from "./key-deal-points";
+import { AcquisitionDateSelect } from "./acquisition-date-select";
 import { PropertyAddressInput } from "./property-address-input";
-import { SponsorMetricsTable } from "./sponsor-metrics-table";
+import { SponsorMetricsTable, SponsorMetricsTableRef } from "./sponsor-metrics-table";
 import OfferDetailsTable from "./offer-details-table";
 import DebtDetailsForm from "./debt-details-form";
 import EquityDetailsForm from "./equity-details-form";
@@ -42,11 +43,11 @@ import { SponsorBackgroundSection } from "./sponsor-background-section";
 import { SponsorAboutSection } from "./sponsor-about-section";
 import { PhysicalDescriptionsTabs } from "./physical-descriptions-tabs";
 import { SiteDocumentsSection } from "./site-documents-section";
-import { SiteDocumentsUpload } from "./site-documents-upload";
+import { SiteDocumentsUpload, SiteDocumentsUploadRef } from "./site-documents-upload";
 import { DocumentsSection } from "./documents-section";
-import { ClosingDocuments } from "./closing-documents";
-import { OfferingInformation } from "./offering-information";
-import { SponsorInformationDocs } from "./sponsor-information-docs";
+import { ClosingDocuments, ClosingDocumentsRef } from "./closing-documents";
+import { OfferingInformation, OfferingInformationRef } from "./offering-information";
+import { SponsorInformationDocs, SponsorInformationDocsRef } from "./sponsor-information-docs";
 import ScreeningNotice from "./screening-notice";
 import BudgetTabs from "./budget-tabs";
 import { EnhancedTextarea } from "./enhanced-textarea";
@@ -59,6 +60,7 @@ import AcknowledgeSignDocs from "./acknowledge-sign-docs";
 import SubmitProject from "./submit-project";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 import { getInvestmentSizeOptions } from "@/src/lib/utils/currency-options";
+import BusinessPlanTheProperty from "./business-plan-the-property";
 
 type FormData = Record<string, FormFieldValue>;
 
@@ -78,6 +80,12 @@ export interface FormFieldRef {
 export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
   ({ field, value, onChange, error, formData = {}, spans2Columns = false }, ref) => {
     const projectDetailsTableRef = useRef<ProjectDetailsTableRef>(null);
+    const keyDealPointsRef = useRef<KeyDealPointsRef>(null);
+    const sponsorMetricsTableRef = useRef<SponsorMetricsTableRef>(null);
+    const siteDocumentsUploadRef = useRef<SiteDocumentsUploadRef>(null);
+    const closingDocumentsRef = useRef<ClosingDocumentsRef>(null);
+    const offeringInformationRef = useRef<OfferingInformationRef>(null);
+    const sponsorInformationDocsRef = useRef<SponsorInformationDocsRef>(null);
     const { currencySymbol, formatCurrency } = useCurrencySafe();
 
     // Expose validation method to parent
@@ -86,20 +94,49 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         if (field.key === "completed_projects" && projectDetailsTableRef.current) {
           return projectDetailsTableRef.current.validate();
         }
+        if (field.key === "key_deal_points" && keyDealPointsRef.current) {
+          return keyDealPointsRef.current.validate();
+        }
+        if (field.customComponent === "SponsorMetricsTable" && sponsorMetricsTableRef.current) {
+          return sponsorMetricsTableRef.current.validate();
+        }
+        if (field.customComponent === "SiteDocumentsUpload" && siteDocumentsUploadRef.current) {
+          const isValid = siteDocumentsUploadRef.current.validate();
+          console.log("SiteDocumentsUpload form validation:", { fieldKey: field.key, isValid });
+          return isValid;
+        }
+        if (field.customComponent === "ClosingDocuments" && closingDocumentsRef.current) {
+          const isValid = closingDocumentsRef.current.validate();
+          console.log("ClosingDocuments form validation:", { fieldKey: field.key, isValid });
+          return isValid;
+        }
+        if (field.customComponent === "OfferingInformation" && offeringInformationRef.current) {
+          const isValid = offeringInformationRef.current.validate();
+          console.log("OfferingInformation form validation:", { fieldKey: field.key, isValid });
+          return isValid;
+        }
+        if (field.customComponent === "SponsorInformationDocs" && sponsorInformationDocsRef.current) {
+          const isValid = sponsorInformationDocsRef.current.validate();
+          console.log("SponsorInformationDocs form validation:", { fieldKey: field.key, isValid });
+          return isValid;
+        }
         return true;
       },
     }));
 
     // Helper function to render label with optional tooltip
     const renderLabel = (label: string) => {
+      // Replace hardcoded currency symbols with dynamic currency symbol
+      const dynamicLabel = label.replace(/\(\$\)/g, `(${currencySymbol})`);
+
       if (field.tooltip) {
         return (
           <Tooltip content={field.tooltip}>
-            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{label}</span>
+            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{dynamicLabel}</span>
           </Tooltip>
         );
       }
-      return <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{label}</span>;
+      return <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{dynamicLabel}</span>;
     };
 
     const renderField = () => {
@@ -230,6 +267,18 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
           );
 
         case "select":
+          // Handle special acquisition date select case
+          if (field.key === "acquisition_date") {
+            return (
+              <AcquisitionDateSelect
+                value={(value as string) || ""}
+                onChange={onChange}
+                error={error}
+                className={cn("h-[51px] max-w-[300px] text-sm shadow-none", error && "border-red-500")}
+              />
+            );
+          }
+
           // Handle special currency select case
           if (field.options === "currencies") {
             // Use CurrencyDropdown for currency_of_account field, CurrencySelect for others
@@ -568,7 +617,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             );
           }
           if (field.customComponent === "KeyDealPoints") {
-            return <KeyDealPoints value={value as never} onChange={onChange} error={error} />;
+            return <KeyDealPoints ref={keyDealPointsRef} value={value as never} onChange={onChange} error={error} />;
           }
           if (field.customComponent === "PropertyAddressInput") {
             return (
@@ -580,7 +629,14 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             );
           }
           if (field.customComponent === "SponsorMetricsTable") {
-            return <SponsorMetricsTable value={value as never} onChange={onChange as never} error={error} />;
+            return (
+              <SponsorMetricsTable
+                ref={sponsorMetricsTableRef}
+                value={value as never}
+                onChange={onChange as never}
+                error={error}
+              />
+            );
           }
           if (field.customComponent === "OfferDetailsTable") {
             return <OfferDetailsTable value={value as never} onChange={onChange} />;
@@ -648,19 +704,42 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             return <SiteDocumentsSection value={value as never} onChange={onChange} error={error} />;
           }
           if (field.customComponent === "SiteDocumentsUpload") {
-            return <SiteDocumentsUpload value={value as never} onChange={onChange} error={error} />;
+            return (
+              <SiteDocumentsUpload
+                ref={siteDocumentsUploadRef}
+                value={value as never}
+                onChange={onChange}
+                error={error}
+              />
+            );
           }
           if (field.customComponent === "DocumentsSection") {
             return <DocumentsSection value={value as never} onChange={onChange} error={error} label={field.label} />;
           }
           if (field.customComponent === "ClosingDocuments") {
-            return <ClosingDocuments value={value as never} onChange={onChange} error={error} />;
+            return (
+              <ClosingDocuments ref={closingDocumentsRef} value={value as never} onChange={onChange} error={error} />
+            );
           }
           if (field.customComponent === "OfferingInformation") {
-            return <OfferingInformation value={value as never} onChange={onChange} error={error} />;
+            return (
+              <OfferingInformation
+                ref={offeringInformationRef}
+                value={value as never}
+                onChange={onChange}
+                error={error}
+              />
+            );
           }
           if (field.customComponent === "SponsorInformationDocs") {
-            return <SponsorInformationDocs value={value as never} onChange={onChange} error={error} />;
+            return (
+              <SponsorInformationDocs
+                ref={sponsorInformationDocsRef}
+                value={value as never}
+                onChange={onChange}
+                error={error}
+              />
+            );
           }
           if (field.customComponent === "ScreeningNotice") {
             return <ScreeningNotice />;
@@ -669,7 +748,14 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             return <BudgetTabs value={value as never} onChange={onChange as never} error={error} />;
           }
           if (field.customComponent === "SponsorMetricsTable") {
-            return <SponsorMetricsTable value={value as never} onChange={onChange as never} error={error} />;
+            return (
+              <SponsorMetricsTable
+                ref={sponsorMetricsTableRef}
+                value={value as never}
+                onChange={onChange as never}
+                error={error}
+              />
+            );
           }
           if (field.customComponent === "OfferDetailsTable") {
             return <OfferDetailsTable value={value as never} onChange={onChange} />;
@@ -697,6 +783,9 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                 required={field.validation?.required}
               />
             );
+          }
+          if (field.customComponent === "BusinessPlanTheProperty") {
+            return <BusinessPlanTheProperty />;
           }
           return (
             <div className='rounded-lg border-2 border-dashed border-gray-300 p-4 text-center'>

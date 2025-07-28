@@ -12,7 +12,9 @@ interface SponsorLogoUploadProps {
   error?: string;
 }
 
-export function SponsorLogoUpload({ value = [], onChange, error }: SponsorLogoUploadProps) {
+export function SponsorLogoUpload({ value = [], onChange
+  //  error
+   }: SponsorLogoUploadProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);
 
@@ -92,8 +94,6 @@ export function SponsorLogoUpload({ value = [], onChange, error }: SponsorLogoUp
             ))}
           </div>
         )}
-
-        {error && <p className='text-sm text-red-500'>{error}</p>}
       </div>
 
       {/* Upload Dialog - Same as FileUpload component */}
