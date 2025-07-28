@@ -17,7 +17,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   value,
   onChange,
   placeholder,
-  error,
+  // error,
   className,
   required,
 }) => {
@@ -134,7 +134,6 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         className={className}
         required={required}
       />
-      {error && <p className='mt-1 text-sm text-red-500'>{error}</p>}
     </div>
   );
 };

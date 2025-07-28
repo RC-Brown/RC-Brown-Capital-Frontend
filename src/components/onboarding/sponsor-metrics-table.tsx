@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useImperativeHandle, forwardRef, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Input } from "@/src/components/ui/input";
 import { cn } from "@/src/lib/utils";
@@ -28,6 +28,10 @@ interface SponsorMetricsTableProps {
   error?: string;
 }
 
+export interface SponsorMetricsTableRef {
+  validate: () => boolean;
+}
+
 const metricsConfig = [
   {
     key: "yearsInOperation",
@@ -47,21 +51,21 @@ const metricsConfig = [
     key: "historicalPortfolioActivity",
     label: "Historical Portfolio Activity (${currencySymbol})",
     type: "currency",
-    placeholder: "",
+    placeholder: "e.g $25,000,000",
     info: "Total past investment volume handled across all projects",
   },
   {
     key: "projectsUnderManagement",
     label: "Projects currently under Management",
     type: "currency",
-    placeholder: "",
+    placeholder: "e.g $100,000,000",
     info: "Current total value of properties/assets the sponsor manages.",
   },
   {
     key: "totalSquareFeetManaged",
     label: "Total Square Feet Managed",
     type: "number",
-    placeholder: "",
+    placeholder: "e.g 500,000",
     unit: "sq ft",
     info: "Combined size of all properties under the sponsor's management.",
   },
@@ -139,7 +143,7 @@ const metricsConfig = [
     key: "highestBudgetProject",
     label: "Highest Budget for a Project ${currencySymbol}",
     type: "currency",
-    placeholder: "",
+    placeholder: "e.g $100,000,000",
     info: "The largest single-project budget the sponsor has worked with.",
   },
   {
@@ -158,138 +162,190 @@ const metricsConfig = [
   },
 ];
 
-export function SponsorMetricsTable({ value = {}, onChange, error }: SponsorMetricsTableProps) {
-  const [metrics, setMetrics] = useState<SponsorMetricsData>(value);
-  const { formatCurrency, currencySymbol } = useCurrencySafe();
+export const SponsorMetricsTable = forwardRef<SponsorMetricsTableRef, SponsorMetricsTableProps>(
+  ({ value = {}, onChange, error }, ref) => {
+    const [metrics, setMetrics] = useState<SponsorMetricsData>(value);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+    const { formatCurrency, currencySymbol } = useCurrencySafe();
 
-  // Create dynamic metrics config with currency-aware placeholders and labels
-  const dynamicMetricsConfig = metricsConfig.map((metric) => {
-    const updatedMetric = { ...metric };
+    // Trigger validation when error prop changes (from parent validation)
+    useEffect(() => {
+      if (error) {
+        validateAllFields();
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [error]);
 
-    // Handle currency placeholders
-    if (metric.placeholder && metric.placeholder.includes("$")) {
-      updatedMetric.placeholder = metric.placeholder.replace(/\$[0-9,]+/g, (match) => {
-        const amount = match.replace("$", "");
-        return formatCurrency(amount);
+    // Create dynamic metrics config with currency-aware placeholders and labels
+    const dynamicMetricsConfig = metricsConfig.map((metric) => {
+      const updatedMetric = { ...metric };
+
+      // Handle currency placeholders
+      if (metric.placeholder && metric.placeholder.includes("$")) {
+        updatedMetric.placeholder = metric.placeholder.replace(/\$[0-9,]+/g, (match) => {
+          const amount = match.replace("$", "");
+          return formatCurrency(amount);
+        });
+      }
+
+      // Handle currency labels - replace template strings with actual currency symbols
+      if (metric.type === "currency" && metric.label.includes("${currencySymbol}")) {
+        updatedMetric.label = metric.label.replace("${currencySymbol}", currencySymbol);
+      }
+
+      return updatedMetric;
+    });
+
+    // Validate individual field
+    const validateField = (key: string, value: string): string => {
+      if (!value || value.trim() === "") {
+        return "This field is required";
+      }
+      return "";
+    };
+
+    // Validate all fields
+    const validateAllFields = (): boolean => {
+      const newErrors: Record<string, string> = {};
+      let hasErrors = false;
+
+      // Check all fields in metricsConfig (all are required)
+      metricsConfig.forEach((metric) => {
+        const value = metrics[metric.key as keyof SponsorMetricsData] || "";
+        const error = validateField(metric.key, value);
+        if (error) {
+          newErrors[metric.key] = error;
+          hasErrors = true;
+        }
       });
-    }
 
-    // Handle currency labels - replace template strings with actual currency symbols
-    if (metric.type === "currency" && metric.label.includes("${currencySymbol}")) {
-      updatedMetric.label = metric.label.replace("${currencySymbol}", currencySymbol);
-    }
+      setFieldErrors(newErrors);
+      return !hasErrors;
+    };
 
-    return updatedMetric;
-  });
+    const handleMetricChange = (key: string, newValue: string) => {
+      const updatedMetrics = { ...metrics, [key]: newValue };
+      setMetrics(updatedMetrics);
+      onChange(updatedMetrics);
 
-  const handleMetricChange = (key: string, newValue: string) => {
-    const updatedMetrics = { ...metrics, [key]: newValue };
-    setMetrics(updatedMetrics);
-    onChange(updatedMetrics);
-  };
+      // Clear field error when user starts typing
+      if (fieldErrors[key]) {
+        setFieldErrors((prev) => ({ ...prev, [key]: "" }));
+      }
+    };
 
-  return (
-    <div className='space-y-4'>
-      <div className='overflow-x-auto'>
-        <table className='w-full border-collapse'>
-          <thead>
-            <tr className='border-b'>
-              <th className='p-3 text-left font-medium text-text-muted'>Category</th>
-              <th className='p-3 text-left font-medium text-text-muted'>Input</th>
-              <th className='p-3 text-left font-medium text-text-muted'>Brief info</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dynamicMetricsConfig.map((metric) => (
-              <tr key={metric.key} className='border-b'>
-                <td className='p-3 text-sm text-text-muted/80'>{metric.label}</td>
-                <td className='p-3'>
-                  {metric.type === "select" ? (
-                    <Select
-                      value={metrics[metric.key as keyof SponsorMetricsData] || ""}
-                      onValueChange={(value) => handleMetricChange(metric.key, value)}
-                    >
-                      <SelectTrigger
-                        className={cn(
-                          "w-full",
-                          error && "border-red-500",
-                          "h-[51px] border border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-sm data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80"
-                        )}
-                      >
-                        <SelectValue
-                          className='text-sm text-text-muted/80 data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80'
-                          placeholder={
-                            metric.key === "yearsInOperation"
-                              ? "2 years"
-                              : metric.key === "dealsFundedByRC"
-                                ? "2"
-                                : metric.key === "propertiesUnderManagement"
-                                  ? "2"
-                                  : metric.key === "totalRealizedProjects"
-                                    ? "2"
-                                    : metric.key === "propertiesDeveloped"
-                                      ? "2"
-                                      : metric.key === "propertiesBuiltAndSold"
-                                        ? "2"
-                                        : metric.key === "averageCompletionLength"
-                                          ? "12 Months"
-                                          : "Select"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent className='bg-white'>
-                        {metric.options?.map((option) => (
-                          <SelectItem
-                            key={option.value}
-                            value={option.value}
-                            className='cursor-pointer hover:bg-primary hover:text-white'
-                          >
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : metric.type === "currency" ? (
-                    <CurrencyInput
-                      value={metrics[metric.key as keyof SponsorMetricsData] || ""}
-                      onChange={(value) => handleMetricChange(metric.key, value)}
-                      placeholder={metric.placeholder || "Enter value"}
-                      className={cn(
-                        error && "border-red-500",
-                        "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
-                      )}
-                    />
-                  ) : metric.type === "number" ? (
-                    <NumberInput
-                      value={metrics[metric.key as keyof SponsorMetricsData] || ""}
-                      onChange={(value) => handleMetricChange(metric.key, value)}
-                      placeholder={metric.placeholder || "Enter value"}
-                      unit={metric.unit}
-                      className={cn(
-                        error && "border-red-500",
-                        "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
-                      )}
-                    />
-                  ) : (
-                    <Input
-                      type='text'
-                      placeholder={metric.placeholder || "Enter value"}
-                      value={metrics[metric.key as keyof SponsorMetricsData] || ""}
-                      onChange={(e) => handleMetricChange(metric.key, e.target.value)}
-                      className={cn(
-                        error && "border-red-500",
-                        "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
-                      )}
-                    />
-                  )}
-                </td>
-                <td className='p-3 text-sm text-text-muted/80'>{metric.info}</td>
+    // Expose validation method to parent
+    useImperativeHandle(ref, () => ({
+      validate: () => validateAllFields(),
+    }));
+
+    return (
+      <div className='space-y-4'>
+        <div className='overflow-x-auto'>
+          <table className='w-full border-collapse'>
+            <thead>
+              <tr className='border-b'>
+                <th className='p-3 text-left font-medium text-text-muted'>Category</th>
+                <th className='p-3 text-left font-medium text-text-muted'>Input</th>
+                <th className='p-3 text-left font-medium text-text-muted'>Brief info</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {dynamicMetricsConfig.map((metric) => (
+                <tr key={metric.key} className='border-b'>
+                  <td className='p-3 text-sm text-text-muted/80'>{metric.label}</td>
+                  <td className='p-3'>
+                    <div className='space-y-1'>
+                      {metric.type === "select" ? (
+                        <Select
+                          value={metrics[metric.key as keyof SponsorMetricsData] || ""}
+                          onValueChange={(value) => handleMetricChange(metric.key, value)}
+                        >
+                          <SelectTrigger
+                            className={cn(
+                              "w-full",
+                              (error || fieldErrors[metric.key]) && "border-red-500",
+                              "h-[51px] border border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-sm data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80"
+                            )}
+                          >
+                            <SelectValue
+                              className='text-sm text-text-muted/80 data-[placeholder]:text-sm data-[placeholder]:text-text-muted/80'
+                              placeholder={
+                                metric.key === "yearsInOperation"
+                                  ? "2 years"
+                                  : metric.key === "dealsFundedByRC"
+                                    ? "2"
+                                    : metric.key === "propertiesUnderManagement"
+                                      ? "2"
+                                      : metric.key === "totalRealizedProjects"
+                                        ? "2"
+                                        : metric.key === "propertiesDeveloped"
+                                          ? "2"
+                                          : metric.key === "propertiesBuiltAndSold"
+                                            ? "2"
+                                            : metric.key === "averageCompletionLength"
+                                              ? "12 Months"
+                                              : "Select"
+                              }
+                            />
+                          </SelectTrigger>
+                          <SelectContent className='bg-white'>
+                            {metric.options?.map((option) => (
+                              <SelectItem
+                                key={option.value}
+                                value={option.value}
+                                className='cursor-pointer hover:bg-primary hover:text-white'
+                              >
+                                {option.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : metric.type === "currency" ? (
+                        <CurrencyInput
+                          value={metrics[metric.key as keyof SponsorMetricsData] || ""}
+                          onChange={(value) => handleMetricChange(metric.key, value)}
+                          placeholder={metric.placeholder || "Enter value"}
+                          className={cn(
+                            (error || fieldErrors[metric.key]) && "border-red-500",
+                            "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
+                          )}
+                        />
+                      ) : metric.type === "number" ? (
+                        <NumberInput
+                          value={metrics[metric.key as keyof SponsorMetricsData] || ""}
+                          onChange={(value) => handleMetricChange(metric.key, value)}
+                          placeholder={metric.placeholder || "Enter value"}
+                          unit={metric.unit}
+                          className={cn(
+                            (error || fieldErrors[metric.key]) && "border-red-500",
+                            "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
+                          )}
+                        />
+                      ) : (
+                        <Input
+                          type='text'
+                          placeholder={metric.placeholder || "Enter value"}
+                          value={metrics[metric.key as keyof SponsorMetricsData] || ""}
+                          onChange={(e) => handleMetricChange(metric.key, e.target.value)}
+                          className={cn(
+                            (error || fieldErrors[metric.key]) && "border-red-500",
+                            "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
+                          )}
+                        />
+                      )}
+                      {fieldErrors[metric.key] && <p className='text-xs text-red-500'>{fieldErrors[metric.key]}</p>}
+                    </div>
+                  </td>
+                  <td className='p-3 text-sm text-text-muted/80'>{metric.info}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-      {error && <p className='text-sm text-red-500'>{error}</p>}
-    </div>
-  );
-}
+    );
+  }
+);
+
+SponsorMetricsTable.displayName = "SponsorMetricsTable";

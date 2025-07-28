@@ -136,6 +136,12 @@ export async function signUpSponsor(data: z.infer<typeof signUpSponsorSchema>) {
       const response = error.response;
 
       if (response?.status === 422 && response.data?.errors) {
+        if (response.data.errors.email && response.data.errors.email[0] === "The email has already been taken.") {
+          return {
+            error: "This email cannot be used. Please use a different email.",
+          };
+        }
+
         return {
           error: "An error occured",
           fieldErrors: response.data.errors,

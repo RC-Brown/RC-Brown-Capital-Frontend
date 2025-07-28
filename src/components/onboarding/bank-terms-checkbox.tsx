@@ -49,7 +49,6 @@ export function BankTermsCheckbox({ value = false, onChange, error }: BankTermsC
           </a>
         </Label>
       </div>
-      {error && <p className='text-sm text-red-500'>{error}</p>}
     </div>
   );
 }

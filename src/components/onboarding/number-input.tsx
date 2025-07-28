@@ -17,7 +17,7 @@ export const NumberInput: React.FC<NumberInputProps> = ({
   value,
   onChange,
   placeholder,
-  error,
+  // error,
   className,
   required,
   unit,
@@ -134,7 +134,6 @@ export const NumberInput: React.FC<NumberInputProps> = ({
         className={className}
         required={required}
       />
-      {error && <p className='mt-1 text-sm text-red-500'>{error}</p>}
     </div>
   );
 };

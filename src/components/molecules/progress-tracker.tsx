@@ -152,7 +152,10 @@ export function SectionProgressTracker({
   onSectionClick,
 }: SectionProgressTrackerProps) {
   return (
-    <div className='space-y-8'>
+    <div
+      className='scrollbar-hide max-h-[63vh] space-y-8 overflow-y-auto'
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+    >
       {sections.map((section, index) => {
         const isCompleted = completedSections.includes(section.key);
         const isCurrent = index === currentSection;

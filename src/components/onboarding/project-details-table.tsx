@@ -32,7 +32,9 @@ export interface ProjectDetailsTableRef {
 }
 
 export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDetailsTableProps>(
-  ({ value = [], onChange, error }, ref) => {
+  ({ value = [], onChange
+    //  error
+     }, ref) => {
     const [projects, setProjects] = useState<ProjectDetail[]>(value.length > 0 ? value : [createEmptyProject()]);
     const [fieldErrors, setFieldErrors] = useState<Record<string, Record<string, string>>>({});
 
@@ -357,8 +359,6 @@ export const ProjectDetailsTable = forwardRef<ProjectDetailsTableRef, ProjectDet
             <span className='text-sm font-normal text-text-muted'>Add Another Project</span>
           </span>
         </Button>
-
-        {error && <p className='text-sm text-red-500'>{error}</p>}
       </div>
     );
   }

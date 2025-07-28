@@ -16,7 +16,7 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
   value,
   onChange,
   placeholder,
-  error,
+  // error,
   className,
   required,
 }) => {
@@ -133,7 +133,6 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
         className={className}
         required={required}
       />
-      {error && <p className='mt-1 text-sm text-red-500'>{error}</p>}
     </div>
   );
 };

@@ -9,7 +9,9 @@ interface TermsCheckboxProps {
   error?: string;
 }
 
-export function TermsCheckbox({ value = false, onChange, error }: TermsCheckboxProps) {
+export function TermsCheckbox({ value = false, onChange
+  //  error
+   }: TermsCheckboxProps) {
   return (
     <div className='max-w-[300px] space-y-2'>
       <div className='flex items-start space-x-2'>
@@ -40,7 +42,6 @@ export function TermsCheckbox({ value = false, onChange, error }: TermsCheckboxP
           </a>
         </Label>
       </div>
-      {error && <p className='text-sm text-red-500'>{error}</p>}
     </div>
   );
 }
