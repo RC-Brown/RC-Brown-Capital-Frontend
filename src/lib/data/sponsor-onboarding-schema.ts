@@ -649,7 +649,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           congratsMessage: {
             title: "Fund Wallet",
             description:
-              "A ₦1,000,000 non-refundable wallet funding is required for due diligence before final submission.",
+              "A {wallet_funding_amount} non-refundable wallet funding is required for due diligence before final submission.",
             ctaText: "Fund Now",
           },
         },
@@ -764,7 +764,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           title: "Project Consideration",
           fields: [
             {
-              key: "business_plan_rating",
+              key: "business_plan_ratings",
               label: "",
               type: "custom-component",
               customComponent: "BusinessPlanRating",
@@ -780,7 +780,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               validation: { required: false },
             },
             {
-              key: "deal_snapshot",
+              key: "deal_snapshots",
               label: "",
               type: "custom-component",
               customComponent: "DealSnapshot",
@@ -910,7 +910,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           congratsMessage: {
             title: "Fund Wallet",
             description:
-              "A ₦1,000,000 non-refundable wallet funding is required for due diligence before final submission.",
+              "A {wallet_funding_amount} non-refundable wallet funding is required for due diligence before final submission.",
             ctaText: "Fund Now",
           },
         },
@@ -986,14 +986,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               customComponent: "BusinessPlanTheProperty",
               gridSpan: 2,
               validation: { required: false },
-            },
-            {
-              key: "offer_live_date",
-              label: "Offer Live Date *",
-              tooltip: "Date when the investment offer is first made available.",
-              type: "date",
-              gridSpan: 1,
-              validation: { required: true },
             },
             {
               key: "offer_closing_date",
@@ -1109,7 +1101,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               layout: "inline",
               gridSpan: 1,
               validation: {
-                required: false,
+                required: true,
                 fileTypes: [
                   "application/pdf",
                   "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -1126,19 +1118,12 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           title: "Physical Descriptions",
           fields: [
             {
-              key: "physical_descriptions_tabs",
+              key: "physical_descriptions",
               label:
-                "This section is where you’ll provide detailed technical and structural information about the property or project",
+                "This section is where you'll provide detailed technical and structural information about the property or project",
               type: "custom-component",
               customComponent: "PhysicalDescriptionsTabs",
               gridSpan: 2,
-              validation: { required: false },
-            },
-            {
-              key: "site_documents_section",
-              label: "",
-              type: "custom-component",
-              customComponent: "SiteDocumentsSection",
               validation: { required: false },
             },
             {
@@ -1148,13 +1133,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               customComponent: "SiteDocumentsUpload",
               gridSpan: 1,
               validation: { required: true },
-            },
-            {
-              key: "documents_section",
-              label: "",
-              type: "custom-component",
-              customComponent: "DocumentsSection",
-              validation: { required: false },
             },
             {
               key: "closing_documents",
@@ -1295,7 +1273,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           congratsMessage: {
             title: "Fund Wallet",
             description:
-              "A ₦1,000,000 non-refundable wallet funding is required for due diligence before final submission.",
+              "A {wallet_funding_amount} non-refundable wallet funding is required for due diligence before final submission.",
             ctaText: "Fund Now",
           },
         },

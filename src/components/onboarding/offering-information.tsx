@@ -8,9 +8,14 @@ import { FileText, X, Plus } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import Image from "next/image";
 
+interface OfferingDocument {
+  document_name: string;
+  files: File[];
+}
+
 interface OfferingInformationProps {
-  value?: { informationType: string; file?: File };
-  onChange: (value: { informationType: string; file?: File }) => void;
+  value?: OfferingDocument[];
+  onChange: (value: OfferingDocument[]) => void;
   error?: string;
 }
 
@@ -29,9 +34,9 @@ const informationTypes = [
 ];
 
 export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingInformationProps>(
-  ({ value = { informationType: "" }, onChange, error }, ref) => {
-    const [selectedType, setSelectedType] = useState(value.informationType);
-    const [uploadedFile, setUploadedFile] = useState<File | undefined>(value.file);
+  ({  onChange, error }, ref) => {
+    const [selectedType, setSelectedType] = useState("");
+    const [uploadedFile, setUploadedFile] = useState<File | undefined>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [validationError, setValidationError] = useState<string>("");
@@ -52,12 +57,16 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
 
     const handleTypeChange = (informationType: string) => {
       setSelectedType(informationType);
-      onChange({ informationType, file: uploadedFile });
+      const infoType = informationTypes.find((type) => type.value === informationType);
+      if (infoType && uploadedFile) {
+        onChange([{ document_name: infoType.value, files: [uploadedFile] }]);
+      } else if (infoType) {
+        onChange([{ document_name: infoType.value, files: [] }]);
+      }
     };
 
     const openUploadModal = () => {
       if (!selectedType) {
-        // Show error or alert that information type must be selected first
         return;
       }
       setIsModalOpen(true);
@@ -74,7 +83,10 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
       const file = selectedFiles[0];
       if (acceptedFileTypes.includes(file.type) || file.name.match(/\.(pdf|doc|docx|txt|xls|xlsx|jpg|jpeg|png)$/i)) {
         setUploadedFile(file);
-        onChange({ informationType: selectedType, file });
+        const infoType = informationTypes.find((type) => type.value === selectedType);
+        if (infoType) {
+          onChange([{ document_name: infoType.value, files: [file] }]);
+        }
       }
       closeModal();
     };
@@ -97,8 +109,10 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
 
     const removeFile = () => {
       setUploadedFile(undefined);
-      onChange({ informationType: selectedType, file: undefined });
-      // Clear validation error when file is removed
+      const infoType = informationTypes.find((type) => type.value === selectedType);
+      if (infoType) {
+        onChange([{ document_name: infoType.value, files: [] }]);
+      }
       setValidationError("");
     };
 
@@ -107,11 +121,9 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
       if (!selectedType || !uploadedFile) {
         const error = "Please select an information type and upload the required document";
         setValidationError(error);
-        console.log("OfferingInformation validation:", { isValid: false, error, selectedType, uploadedFile });
         return false;
       }
       setValidationError("");
-      console.log("OfferingInformation validation:", { isValid: true, selectedType, uploadedFile });
       return true;
     };
 

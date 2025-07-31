@@ -102,22 +102,18 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
         }
         if (field.customComponent === "SiteDocumentsUpload" && siteDocumentsUploadRef.current) {
           const isValid = siteDocumentsUploadRef.current.validate();
-          console.log("SiteDocumentsUpload form validation:", { fieldKey: field.key, isValid });
           return isValid;
         }
         if (field.customComponent === "ClosingDocuments" && closingDocumentsRef.current) {
           const isValid = closingDocumentsRef.current.validate();
-          console.log("ClosingDocuments form validation:", { fieldKey: field.key, isValid });
           return isValid;
         }
         if (field.customComponent === "OfferingInformation" && offeringInformationRef.current) {
           const isValid = offeringInformationRef.current.validate();
-          console.log("OfferingInformation form validation:", { fieldKey: field.key, isValid });
           return isValid;
         }
         if (field.customComponent === "SponsorInformationDocs" && sponsorInformationDocsRef.current) {
           const isValid = sponsorInformationDocsRef.current.validate();
-          console.log("SponsorInformationDocs form validation:", { fieldKey: field.key, isValid });
           return isValid;
         }
         return true;
@@ -181,7 +177,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             return (
               <NumberInput
                 value={value as string | number}
-                onChange={onChange}
+                onChange={(val) => onChange(val.toString())}
                 placeholder={field.placeholder}
                 error={error}
                 className={cn(
@@ -593,9 +589,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             );
           }
           if (field.customComponent === "BusinessPlanRating") {
-            return (
-              <BusinessPlanRating value={(value as Record<string, string>) || {}} onChange={onChange} error={error} />
-            );
+            return <BusinessPlanRating value={(value as never) || []} onChange={onChange} error={error} />;
           }
           if (field.customComponent === "DefinitionsDocument") {
             return <DefinitionsDocument value={Boolean(value)} onChange={onChange} error={error} />;
@@ -708,7 +702,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
               <SiteDocumentsUpload
                 ref={siteDocumentsUploadRef}
                 value={value as never}
-                onChange={onChange}
+                onChange={onChange as never}
                 error={error}
               />
             );

@@ -144,11 +144,9 @@ export const SponsorInformationDocs = forwardRef<SponsorInformationDocsRef, Spon
       if (!trackRecordFile) {
         const error = "Please upload your track record document";
         setValidationError(error);
-        console.log("SponsorInformationDocs validation:", { isValid: false, error, trackRecordFile });
         return false;
       }
       setValidationError("");
-      console.log("SponsorInformationDocs validation:", { isValid: true, trackRecordFile });
       return true;
     };
 

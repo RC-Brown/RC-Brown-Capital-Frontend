@@ -5,9 +5,14 @@ import { Button } from "@/src/components/ui/button";
 import { EnhancedTextarea } from "./enhanced-textarea";
 import { cn } from "@/src/lib/utils";
 
+interface PhysicalDescription {
+  description_title: string;
+  description: string;
+}
+
 interface PhysicalDescriptionsTabsProps {
-  value?: Record<string, { text: string; files: File[] }>;
-  onChange: (value: Record<string, { text: string; files: File[] }>) => void;
+  value?: PhysicalDescription[];
+  onChange: (value: PhysicalDescription[]) => void;
   error?: string;
 }
 
@@ -43,7 +48,7 @@ const physicalDescriptionOptions = [
   { value: "unit_mix", label: "Unit Mix" },
 ];
 
-export function PhysicalDescriptionsTabs({ value = {}, onChange, error }: PhysicalDescriptionsTabsProps) {
+export function PhysicalDescriptionsTabs({ value = [], onChange, error }: PhysicalDescriptionsTabsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -68,37 +73,31 @@ export function PhysicalDescriptionsTabs({ value = {}, onChange, error }: Physic
   const handleOptionClick = (optionValue: string) => {
     setIsOpen(false);
 
-    // Initialize the option if it doesn't exist
-    if (!value[optionValue]) {
-      const newValue = {
-        ...value,
-        [optionValue]: { text: "", files: [] },
-      };
-      onChange(newValue);
-    }
-  };
+    const option = physicalDescriptionOptions.find((opt) => opt.value === optionValue);
+    if (!option) return;
 
-  const handleTextChange = (optionValue: string, text: string) => {
-    const currentData = value[optionValue] || { text: "", files: [] };
-    const newValue = {
-      ...value,
-      [optionValue]: { ...currentData, text },
+    // Check if this description already exists
+    const existingIndex = value.findIndex((desc) => desc.description_title === option.label);
+    if (existingIndex !== -1) return; // Already exists
+
+    // Add new physical description
+    const newDescription: PhysicalDescription = {
+      description_title: option.label,
+      description: "",
     };
+
+    const newValue = [...value, newDescription];
     onChange(newValue);
   };
 
-  const handleFilesChange = (optionValue: string, files: File[]) => {
-    const currentData = value[optionValue] || { text: "", files: [] };
-    const newValue = {
-      ...value,
-      [optionValue]: { ...currentData, files },
-    };
+  const handleDescriptionChange = (index: number, description: string) => {
+    const newValue = [...value];
+    newValue[index] = { ...newValue[index], description };
     onChange(newValue);
   };
 
-  const removeOption = (optionValue: string) => {
-    const newValue = { ...value };
-    delete newValue[optionValue];
+  const removeDescription = (index: number) => {
+    const newValue = value.filter((_, i) => i !== index);
     onChange(newValue);
   };
 
@@ -114,7 +113,7 @@ export function PhysicalDescriptionsTabs({ value = {}, onChange, error }: Physic
         >
           <div className='flex items-center'>
             <span className='font-medium text-blue-600'>Add</span>
-            <span className='ml-2 text-text-muted/80'>Brief description of</span>
+            <span className='ml-2 text-text-muted/80'>Physical description</span>
           </div>
         </Button>
 
@@ -123,55 +122,52 @@ export function PhysicalDescriptionsTabs({ value = {}, onChange, error }: Physic
             ref={dropdownRef}
             className='absolute left-0 top-full z-50 mt-1 w-full max-w-[200px] rounded-md border border-gray-200 bg-white shadow-lg'
           >
-            {physicalDescriptionOptions.map((option) => (
-              <button
-                key={option.value}
-                type='button'
-                onClick={() => handleOptionClick(option.value)}
-                className={cn(
-                  "w-full px-4 py-2 text-left text-sm transition-colors hover:bg-primary hover:text-white",
-                  value[option.value] && "bg-primary text-white"
-                )}
-              >
-                {option.label}
-              </button>
-            ))}
+            {physicalDescriptionOptions.map((option) => {
+              const isSelected = value.some((desc) => desc.description_title === option.label);
+              return (
+                <button
+                  key={option.value}
+                  type='button'
+                  onClick={() => handleOptionClick(option.value)}
+                  disabled={isSelected}
+                  className={cn(
+                    "w-full px-4 py-2 text-left text-sm transition-colors",
+                    isSelected ? "cursor-not-allowed bg-gray-100 text-gray-400" : "hover:bg-primary hover:text-white"
+                  )}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
-      {/* Show selected options with textareas */}
-      {Object.keys(value).length > 0 && (
+      {/* Show selected descriptions with textareas */}
+      {value.length > 0 && (
         <div className='space-y-4'>
-          {Object.entries(value).map(([optionValue, data]) => {
-            const option = physicalDescriptionOptions.find((opt) => opt.value === optionValue);
-            return (
-              <div key={optionValue} className='rounded-lg border border-gray-200 p-4'>
-                <div className='mb-3 flex items-center justify-between'>
-                  <h4 className='text-sm font-medium text-text-muted/80'>{option?.label}</h4>
-                  <Button
-                    type='button'
-                    variant='ghost'
-                    size='sm'
-                    onClick={() => removeOption(optionValue)}
-                    className='h-6 w-6 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
-                  >
-                    <span className='text-sm'>×</span>
-                  </Button>
-                </div>
-                <EnhancedTextarea
-                  value={data.text}
-                  onChange={(text) => handleTextChange(optionValue, text)}
-                  placeholder={`Brief description of the ${option?.label.toLowerCase()}`}
-                  uploadedFiles={data.files}
-                  onFilesChange={(files) => handleFilesChange(optionValue, files)}
-                  acceptedFileTypes={[".pdf", ".doc", ".docx", ".jpg", ".png"]}
-                  multiple={true}
-                  error={!!error}
-                />
+          {value.map((description, index) => (
+            <div key={index} className='rounded-lg border border-gray-200 p-4'>
+              <div className='mb-3 flex items-center justify-between'>
+                <h4 className='text-sm font-medium text-text-muted/80'>{description.description_title}</h4>
+                <Button
+                  type='button'
+                  variant='ghost'
+                  size='sm'
+                  onClick={() => removeDescription(index)}
+                  className='h-6 w-6 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
+                >
+                  <span className='text-sm'>×</span>
+                </Button>
               </div>
-            );
-          })}
+              <EnhancedTextarea
+                value={description.description}
+                onChange={(text) => handleDescriptionChange(index, text)}
+                placeholder={`Brief description of the ${description.description_title.toLowerCase()}`}
+                error={!!error}
+              />
+            </div>
+          ))}
         </div>
       )}
 

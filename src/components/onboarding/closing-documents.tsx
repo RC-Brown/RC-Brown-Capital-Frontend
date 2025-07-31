@@ -8,9 +8,14 @@ import { FileText, X, Plus } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import Image from "next/image";
 
+interface ClosingDocument {
+  document_name: string;
+  files: File[];
+}
+
 interface ClosingDocumentsProps {
-  value?: { documentType: string; file?: File };
-  onChange: (value: { documentType: string; file?: File }) => void;
+  value?: ClosingDocument[];
+  onChange: (value: ClosingDocument[]) => void;
   error?: string;
 }
 
@@ -27,9 +32,9 @@ const documentTypes = [
 ];
 
 export const ClosingDocuments = forwardRef<ClosingDocumentsRef, ClosingDocumentsProps>(
-  ({ value = { documentType: "" }, onChange, error }, ref) => {
-    const [selectedType, setSelectedType] = useState(value.documentType);
-    const [uploadedFile, setUploadedFile] = useState<File | undefined>(value.file);
+  ({  onChange, error }, ref) => {
+    const [selectedType, setSelectedType] = useState("");
+    const [uploadedFile, setUploadedFile] = useState<File | undefined>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [validationError, setValidationError] = useState<string>("");
@@ -50,12 +55,16 @@ export const ClosingDocuments = forwardRef<ClosingDocumentsRef, ClosingDocuments
 
     const handleTypeChange = (documentType: string) => {
       setSelectedType(documentType);
-      onChange({ documentType, file: uploadedFile });
+      const docType = documentTypes.find((type) => type.value === documentType);
+      if (docType && uploadedFile) {
+        onChange([{ document_name: docType.value, files: [uploadedFile] }]);
+      } else if (docType) {
+        onChange([{ document_name: docType.value, files: [] }]);
+      }
     };
 
     const openUploadModal = () => {
       if (!selectedType) {
-        // Show error or alert that document type must be selected first
         return;
       }
       setIsModalOpen(true);
@@ -72,7 +81,10 @@ export const ClosingDocuments = forwardRef<ClosingDocumentsRef, ClosingDocuments
       const file = selectedFiles[0];
       if (acceptedFileTypes.includes(file.type) || file.name.match(/\.(pdf|doc|docx|txt|xls|xlsx|jpg|jpeg|png)$/i)) {
         setUploadedFile(file);
-        onChange({ documentType: selectedType, file });
+        const docType = documentTypes.find((type) => type.value === selectedType);
+        if (docType) {
+          onChange([{ document_name: docType.value, files: [file] }]);
+        }
       }
       closeModal();
     };
@@ -95,35 +107,35 @@ export const ClosingDocuments = forwardRef<ClosingDocumentsRef, ClosingDocuments
 
     const removeFile = () => {
       setUploadedFile(undefined);
-      onChange({ documentType: selectedType, file: undefined });
-      // Clear validation error when file is removed
+      const docType = documentTypes.find((type) => type.value === selectedType);
+      if (docType) {
+        onChange([{ document_name: docType.value, files: [] }]);
+      }
       setValidationError("");
     };
 
     // Validate that both document type and file are selected
-    const validateClosingDocument = () => {
+    const validateClosingDocuments = () => {
       if (!selectedType || !uploadedFile) {
         const error = "Please select a document type and upload the required document";
         setValidationError(error);
-        console.log("ClosingDocuments validation:", { isValid: false, error, selectedType, uploadedFile });
         return false;
       }
       setValidationError("");
-      console.log("ClosingDocuments validation:", { isValid: true, selectedType, uploadedFile });
       return true;
     };
 
     // Trigger validation when error prop changes (from parent validation)
     useEffect(() => {
       if (error) {
-        validateClosingDocument();
+        validateClosingDocuments();
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [error]);
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
-      validate: () => validateClosingDocument(),
+      validate: () => validateClosingDocuments(),
     }));
 
     return (

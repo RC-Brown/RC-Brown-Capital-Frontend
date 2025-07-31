@@ -25,23 +25,20 @@ const optionalStringOrAllowOtherObject = () =>
     .optional();
 
 // Custom component schemas
-const BusinessPlanRatingSchema = z.object({
-  leverage: z.enum(["low", "medium", "high"], {
-    required_error: "Please select a leverage rating",
-  }),
-  occupancy: z.enum(["low", "medium", "high"], {
-    required_error: "Please select an occupancy rating",
-  }),
-  capex_hard_cost: z.enum(["low", "medium", "high"], {
-    required_error: "Please select a capex/hard cost rating",
-  }),
-  target_noi_growth: z.enum(["low", "medium", "high"], {
-    required_error: "Please select a target NOI growth rating",
-  }),
-});
+const BusinessPlanRatingSchema = z
+  .array(
+    z.object({
+      category: z.enum(["leverage", "occupancy", "capex_hard_cost", "target_noi_growth"], {
+        required_error: "Please select a valid category",
+      }),
+      rating: z.enum(["low", "medium", "high"], {
+        required_error: "Please select a rating",
+      }),
+    })
+  )
+  .length(4, "All 4 categories must be rated");
 
 const DealSnapshotItemSchema = z.object({
-  id: z.string(),
   header: z.string().min(1, "Header is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
 });
@@ -49,12 +46,8 @@ const DealSnapshotItemSchema = z.object({
 const DealSnapshotSchema = z.array(DealSnapshotItemSchema).min(1, "At least one deal point is required");
 
 const RiskConsiderationItemSchema = z.object({
-  id: z.string(),
-  risk: z.string().min(1, "Risk description is required"),
-  severity: z.enum(["low", "medium", "high"], {
-    required_error: "Please select risk severity",
-  }),
-  mitigation: z.string().min(10, "Mitigation strategy is required"),
+  potential_risk: z.string().min(1, "Risk description is required"),
+  assessment_mitigation: z.string().min(10, "Assessment/mitigation strategy is required"),
 });
 
 const RiskConsiderationsSchema = z
@@ -318,9 +311,9 @@ export const ProjectUploadSchema = z.object({
   rc_brown_capital_offerings: z.string().min(1, "RC Brown Capital offerings is required"),
 
   // Project Consideration
-  business_plan_rating: BusinessPlanRatingSchema,
+  business_plan_ratings: BusinessPlanRatingSchema,
   definitions_document: z.boolean().refine((val) => val === true, "Definitions document must be accepted"),
-  deal_snapshot: DealSnapshotSchema,
+  deal_snapshots: DealSnapshotSchema,
   risk_considerations: RiskConsiderationsSchema,
 
   // The Deal
