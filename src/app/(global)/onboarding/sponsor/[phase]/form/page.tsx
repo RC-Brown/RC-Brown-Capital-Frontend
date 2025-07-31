@@ -25,7 +25,11 @@ import {
   transformCompanyRepDataToApi,
   getCompanyRepSectionStepNumber,
 } from "@/src/lib/utils/onboarding-field-mapping";
+import { useSaveProjectUploadStep } from "@/src/lib/hooks/use-project-upload-mutations";
+import { ProjectUploadInput } from "@/src/services/project-upload";
+import { transformFormToBackendData } from "@/src/lib/utils/project-upload-field-mapping";
 import { OnboardingField } from "@/src/types/onboarding";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
@@ -47,6 +51,7 @@ export default function FormPage({ params }: FormPageProps) {
   const router = useRouter();
   const { data: session } = useSession();
   const store = useOnboardingStoreWithUser();
+  const { formatCurrency } = useCurrencySafe();
   const {
     currentSection,
     formData,
@@ -60,6 +65,7 @@ export default function FormPage({ params }: FormPageProps) {
   // Backend integration hooks
   const saveBusinessStepMutation = useSaveBusinessInformationStep();
   const saveCompanyRepStepMutation = useSaveCompanyRepresentativeStep();
+  const saveProjectUploadStepMutation = useSaveProjectUploadStep();
 
   // All state hooks
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -68,6 +74,7 @@ export default function FormPage({ params }: FormPageProps) {
   const [isValidating, setIsValidating] = useState(false);
   const [showSaveAndExit, setShowSaveAndExit] = useState(false);
   const [showWelcomePopup, setShowWelcomePopup] = useState(false);
+  const [projectId, setProjectId] = useState<number | null>(null);
   const formFieldRefs = useRef<Record<string, FormFieldRef | null>>({});
 
   // Find phase and current section data
@@ -338,13 +345,33 @@ export default function FormPage({ params }: FormPageProps) {
       return getSectionStepNumber(currentSectionData.key);
     } else if (resolvedParams.phase === "company-representative") {
       return getCompanyRepSectionStepNumber(currentSectionData.key);
+    } else if (resolvedParams.phase === "project-upload") {
+      return getProjectUploadStepNumber(currentSectionData.key);
     }
 
     return 1; // Default to step 1 for other phases
   };
 
+  // Get step number for project upload sections
+  const getProjectUploadStepNumber = (sectionKey: string): number => {
+    const stepMapping: Record<string, number> = {
+      "sponsor-info": 1,
+      "project-overview": 2,
+      "project-consideration": 3,
+      "the-deal": 4,
+      "investment-returns": 5,
+      "the-sponsor": 6,
+      "physical-descriptions": 7,
+      "investment-structure": 8,
+      "budget-sheet": 9,
+      "expenses-revenue": 10,
+    };
+
+    return stepMapping[sectionKey] || 1;
+  };
+
   // Convert form data to API format
-  const convertToApiFormat = (): BusinessInformationInput | CompanyRepresentativeInput => {
+  const convertToApiFormat = (): BusinessInformationInput | CompanyRepresentativeInput | ProjectUploadInput => {
     if (!session?.user?.id) {
       throw new Error("User ID not available");
     }
@@ -353,6 +380,9 @@ export default function FormPage({ params }: FormPageProps) {
       return transformFormDataToApi(formData, parseInt(session.user.id));
     } else if (resolvedParams.phase === "company-representative") {
       return transformCompanyRepDataToApi(formData, parseInt(session.user.id));
+    } else if (resolvedParams.phase === "project-upload") {
+      const result = transformFormToBackendData(formData as ProjectUploadInput);
+      return result;
     }
 
     // Fallback for other phases
@@ -397,6 +427,36 @@ export default function FormPage({ params }: FormPageProps) {
         // Error toast is handled by the mutation hook
         return;
       }
+    } else if (resolvedParams.phase === "project-upload") {
+      try {
+        const apiData = convertToApiFormat() as ProjectUploadInput;
+        const step = getCurrentStep();
+
+        // Temporarily skip backend save for step 4, 5, and 6 if there are issues
+        if (step === 4 || step === 5 || step === 6 || step === 7 || step === 8 || step === 9) {
+          markSectionCompleted(currentSectionData.key);
+        } else {
+          const result = await saveProjectUploadStepMutation.mutateAsync({
+            step,
+            data: apiData,
+            projectId: projectId || undefined,
+          });
+
+          // Store project ID from step 1 response
+          if (step === 1 && result.project?.id) {
+            setProjectId(result.project.id);
+          }
+
+          // Mark section as completed
+          markSectionCompleted(currentSectionData.key);
+        }
+
+        // The mutation success handler in the hook will update the store automatically
+      } catch (error) {
+        console.error("Failed to save project upload step:", error);
+        // Error toast is handled by the mutation hook
+        return;
+      }
     } else {
       // For other phases, just mark section as completed locally
       markSectionCompleted(currentSectionData.key);
@@ -404,7 +464,16 @@ export default function FormPage({ params }: FormPageProps) {
 
     // Show congratulations if section has a message
     if (currentSectionData.congratsMessage) {
-      setCurrentCongratsMessage(currentSectionData.congratsMessage);
+      // Replace currency placeholders in the description
+      const formattedDescription = currentSectionData.congratsMessage.description.replace(
+        "{wallet_funding_amount}",
+        formatCurrency("1,000,000")
+      );
+
+      setCurrentCongratsMessage({
+        ...currentSectionData.congratsMessage,
+        description: formattedDescription,
+      });
       setShowCongrats(true);
       return;
     }
@@ -454,6 +523,16 @@ export default function FormPage({ params }: FormPageProps) {
           step,
           data: { ...apiData, is_draft: true },
           sectionKey: currentSectionData.key,
+        });
+      } else if (resolvedParams.phase === "project-upload") {
+        const apiData = convertToApiFormat() as ProjectUploadInput;
+        const step = getCurrentStep();
+
+        // Save as draft
+        await saveProjectUploadStepMutation.mutateAsync({
+          step,
+          data: apiData,
+          projectId: projectId || undefined,
         });
       }
 
@@ -601,9 +680,15 @@ export default function FormPage({ params }: FormPageProps) {
                     onClick={handleNext}
                     size='lg'
                     className='px-9 text-xs'
-                    disabled={saveBusinessStepMutation.isPending || saveCompanyRepStepMutation.isPending}
+                    disabled={
+                      saveBusinessStepMutation.isPending ||
+                      saveCompanyRepStepMutation.isPending ||
+                      saveProjectUploadStepMutation.isPending
+                    }
                   >
-                    {saveBusinessStepMutation.isPending || saveCompanyRepStepMutation.isPending ? (
+                    {saveBusinessStepMutation.isPending ||
+                    saveCompanyRepStepMutation.isPending ||
+                    saveProjectUploadStepMutation.isPending ? (
                       <>
                         <Loader2 className='mr-2 h-4 w-4 animate-spin' />
                         Saving...

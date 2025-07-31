@@ -10,10 +10,8 @@ import { cn } from "@/src/lib/utils";
 import Image from "next/image";
 
 interface RiskConsiderationItem {
-  id: string;
-  risk: string;
-  severity: string;
-  mitigation: string;
+  potential_risk: string;
+  assessment_mitigation: string;
 }
 
 interface RiskConsiderationsProps {
@@ -23,9 +21,9 @@ interface RiskConsiderationsProps {
 }
 
 // const severityOptions = [
-//   { value: "low", label: "Low" },
-//   { value: "medium", label: "Medium" },
-//   { value: "high", label: "High" },
+//   { value: "Low", label: "Low" },
+//   { value: "Medium", label: "Medium" },
+//   { value: "High", label: "High" },
 // ];
 
 export function RiskConsiderations({ value = [], onChange, error }: RiskConsiderationsProps) {
@@ -34,20 +32,18 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
     if (Array.isArray(value) && value.length > 0) {
       return value;
     }
-    return [{ id: "1", risk: "", severity: "", mitigation: "" }];
+    return [{ potential_risk: "", assessment_mitigation: "" }];
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newItem, setNewItem] = useState<{ risk: string; mitigation: string }>({
-    risk: "",
-    mitigation: "",
+  const [newItem, setNewItem] = useState<{ potential_risk: string; assessment_mitigation: string }>({
+    potential_risk: "",
+    assessment_mitigation: "",
   });
 
   const handleAddNew = () => {
     const newItem: RiskConsiderationItem = {
-      id: Date.now().toString(),
-      risk: "",
-      severity: "",
-      mitigation: "",
+      potential_risk: "",
+      assessment_mitigation: "",
     };
     const newItems = [...items, newItem];
     setItems(newItems);
@@ -55,33 +51,31 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
   };
 
   const handleConfirmAdd = () => {
-    if (newItem.risk.trim() && newItem.mitigation.trim()) {
+    if (newItem.potential_risk.trim() && newItem.assessment_mitigation.trim()) {
       const newItemWithId: RiskConsiderationItem = {
-        id: Date.now().toString(),
-        risk: newItem.risk,
-        mitigation: newItem.mitigation,
-        severity: "",
+        potential_risk: newItem.potential_risk,
+        assessment_mitigation: newItem.assessment_mitigation,
       };
       const newItems = [...items, newItemWithId];
       setItems(newItems);
       onChange(newItems);
 
       // Reset form and close modal
-      setNewItem({ risk: "", mitigation: "" });
+      setNewItem({ potential_risk: "", assessment_mitigation: "" });
       setIsModalOpen(false);
     }
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = (index: number) => {
     if (items.length > 1) {
-      const newItems = items.filter((item) => item.id !== id);
+      const newItems = items.filter((_, i) => i !== index);
       setItems(newItems);
       onChange(newItems);
     }
   };
 
-  const handleItemChange = (id: string, field: keyof RiskConsiderationItem, value: string) => {
-    const newItems = items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
+  const handleItemChange = (index: number, field: keyof RiskConsiderationItem, value: string) => {
+    const newItems = items.map((item, i) => (i === index ? { ...item, [field]: value } : item));
     setItems(newItems);
     onChange(newItems);
   };
@@ -115,13 +109,13 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className='border-b border-black/10'>
+              {items.map((item, index) => (
+                <tr key={index} className='border-b border-black/10'>
                   <td className='p-4 align-top'>
                     <Input
                       placeholder='e.g. Rising construction costs'
-                      value={item.risk}
-                      onChange={(e) => handleItemChange(item.id, "risk", e.target.value)}
+                      value={item.potential_risk}
+                      onChange={(e) => handleItemChange(index, "potential_risk", e.target.value)}
                       className={cn(
                         "w-full rounded-none border-b-[1px] border-l-0 border-r-0 border-t-0 border-black/20 text-sm text-text-muted/80 shadow-none placeholder:text-sm focus-visible:ring-0",
                         error && "border-red-500"
@@ -131,8 +125,8 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
                   <td className='p-4 align-top'>
                     <Textarea
                       placeholder='e.g. Secured fixed-rate contracts to lock pricing in early phases.'
-                      value={item.mitigation}
-                      onChange={(e) => handleItemChange(item.id, "mitigation", e.target.value)}
+                      value={item.assessment_mitigation}
+                      onChange={(e) => handleItemChange(index, "assessment_mitigation", e.target.value)}
                       className={cn("min-h-[145px] w-full shadow-none", error && "border-red-500")}
                       rows={3}
                     />
@@ -143,7 +137,7 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
                         type='button'
                         variant='ghost'
                         size='sm'
-                        onClick={() => handleRemove(item.id)}
+                        onClick={() => handleRemove(index)}
                         className='h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
                       >
                         <X className='h-4 w-4' />
@@ -175,15 +169,15 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
             </div>
             <div className='col-span-3 space-y-2'>
               <Input
-                placeholder='Enter header'
-                value={newItem.risk}
-                onChange={(e) => setNewItem({ ...newItem, risk: e.target.value })}
+                placeholder='Enter potential risk'
+                value={newItem.potential_risk}
+                onChange={(e) => setNewItem({ ...newItem, potential_risk: e.target.value })}
                 className='w-full border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-sm'
               />
               <Textarea
-                placeholder='Enter description'
-                value={newItem.mitigation}
-                onChange={(e) => setNewItem({ ...newItem, mitigation: e.target.value })}
+                placeholder='Enter assessment/mitigation'
+                value={newItem.assessment_mitigation}
+                onChange={(e) => setNewItem({ ...newItem, assessment_mitigation: e.target.value })}
                 className='min-h-[175px] w-full border-black/10 text-sm text-text-muted/80 shadow-none placeholder:text-sm'
                 rows={4}
               />
@@ -192,7 +186,7 @@ export function RiskConsiderations({ value = [], onChange, error }: RiskConsider
           <div className='flex justify-end pt-4'>
             <Button
               onClick={handleConfirmAdd}
-              disabled={!newItem.risk.trim() || !newItem.mitigation.trim()}
+              disabled={!newItem.potential_risk.trim() || !newItem.assessment_mitigation.trim()}
               className='bg-primary text-white hover:bg-primary/90'
             >
               Confirm

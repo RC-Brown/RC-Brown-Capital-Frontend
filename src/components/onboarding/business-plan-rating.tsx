@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { cn } from "@/src/lib/utils";
 import { ExclamationCircleIcon } from "@heroicons/react/24/solid";
@@ -9,8 +9,8 @@ import { Input } from "../ui/input";
 import Image from "next/image";
 
 interface BusinessPlanRatingProps {
-  value?: Record<string, string>;
-  onChange: (value: Record<string, string>) => void;
+  value?: Array<{ category: string; rating: string }>;
+  onChange: (value: Array<{ category: string; rating: string }>) => void;
   error?: string;
 }
 
@@ -43,15 +43,39 @@ const ratingOptions = [
   { label: "High", value: "high" },
 ];
 
-export function BusinessPlanRating({ value = {}, onChange, error }: BusinessPlanRatingProps) {
-  const [ratings, setRatings] = useState<Record<string, string>>(value);
+export function BusinessPlanRating({ value = [], onChange, error }: BusinessPlanRatingProps) {
+  // Ensure value is always an array
+  const safeValue = Array.isArray(value) ? value : [];
+  const [ratings, setRatings] = useState<Array<{ category: string; rating: string }>>(safeValue);
 
   const handleRatingChange = (category: string, rating: string) => {
-    const newRatings = { ...ratings, [category]: rating };
-    setRatings(newRatings);
+    const existingIndex = ratings.findIndex((r) => r.category === category);
+    let newRatings: Array<{ category: string; rating: string }>;
 
+    if (existingIndex >= 0) {
+      // Update existing rating
+      newRatings = [...ratings];
+      newRatings[existingIndex] = { category, rating };
+    } else {
+      // Add new rating
+      newRatings = [...ratings, { category, rating }];
+    }
+
+    setRatings(newRatings);
     onChange(newRatings);
   };
+
+  const getRatingForCategory = (category: string): string => {
+    if (!Array.isArray(ratings)) return "";
+    const rating = ratings.find((r) => r.category === category);
+    return rating?.rating || "";
+  };
+
+  // Update ratings when value prop changes
+  useEffect(() => {
+    const safeValue = Array.isArray(value) ? value : [];
+    setRatings(safeValue);
+  }, [value]);
 
   //   return categories.every((cat) => ratings[cat.key] && ratings[cat.key] !== "");
   // };
@@ -94,14 +118,16 @@ export function BusinessPlanRating({ value = {}, onChange, error }: BusinessPlan
           <tbody>
             {categories.map((category) => (
               <tr key={category.key} className=''>
-                <td className='whitespace-nowrap py-4 text-sm text-text-muted/80'>
+                <td className='py-4 text-sm text-text-muted/80'>
                   <Tooltip content={category.info}>
-                    <span className='cursor-pointer text-sm text-text-muted/80'>{category.label}</span>
+                    <span className='cursor-pointer whitespace-nowrap text-sm text-text-muted/80'>
+                      {category.label}
+                    </span>
                   </Tooltip>
                 </td>
                 <td className='p-4'>
                   <Select
-                    value={ratings[category.key] || ""}
+                    value={getRatingForCategory(category.key)}
                     onValueChange={(value) => handleRatingChange(category.key, value)}
                   >
                     <SelectTrigger

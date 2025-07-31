@@ -10,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import Image from "next/image";
 
 interface DealSnapshotItem {
-  id: string;
   header: string;
   description: string;
 }
@@ -22,9 +21,7 @@ interface DealSnapshotProps {
 }
 
 export function DealSnapshot({ value = [], onChange, error }: DealSnapshotProps) {
-  const [items, setItems] = useState<DealSnapshotItem[]>(
-    value.length > 0 ? value : [{ id: "1", header: "", description: "" }]
-  );
+  const [items, setItems] = useState<DealSnapshotItem[]>(value.length > 0 ? value : [{ header: "", description: "" }]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newItem, setNewItem] = useState<{ header: string; description: string }>({
     header: "",
@@ -38,7 +35,6 @@ export function DealSnapshot({ value = [], onChange, error }: DealSnapshotProps)
   const handleConfirmAdd = () => {
     if (newItem.header.trim() && newItem.description.trim()) {
       const newItemWithId: DealSnapshotItem = {
-        id: Date.now().toString(),
         header: newItem.header,
         description: newItem.description,
       };
@@ -52,16 +48,16 @@ export function DealSnapshot({ value = [], onChange, error }: DealSnapshotProps)
     }
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = (index: number) => {
     if (items.length > 1) {
-      const newItems = items.filter((item) => item.id !== id);
+      const newItems = items.filter((_, i) => i !== index);
       setItems(newItems);
       onChange(newItems);
     }
   };
 
-  const handleItemChange = (id: string, field: keyof DealSnapshotItem, value: string) => {
-    const newItems = items.map((item) => (item.id === id ? { ...item, [field]: value } : item));
+  const handleItemChange = (index: number, field: keyof DealSnapshotItem, value: string) => {
+    const newItems = items.map((item, i) => (i === index ? { ...item, [field]: value } : item));
     setItems(newItems);
     onChange(newItems);
   };
@@ -95,13 +91,13 @@ export function DealSnapshot({ value = [], onChange, error }: DealSnapshotProps)
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
-                <tr key={item.id} className='border-b border-gray-100'>
+              {items.map((item, index) => (
+                <tr key={index} className='border-b border-gray-100'>
                   <td className='p-4 align-top'>
                     <Input
                       placeholder='e.g. Prime Location'
                       value={item.header}
-                      onChange={(e) => handleItemChange(item.id, "header", e.target.value)}
+                      onChange={(e) => handleItemChange(index, "header", e.target.value)}
                       className={cn(
                         "w-full rounded-none border-b-[1px] border-l-0 border-r-0 border-t-0 border-black/20 text-sm text-text-muted/80 shadow-none placeholder:text-sm focus-visible:ring-0",
                         error && "border-red-500"
@@ -113,7 +109,7 @@ export function DealSnapshot({ value = [], onChange, error }: DealSnapshotProps)
                       <Textarea
                         placeholder='e.g. Located in a fast-growing urban district with increasing rental demand'
                         value={item.description}
-                        onChange={(e) => handleItemChange(item.id, "description", e.target.value)}
+                        onChange={(e) => handleItemChange(index, "description", e.target.value)}
                         className={cn("min-h-[145px] flex-1 shadow-none", error && "border-red-500")}
                         rows={3}
                       />
@@ -122,7 +118,7 @@ export function DealSnapshot({ value = [], onChange, error }: DealSnapshotProps)
                           type='button'
                           variant='ghost'
                           size='sm'
-                          onClick={() => handleRemove(item.id)}
+                          onClick={() => handleRemove(index)}
                           className='h-8 w-8 p-0 text-red-500 hover:bg-red-50 hover:text-red-700'
                         >
                           <X className='h-4 w-4' />

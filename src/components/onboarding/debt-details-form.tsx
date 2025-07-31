@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip } from "../ui/tooltip";
 import { CurrencyInput } from "./currency-input";
 import { PercentageInput } from "./percentage-input";
+import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 type DistributionPeriod = "monthly" | "quarterly" | "semi_annually" | "annually";
 type TargetHoldPeriod = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
@@ -27,6 +28,7 @@ interface DebtDetailsFormProps {
 }
 
 const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange }) => {
+  const { currencySymbol } = useCurrencySafe();
 
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
@@ -229,28 +231,40 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
 
         {/* Expected Max Annual Return */}
         <div className='space-y-2'>
-          <Tooltip content='Input the projected highest annual return investors could potentially earn from the debt investment.'>
-            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Expected Max Annual Return (%) *</span>
+          <Tooltip content='This is automatically calculated based on Maximum Investment Amount and Return on Investment percentage'>
+            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>
+              Expected Max Annual Return ({currencySymbol}) *
+            </span>
           </Tooltip>
-          <PercentageInput
-            value={value.expected_max_annual_return || ""}
-            onChange={(value) => handleInputChange("expected_max_annual_return", value)}
-            placeholder=''
-            className='w-full py-5 text-sm shadow-none'
-          />
+          <div className='w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-5 text-sm text-gray-600'>
+            {(() => {
+              const maxAmount = parseFloat(value.max_investment_amount || "0");
+              const roiPercent = parseFloat(value.return_on_investment || "0");
+              const calculatedReturn = (maxAmount * roiPercent) / 100;
+              return calculatedReturn > 0
+                ? `${currencySymbol}${calculatedReturn.toLocaleString()}`
+                : `${currencySymbol}950`;
+            })()}
+          </div>
         </div>
 
         {/* Expected Min Annual Return */}
         <div className='space-y-2'>
-          <Tooltip content='Input the projected lowest annual return investors can expect from the debt investment'>
-            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Expected Min Annual Return (%) *</span>
+          <Tooltip content='This is automatically calculated based on Minimum Investment Amount and Return on Investment percentage'>
+            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>
+              Expected Min Annual Return ({currencySymbol}) *
+            </span>
           </Tooltip>
-          <PercentageInput
-            value={value.expected_min_annual_return || ""}
-            onChange={(value) => handleInputChange("expected_min_annual_return", value)}
-            placeholder=''
-            className='w-full py-5 text-sm shadow-none'
-          />
+          <div className='w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-5 text-sm text-gray-600'>
+            {(() => {
+              const minAmount = parseFloat(value.min_investment_amount || "0");
+              const roiPercent = parseFloat(value.return_on_investment || "0");
+              const calculatedReturn = (minAmount * roiPercent) / 100;
+              return calculatedReturn > 0
+                ? `${currencySymbol}${calculatedReturn.toLocaleString()}`
+                : `${currencySymbol}950`;
+            })()}
+          </div>
         </div>
 
         {/* Exit Date */}

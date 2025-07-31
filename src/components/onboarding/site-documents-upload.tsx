@@ -7,18 +7,17 @@ import { FileText, X, Plus } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import Image from "next/image";
 
-interface UploadedDocument {
-  id: string;
-  categoryKey: string;
-  categoryLabel: string;
-  fileName: string;
-  fileSize: number;
-  file: File;
+interface SiteDocuments {
+  floor_plan: File[];
+  survey_plan: File[];
+  site_plan: File[];
+  stacking_plan: File[];
+  others: File[];
 }
 
 interface SiteDocumentsUploadProps {
-  value?: UploadedDocument[];
-  onChange: (documents: UploadedDocument[]) => void;
+  value?: SiteDocuments;
+  onChange: (documents: SiteDocuments) => void;
   error?: string;
 }
 
@@ -27,21 +26,23 @@ export interface SiteDocumentsUploadRef {
 }
 
 export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocumentsUploadProps>(
-  ({ value = [], onChange, error }, ref) => {
-    const [documents, setDocuments] = useState<UploadedDocument[]>([]);
+  (
+    { value = { floor_plan: [], survey_plan: [], site_plan: [], stacking_plan: [], others: [] }, onChange, error },
+    ref
+  ) => {
+    const [documents, setDocuments] = useState<SiteDocuments>(value);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeCategory, setActiveCategory] = useState<{ key: string; label: string } | null>(null);
+    const [activeCategory, setActiveCategory] = useState<{ key: keyof SiteDocuments; label: string } | null>(null);
     const [isDragOver, setIsDragOver] = useState(false);
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const lastValueRef = useRef<UploadedDocument[]>([]);
 
     const documentTypes = [
-      { key: "floor_plan", label: "Floor Plan", required: true },
-      { key: "survey_plan", label: "Survey plan", required: true },
-      { key: "site_plan", label: "Site Plan", required: true },
-      { key: "stacking_plan", label: "Stacking Plan", required: true },
-      { key: "others", label: "Others", required: false },
+      { key: "floor_plan" as keyof SiteDocuments, label: "Floor Plan", required: true },
+      { key: "survey_plan" as keyof SiteDocuments, label: "Survey Plan", required: true },
+      { key: "site_plan" as keyof SiteDocuments, label: "Site Plan", required: true },
+      { key: "stacking_plan" as keyof SiteDocuments, label: "Stacking Plan", required: true },
+      { key: "others" as keyof SiteDocuments, label: "Others", required: false },
     ];
 
     const acceptedFileTypes = [
@@ -57,15 +58,6 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
 
     const acceptedExtensions = ".pdf,.doc,.docx,.txt,.xls,.xlsx,.jpg,.jpeg,.png";
 
-    // Initialize documents from value prop only once
-    useEffect(() => {
-      const newValue = Array.isArray(value) ? value : [];
-      if (newValue.length > 0 && lastValueRef.current.length === 0) {
-        setDocuments(newValue);
-        lastValueRef.current = newValue;
-      }
-    }, [value]);
-
     // Trigger validation when error prop changes (from parent validation)
     useEffect(() => {
       if (error) {
@@ -74,7 +66,7 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [error]);
 
-    const openUploadModal = (category: { key: string; label: string }) => {
+    const openUploadModal = (category: { key: keyof SiteDocuments; label: string }) => {
       setActiveCategory(category);
       setIsModalOpen(true);
     };
@@ -88,29 +80,23 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
     const handleFileSelect = (selectedFiles: FileList | null) => {
       if (!selectedFiles || !activeCategory) return;
 
-      const newDocuments: UploadedDocument[] = [];
+      const newFiles: File[] = [];
 
       Array.from(selectedFiles).forEach((file) => {
         if (acceptedFileTypes.includes(file.type) || file.name.match(/\.(pdf|doc|docx|txt|xls|xlsx|jpg|jpeg|png)$/i)) {
-          const uploadedDoc: UploadedDocument = {
-            id: Math.random().toString(36).substr(2, 9),
-            categoryKey: activeCategory.key,
-            categoryLabel: activeCategory.label,
-            fileName: file.name,
-            fileSize: file.size,
-            file,
-          };
-          newDocuments.push(uploadedDoc);
+          newFiles.push(file);
         }
       });
 
-      if (newDocuments.length > 0) {
-        const updatedDocuments = [...documents, ...newDocuments];
+      if (newFiles.length > 0) {
+        const updatedDocuments = {
+          ...documents,
+          [activeCategory.key]: [...documents[activeCategory.key], ...newFiles],
+        };
         setDocuments(updatedDocuments);
-        lastValueRef.current = updatedDocuments;
         onChange(updatedDocuments);
 
-        // Clear validation error for this category when document is added
+        // Clear validation error for this category when documents are added
         if (activeCategory) {
           setValidationErrors((prev) => {
             const newErrors = { ...prev };
@@ -122,24 +108,23 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
       closeModal();
     };
 
-    const removeDocument = (id: string) => {
-      const documentToRemove = documents.find((doc) => doc.id === id);
-      const filteredDocuments = documents.filter((doc) => doc.id !== id);
-      setDocuments(filteredDocuments);
-      lastValueRef.current = filteredDocuments;
-      onChange(filteredDocuments);
+    const removeDocument = (categoryKey: keyof SiteDocuments, fileIndex: number) => {
+      const updatedDocuments = {
+        ...documents,
+        [categoryKey]: documents[categoryKey].filter((_, index) => index !== fileIndex),
+      };
+      setDocuments(updatedDocuments);
+      onChange(updatedDocuments);
 
       // Check if removing this document makes a required category empty
-      if (documentToRemove) {
-        const categoryDocs = filteredDocuments.filter((doc) => doc.categoryKey === documentToRemove.categoryKey);
-        const docType = documentTypes.find((type) => type.key === documentToRemove.categoryKey);
+      const categoryDocs = updatedDocuments[categoryKey];
+      const docType = documentTypes.find((type) => type.key === categoryKey);
 
-        if (docType?.required && categoryDocs.length === 0) {
-          setValidationErrors((prev) => ({
-            ...prev,
-            [documentToRemove.categoryKey]: `Please upload the required document here`,
-          }));
-        }
+      if (docType?.required && categoryDocs.length === 0) {
+        setValidationErrors((prev) => ({
+          ...prev,
+          [categoryKey]: `Please upload the required document here`,
+        }));
       }
     };
 
@@ -167,17 +152,13 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
-    const getCategoryDocuments = (categoryKey: string) => {
-      return documents.filter((doc) => doc.categoryKey === categoryKey);
-    };
-
     // Validate required document types
     const validateRequiredDocuments = () => {
       const errors: Record<string, string> = {};
 
       documentTypes.forEach((docType) => {
         if (docType.required) {
-          const categoryDocs = getCategoryDocuments(docType.key);
+          const categoryDocs = documents[docType.key];
           if (categoryDocs.length === 0) {
             errors[docType.key] = `Please upload the required document here`;
           }
@@ -186,18 +167,8 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
 
       setValidationErrors(errors);
       const isValid = Object.keys(errors).length === 0;
-      console.log("SiteDocumentsUpload validation:", { isValid, errors, documents });
       return isValid;
     };
-
-    // Check if all required documents are uploaded
-    // const hasAllRequiredDocuments = () => {
-    //   return documentTypes.every((docType) => {
-    //     if (!docType.required) return true;
-    //     const categoryDocs = getCategoryDocuments(docType.key);
-    //     return categoryDocs.length > 0;
-    //   });
-    // };
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
@@ -209,7 +180,7 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
         {/* Document Categories List */}
         <div className='space-y-4'>
           {documentTypes.map((docType) => {
-            const categoryDocs = getCategoryDocuments(docType.key);
+            const categoryDocs = documents[docType.key];
 
             return (
               <div key={docType.key}>
@@ -247,20 +218,20 @@ export const SiteDocumentsUpload = forwardRef<SiteDocumentsUploadRef, SiteDocume
                 {/* Show uploaded documents for this category */}
                 {categoryDocs.length > 0 && (
                   <div className='ml-4 space-y-2'>
-                    {categoryDocs.map((doc) => (
-                      <div key={doc.id} className='flex items-center justify-between rounded-lg bg-gray-50 p-2'>
+                    {categoryDocs.map((file, index) => (
+                      <div key={index} className='flex items-center justify-between rounded-lg bg-gray-50 p-2'>
                         <div className='flex items-center space-x-2'>
                           <FileText className='h-4 w-4 text-gray-500' />
                           <div>
-                            <p className='text-xs font-medium text-gray-900'>{doc.fileName}</p>
-                            <p className='text-xs text-gray-500'>{formatFileSize(doc.fileSize)}</p>
+                            <p className='text-xs font-medium text-gray-900'>{file.name}</p>
+                            <p className='text-xs text-gray-500'>{formatFileSize(file.size)}</p>
                           </div>
                         </div>
                         <Button
                           type='button'
                           variant='ghost'
                           size='sm'
-                          onClick={() => removeDocument(doc.id)}
+                          onClick={() => removeDocument(docType.key, index)}
                           className='h-6 w-6 p-0 text-red-600 hover:text-red-700'
                         >
                           <X className='h-3 w-3' />
