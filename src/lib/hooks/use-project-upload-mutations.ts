@@ -37,6 +37,7 @@ export function useSaveProjectUploadStep() {
       // Get project ID from localStorage if not provided and step > 1
       let finalProjectId = projectId;
       if (!finalProjectId && step > 1) {
+        // First try localStorage (for backward compatibility)
         const storedProjectId = localStorage.getItem("project-upload-id");
         if (storedProjectId) {
           finalProjectId = parseInt(storedProjectId, 10);

@@ -97,6 +97,13 @@ export default function FormPage({ params }: FormPageProps) {
     }
   }, [resolvedParams.phase, currentSectionData?.key]);
 
+  // Initialize project ID from store for project upload phase
+  useEffect(() => {
+    if (resolvedParams.phase === "project-upload" && formData.project_id && !projectId) {
+      setProjectId(formData.project_id as number);
+    }
+  }, [resolvedParams.phase, formData.project_id, projectId]);
+
   // Function to check if a field should be shown based on conditions
   const shouldShowField = useCallback(
     (field: OnboardingField): boolean => {
@@ -364,7 +371,7 @@ export default function FormPage({ params }: FormPageProps) {
       "physical-descriptions": 7,
       "investment-structure": 8,
       "budget-sheet": 9,
-      "expenses-revenue": 10,
+      "media-acknowledgement": 10,
     };
 
     return stepMapping[sectionKey] || 1;
@@ -445,6 +452,8 @@ export default function FormPage({ params }: FormPageProps) {
           // Store project ID from step 1 response
           if (step === 1 && result.project?.id) {
             setProjectId(result.project.id);
+            // Also save to onboarding store
+            updateFormData({ project_id: result.project.id });
           }
 
           // Mark section as completed
@@ -696,7 +705,7 @@ export default function FormPage({ params }: FormPageProps) {
                     ) : (
                       <>
                         <span className='mr-2'>
-                          {resolvedParams.phase === "project-upload" && currentSectionData?.key === "expenses-revenue"
+                          {resolvedParams.phase === "project-upload" && currentSectionData?.key === "media-acknowledgement"
                             ? "Submit project"
                             : "Next"}
                         </span>
@@ -721,7 +730,7 @@ export default function FormPage({ params }: FormPageProps) {
       {/* Congratulations Popup */}
       {currentSectionData?.key === "sponsor-info" ||
       currentSectionData?.key === "the-deal" ||
-      currentSectionData?.key === "expenses-revenue" ? (
+      currentSectionData?.key === "media-acknowledgement" ? (
         <SponsorInfoPopup
           isOpen={showCongrats}
           title={currentCongratsMessage?.title || ""}

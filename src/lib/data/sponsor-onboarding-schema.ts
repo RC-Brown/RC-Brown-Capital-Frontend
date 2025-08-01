@@ -1242,8 +1242,8 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
           ],
         },
         {
-          key: "expenses-revenue",
-          title: "Expenses & Revenue",
+          key: "media-acknowledgement",
+          title: "Media & Acknowledgement",
           fields: [
             {
               key: "media_assets_upload",

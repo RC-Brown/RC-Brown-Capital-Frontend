@@ -47,7 +47,7 @@ export function useProjectUploadIntegration() {
       "physical-descriptions": 7,
       "investment-structure": 8,
       "budget-sheet": 9,
-      "expenses-revenue": 10,
+      "media-acknowledgement": 10,
     };
 
     return stepMapping[sectionKey] || 1;

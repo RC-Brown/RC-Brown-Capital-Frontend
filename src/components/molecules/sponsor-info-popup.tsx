@@ -80,7 +80,7 @@ export function SponsorInfoPopup({
                   <Button
                     onClick={onContinue}
                     variant='outline'
-                    className={`${phase === "project-upload" && currentSectionData?.key === "expenses-revenue" ? "hidden" : ""} h-[51px] flex-1 rounded-md border-[1.5px] border-black/10 border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50`}
+                    className={`${phase === "project-upload" && currentSectionData?.key === "media-acknowledgement" ? "hidden" : ""} h-[51px] flex-1 rounded-md border-[1.5px] border-black/10 border-gray-300 px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50`}
                   >
                     Next Page
                   </Button>

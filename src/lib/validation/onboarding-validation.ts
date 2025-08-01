@@ -486,7 +486,7 @@ function getCurrentPhase(sectionKey: string): string {
     "physical-descriptions",
     "investment-structure",
     "budget-sheet",
-    "expenses-revenue",
+    "media-acknowledgement",
   ];
 
   if (businessSections.includes(sectionKey)) return "business-information";

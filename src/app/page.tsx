@@ -233,7 +233,7 @@ export default function Home() {
 
             <div className='grid grid-cols-2 items-center gap-4 sm:gap-8 md:grid-cols-4 lg:grid-cols-6'>
               {/* Partner logos - using placeholder images */}
-              {Array.from({ length: 12 }).map((_, i) => (
+              {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className='flex aspect-[2/1] items-center justify-center rounded-md bg-white p-2'>
                   <Image
                     src={`/images/partner-logo${i + 1}.png`}

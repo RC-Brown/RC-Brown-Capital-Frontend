@@ -59,7 +59,7 @@ import FundWallet from "./fund-wallet";
 import AcknowledgeSignDocs from "./acknowledge-sign-docs";
 import SubmitProject from "./submit-project";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
-import { getInvestmentSizeOptions } from "@/src/lib/utils/currency-options";
+import { getCurrencySpecificInvestmentOptions } from "@/src/lib/utils/currency-options";
 import BusinessPlanTheProperty from "./business-plan-the-property";
 
 type FormData = Record<string, FormFieldValue>;
@@ -86,7 +86,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
     const closingDocumentsRef = useRef<ClosingDocumentsRef>(null);
     const offeringInformationRef = useRef<OfferingInformationRef>(null);
     const sponsorInformationDocsRef = useRef<SponsorInformationDocsRef>(null);
-    const { currencySymbol, formatCurrency } = useCurrencySafe();
+    const { currencySymbol, formatCurrency, selectedCurrency } = useCurrencySafe();
 
     // Expose validation method to parent
     useImperativeHandle(ref, () => ({
@@ -387,7 +387,7 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
 
           // Handle dynamic currency options for investment size
           const dynamicOptions =
-            field.key === "investment_size" ? getInvestmentSizeOptions(currencySymbol) : field.options;
+            field.key === "investment_size" ? getCurrencySpecificInvestmentOptions(selectedCurrency) : field.options;
 
           return (
             <Select

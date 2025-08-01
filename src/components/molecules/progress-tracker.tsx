@@ -26,7 +26,7 @@ export function ProgressTracker({ phases, currentPhase, onPhaseClick, onStartCur
         title: "Company Representative Details",
         description: "Please provide the required information to proceed",
         color: "bg-tertiary", // tertiary color
-        labelBgColor: "bg-tertiary",
+        labelBgColor: "bg-[#5EBB37]",
       };
     } else if (phaseIndex === 3) {
       // Project Upload (phase 4)

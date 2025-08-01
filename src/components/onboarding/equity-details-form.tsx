@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { CurrencyInput } from "./currency-input";
@@ -28,10 +28,41 @@ interface EquityDetailsFormProps {
 
 const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onChange }) => {
   const { formatCurrency } = useCurrencySafe();
+  const [dateError, setDateError] = useState<string>("");
 
   const handleInputChange = (field: string, inputValue: string) => {
-    onChange?.({ ...value, [field]: inputValue });
+    const newValue = { ...value, [field]: inputValue };
+
+    // Validate dates when either date field changes
+    if (field === "target_distribution_start" || field === "exit_date") {
+      validateDates(newValue);
+    }
+
+    onChange?.(newValue);
   };
+
+  const validateDates = (formData: EquityDetailsData) => {
+    const distributionStart = formData.target_distribution_start;
+    const exitDate = formData.exit_date;
+
+    if (distributionStart && exitDate) {
+      const startDate = new Date(distributionStart);
+      const endDate = new Date(exitDate);
+
+      if (endDate <= startDate) {
+        setDateError("Exit date must be after the Target Distribution Start date");
+      } else {
+        setDateError("");
+      }
+    } else {
+      setDateError("");
+    }
+  };
+
+  // Validate dates on component mount and when value changes
+  useEffect(() => {
+    validateDates(value);
+  }, [value.target_distribution_start, value.exit_date, value]);
 
   const distributionFrequencyOptions = [
     { label: "Monthly", value: "monthly" },
@@ -125,6 +156,21 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       briefInfo: "Enter the highest amount a single investor is allowed to invest in equity",
     },
     {
+      category: "Exit Date",
+      inputType: "date-picker",
+      field: "exit_date",
+      placeholder: "2/5/27",
+      briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
+    },
+    {
+      category: "Return on Investment (%)",
+      inputType: "select",
+      field: "return_on_investment",
+      placeholder: "%",
+      options: returnOnInvestmentOptions,
+      briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
+    },
+    {
       category: `Expected Min Return (%)`,
       inputType: "percentage",
       field: "expected_min_return",
@@ -145,21 +191,6 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       placeholder: "1",
       options: targetHoldPeriodOptions,
       briefInfo: "Select the expected time frame the equity will be held before an exit event",
-    },
-    {
-      category: "Exit Date",
-      inputType: "date-picker",
-      field: "exit_date",
-      placeholder: "2/5/27",
-      briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
-    },
-    {
-      category: "Return on Investment (%)",
-      inputType: "select",
-      field: "return_on_investment",
-      placeholder: "%",
-      options: returnOnInvestmentOptions,
-      briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
     },
   ];
 
@@ -213,6 +244,14 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
         </svg>
         <span className='ml-2 font-semibold text-text-muted'>4. Equity Details</span>
       </h3>
+
+      {/* Date validation error message */}
+      {dateError && (
+        <div className='mb-4 rounded-md border border-red-200 bg-red-50 p-3'>
+          <p className='text-sm text-red-600'>{dateError}</p>
+        </div>
+      )}
+
       <div className='overflow-x-auto'>
         <table className='w-full border-collapse'>
           <thead>
@@ -262,7 +301,11 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
                       placeholder={item.placeholder}
                       value={value[item.field] || ""}
                       onChange={(e) => handleInputChange(item.field, e.target.value)}
-                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs md:text-xs'
+                      className={`h-[51px] w-full text-xs shadow-none placeholder:text-xs md:text-xs ${
+                        dateError && (item.field === "target_distribution_start" || item.field === "exit_date")
+                          ? "border-red-500"
+                          : ""
+                      }`}
                     />
                   ) : (
                     <Select
