@@ -265,5 +265,5 @@ export function useBudgetSheetForm() {
 }
 
 export function useExpensesRevenueForm() {
-  return useProjectUploadForm(10, "expenses-revenue");
+  return useProjectUploadForm(10, "media-acknowledgement");
 }

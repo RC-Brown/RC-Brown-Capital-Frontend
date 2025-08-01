@@ -153,7 +153,7 @@ export function BusinessPlanRating({ value = [], onChange, error }: BusinessPlan
                 </td>
                 <td className='p-4 text-sm text-gray-600'>
                   <Input
-                    placeholder='Brief info'
+                    placeholder='Briefly describe the rating'
                     className='h-[51px] border-black/10 bg-background-secondary text-sm shadow-none placeholder:text-sm placeholder:text-[#787878CC]/80'
                   />
                 </td>

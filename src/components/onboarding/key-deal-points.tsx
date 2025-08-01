@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tooltip } from "../ui/tooltip";
 import { cn } from "@/src/lib/utils";
 import { PercentageInput } from "./percentage-input";
+import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
 
 type DebtTenure =
   | "1_year"
@@ -30,6 +31,7 @@ interface KeyDealPointsData {
   equity_investment_tenure?: string;
   projected_returns_equity?: string;
   total_equity?: string;
+  periodic_payments?: string;
   [key: string]: string | DebtTenure | undefined;
 }
 
@@ -153,7 +155,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
               </Tooltip>
               <div className='ml-9 md:col-span-2'>
                 <Input
-                  className='border border-black/10 py-6 shadow-none placeholder:text-xs'
+                  className='h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs'
                   placeholder='Estimated property value upon completion'
                   value={value.projected_valuation || ""}
                   onChange={(e) => updateField("projected_valuation", e.target.value)}
@@ -170,7 +172,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                 >
                   <SelectTrigger
                     className={cn(
-                      "border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
+                      "h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
                       fieldErrors.timeline_completion && "border-red-500"
                     )}
                   >
@@ -202,7 +204,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
               <div className='ml-9 md:col-span-2'>
                 <Input
                   className={cn(
-                    "border border-black/10 py-6 shadow-none placeholder:text-xs",
+                    "h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs",
                     fieldErrors.total_capital_required && "border-red-500"
                   )}
                   placeholder='Enter total capital required'
@@ -224,7 +226,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                   value={value.total_debt_allocation || ""}
                   onChange={(newValue) => updateField("total_debt_allocation", newValue)}
                   placeholder='Enter debt allocation percentage'
-                  className='border border-black/10 py-6 shadow-none placeholder:text-xs'
+                  className='h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs'
                 />
               </div>
             </div>
@@ -236,7 +238,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                   value={value.debt_investment_tenure || ""}
                   onValueChange={(selectedValue) => updateField("debt_investment_tenure", selectedValue)}
                 >
-                  <SelectTrigger className='border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'>
+                  <SelectTrigger className='h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'>
                     <SelectValue
                       placeholder='Select debt investment tenure'
                       className='text-xs font-normal placeholder:text-xs data-[placeholder]:text-xs'
@@ -264,8 +266,56 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                   value={value.percentage_yield_debt || ""}
                   onChange={(newValue) => updateField("percentage_yield_debt", newValue)}
                   placeholder='Enter yield percentage'
-                  className='border border-black/10 py-6 shadow-none placeholder:text-xs'
+                  className='h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs'
                 />
+              </div>
+            </div>
+
+            <div className='grid grid-cols-1 gap-5 md:grid-cols-3 md:items-center'>
+              <Label className='pr-4 text-xs font-normal text-text-muted'>Are there periodic payments?</Label>
+              <div className='ml-9 md:col-span-2'>
+                <RadioGroup
+                  value={value.periodic_payments || ""}
+                  onValueChange={(selectedValue) => {
+                    onChange({ periodic_payments: selectedValue });
+                  }}
+                >
+                  <div className='flex gap-3'>
+                    <div
+                      className='flex h-[51px] w-full cursor-pointer items-center justify-between rounded-md border border-black/10 px-4'
+                      onClick={() => {
+                        onChange({ periodic_payments: "yes" });
+                      }}
+                    >
+                      <Label
+                        htmlFor='yes'
+                        className='cursor-pointer text-xs font-normal -tracking-[3%] text-text-muted'
+                      >
+                        Yes
+                      </Label>
+                      <RadioGroupItem
+                        value='yes'
+                        id='yes'
+                        className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
+                      />
+                    </div>
+                    <div
+                      className='flex h-[51px] w-full cursor-pointer items-center justify-between rounded-md border border-black/10 px-4'
+                      onClick={() => {
+                        onChange({ periodic_payments: "no" });
+                      }}
+                    >
+                      <Label htmlFor='no' className='cursor-pointer text-xs font-normal -tracking-[3%] text-text-muted'>
+                        No
+                      </Label>
+                      <RadioGroupItem
+                        value='no'
+                        id='no'
+                        className='size-4 border-2 border-primary data-[state=checked]:border-primary data-[state=checked]:bg-primary'
+                      />
+                    </div>
+                  </div>
+                </RadioGroup>
               </div>
             </div>
 
@@ -278,7 +328,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                 >
                   <SelectTrigger
                     className={cn(
-                      "border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
+                      "h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
                       fieldErrors.equity_investment_tenure && "border-red-500"
                     )}
                   >
@@ -313,7 +363,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                   onChange={(newValue) => updateField("projected_returns_equity", newValue)}
                   placeholder='Enter projected equity returns'
                   className={cn(
-                    "border border-black/10 py-6 shadow-none placeholder:text-xs",
+                    "h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs",
                     fieldErrors.projected_returns_equity && "border-red-500"
                   )}
                 />
@@ -331,7 +381,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                   onChange={(newValue) => updateField("total_equity", newValue)}
                   placeholder='Enter total equity percentage'
                   className={cn(
-                    "border border-black/10 py-6 shadow-none placeholder:text-xs",
+                    "h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs",
                     fieldErrors.total_equity && "border-red-500"
                   )}
                 />
