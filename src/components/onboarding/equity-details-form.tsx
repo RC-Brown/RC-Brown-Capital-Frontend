@@ -4,18 +4,53 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CurrencyInput } from "./currency-input";
 import { PercentageInput } from "./percentage-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
+import Image from "next/image";
 
 type DistributionFrequency = "monthly" | "quarterly" | "semi_annually" | "annually";
 type TargetHoldPeriod = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10";
 
+interface DualFieldConfig {
+  field: string;
+  placeholder: string;
+  value?: string;
+  inputType: "percentage" | "currency";
+}
+
+interface BaseTableDataItem {
+  category: string;
+  placeholder?: string;
+  briefInfo: string;
+  isReadOnly?: boolean;
+  options?: Array<{ label: string; value: string }>;
+}
+
+interface DualTableDataItem extends BaseTableDataItem {
+  inputType: "dual";
+  fields: {
+    percentage: DualFieldConfig;
+    amount: DualFieldConfig;
+  };
+}
+
+interface SingleTableDataItem extends BaseTableDataItem {
+  inputType: "text" | "currency" | "percentage" | "date-picker" | "select" | "calculated";
+  field: string;
+}
+
+type TableDataItem = SingleTableDataItem | DualTableDataItem;
+
 interface EquityDetailsData {
-  equity_allocation?: string;
+  equity_allocation_percentage?: string;
+  equity_allocation_amount?: string;
   distribution_frequency?: DistributionFrequency;
   target_distribution_start?: string;
   minimum_investment?: string;
   maximum_investment?: string;
-  expected_min_return?: string;
-  expected_max_return?: string;
+  expected_min_return_percentage?: string;
+  expected_min_return_amount?: string;
+  expected_max_return_percentage?: string;
+  expected_max_return_amount?: string;
   target_hold_period?: TargetHoldPeriod;
   exit_date?: string;
   [key: string]: string | DistributionFrequency | TargetHoldPeriod | undefined;
@@ -29,8 +64,80 @@ interface EquityDetailsFormProps {
 const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onChange }) => {
   const { formatCurrency } = useCurrencySafe();
   const [dateError, setDateError] = useState<string>("");
+  const { formData } = useOnboardingStoreWithUser();
 
-  const handleInputChange = (field: string, inputValue: string) => {
+  // Calculate ROI percentages based on shared store data
+  const calculateROIPercentages = () => {
+    // Get data from other forms via shared store
+    const offerDetailsData = formData.offer_details_table as Record<string, unknown> | undefined;
+    const expensesRevenueData = formData.expenses_revenue_form as Record<string, unknown> | undefined;
+
+    // Extract required values with proper type casting (fixed field names)
+    const totalCapitalRequired = parseFloat(String(offerDetailsData?.total_capitalization || "0"));
+    // const totalDebtAllocation = parseFloat(String(offerDetailsData?.debt_allocation || "0"));
+    const totalEquityAllocation = parseFloat(String(offerDetailsData?.equity_allocation || "0")); // This is the total equity allocation in dollars
+    const totalRentalIncome = parseFloat(String(expensesRevenueData?.["totalRentalIncome"] || "0"));
+    const totalEquityAppreciation = parseFloat(String(expensesRevenueData?.["totalEquityAppreciation"] || "0"));
+    const totalExpenses = parseFloat(String(expensesRevenueData?.["totalExpense"] || "0"));
+
+    const minInvestment = parseFloat(value.minimum_investment || "0");
+    const maxInvestment = parseFloat(value.maximum_investment || "0");
+
+    const calculations = {
+      minROIPercentage: 0,
+      maxROIPercentage: 0,
+      minROIAmount: 0,
+      maxROIAmount: 0,
+      equityAllocationPercentage: 0,
+      equityAllocationAmount: totalEquityAllocation,
+    };
+
+    // Calculate equity allocation percentage
+    calculations.equityAllocationPercentage = (totalEquityAllocation / totalCapitalRequired) * 100;
+
+    if (totalEquityAllocation > 0 && minInvestment > 0) {
+      // Step 1: Calculate percentage of equity invested for minimum investment
+      const minEquityPercent = (minInvestment / totalEquityAllocation) * 100;
+      // Step 2: Calculate ROI value for minimum investment
+      // ROI = % of equity invested × (Total Rental Income + Total Equity Appreciation - Total Expenses)
+      const totalReturns = totalRentalIncome + totalEquityAppreciation - totalExpenses;
+      const minROIValue = (minEquityPercent / 100) * totalReturns;
+
+      // Store monetary value
+      calculations.minROIAmount = minROIValue;
+
+      // Step 3: Calculate ROI percentage
+      // ROI % = (ROI value / Investment Amount) × 100
+      calculations.minROIPercentage = (minROIValue / minInvestment) * 100;
+    }
+
+    if (totalEquityAllocation > 0 && maxInvestment > 0) {
+      // Step 1: Calculate percentage of equity invested for maximum investment
+      const maxEquityPercent = (maxInvestment / totalEquityAllocation) * 100;
+      // Step 2: Calculate ROI value for maximum investment
+      const totalReturns = totalRentalIncome + totalEquityAppreciation - totalExpenses;
+      const maxROIValue = (maxEquityPercent / 100) * totalReturns;
+
+      // Store monetary value
+      calculations.maxROIAmount = maxROIValue;
+
+      // Step 3: Calculate ROI percentage
+      calculations.maxROIPercentage = (maxROIValue / maxInvestment) * 100;
+    }
+
+    return calculations;
+  };
+
+  const {
+    minROIPercentage,
+    maxROIPercentage,
+    minROIAmount,
+    maxROIAmount,
+    equityAllocationPercentage,
+    equityAllocationAmount,
+  } = calculateROIPercentages();
+
+  const handleInputChange = (field: keyof EquityDetailsData, inputValue: string) => {
     const newValue = { ...value, [field]: inputValue };
 
     // Validate dates when either date field changes
@@ -117,12 +224,24 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     { label: "20", value: "20" },
   ];
 
-  const tableData = [
+  const tableData: TableDataItem[] = [
     {
-      category: "Equity % Allocation",
-      inputType: "text",
-      field: "equity_allocation",
-      placeholder: "",
+      category: "Equity Allocation",
+      inputType: "dual",
+      fields: {
+        percentage: {
+          field: "equity_allocation_percentage",
+          placeholder: equityAllocationPercentage ? `${equityAllocationPercentage.toFixed(2)}%` : "0.00%",
+          value: equityAllocationPercentage ? `${equityAllocationPercentage.toFixed(2)}%` : "0.00%",
+          inputType: "percentage",
+        },
+        amount: {
+          field: "equity_allocation_amount",
+          placeholder: equityAllocationAmount ? formatCurrency(equityAllocationAmount.toString()) : formatCurrency("0"),
+          value: equityAllocationAmount ? formatCurrency(equityAllocationAmount.toString()) : formatCurrency("0"),
+          inputType: "currency",
+        },
+      },
       briefInfo: "This is automatically calculated and reflects the portion of equity offered to investors",
       isReadOnly: true,
     },
@@ -171,18 +290,40 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
     },
     {
-      category: `Expected Min Return (%)`,
-      inputType: "percentage",
-      field: "expected_min_return",
-      placeholder: "",
+      category: "Expected Min Return",
+      inputType: "dual",
+      fields: {
+        percentage: {
+          field: "expected_min_return_percentage",
+          placeholder: `${minROIPercentage.toFixed(2)}%`,
+          inputType: "percentage",
+        },
+        amount: {
+          field: "expected_min_return_amount",
+          placeholder: formatCurrency(minROIAmount.toString()),
+          inputType: "currency",
+        },
+      },
       briefInfo: "This is automatically calculated based on projected performance.",
+      isReadOnly: true,
     },
     {
-      category: `Expected Max Return (%)`,
-      inputType: "percentage",
-      field: "expected_max_return",
-      placeholder: "",
+      category: "Expected Max Return",
+      inputType: "dual",
+      fields: {
+        percentage: {
+          field: "expected_max_return_percentage",
+          placeholder: `${maxROIPercentage.toFixed(2)}%`,
+          inputType: "percentage",
+        },
+        amount: {
+          field: "expected_max_return_amount",
+          placeholder: formatCurrency(maxROIAmount.toString()),
+          inputType: "currency",
+        },
+      },
       briefInfo: "This is automatically calculated to show the highest possible return investors might earn on equity",
+      isReadOnly: true,
     },
     {
       category: "Target Hold Period (Years)",
@@ -197,51 +338,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
   return (
     <div className='mb-0 w-full pb-0'>
       <h3 className='mb-7 flex items-center'>
-        <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
-          <g clip-path='url(#clip0_1802_3396)'>
-            <path
-              d='M12.4168 0.664391L13.0504 1.93679L14.4068 2.17199C14.782 2.23719 14.9312 2.71599 14.6644 2.99839L13.6996 4.01959L13.9044 5.43719C13.9612 5.82919 13.5704 6.12519 13.23 5.94799L12 5.30679L10.77 5.94799C10.4296 6.12519 10.0392 5.82959 10.0956 5.43719L10.3004 4.01959L9.3356 2.99839C9.0688 2.71599 9.218 2.23719 9.5932 2.17199L10.9496 1.93679L11.5832 0.664391C11.7584 0.312391 12.2416 0.312391 12.4168 0.664391Z'
-              fill='#F9C82B'
-            />
-            <path
-              d='M5.21661 3.86361L5.85021 5.13601L7.20661 5.37121C7.58181 5.43641 7.73101 5.91521 7.46421 6.19761L6.49941 7.21881L6.70421 8.63641C6.76101 9.02841 6.37021 9.32441 6.02981 9.14721L4.79981 8.50601L3.56981 9.14721C3.22941 9.32441 2.83901 9.02881 2.89541 8.63641L3.10021 7.21881L2.13541 6.19761C1.86861 5.91521 2.01781 5.43641 2.39301 5.37121L3.74941 5.13601L4.38301 3.86361C4.55821 3.51161 5.04141 3.51161 5.21661 3.86361Z'
-              fill='#F9C82B'
-            />
-            <path
-              d='M19.617 3.86361L20.2506 5.13601L21.607 5.37121C21.9822 5.43641 22.1314 5.91521 21.8646 6.19761L20.8998 7.21881L21.1046 8.63641C21.1614 9.02841 20.7706 9.32441 20.4302 9.14721L19.2002 8.50601L17.9702 9.14721C17.6298 9.32441 17.2394 9.02881 17.2958 8.63641L17.5006 7.21881L16.5358 6.19761C16.269 5.91521 16.4182 5.43641 16.7934 5.37121L18.1498 5.13601L18.7834 3.86361C18.9586 3.51161 19.4418 3.51161 19.617 3.86361Z'
-              fill='#F9C82B'
-            />
-            <path
-              d='M7.76039 17.3604C6.67239 18.4484 6.00039 19.9444 6.00039 21.6004C6.00039 21.8204 5.82039 22.0004 5.60039 22.0004H0.800391C0.580391 22.0004 0.400391 21.8204 0.400391 21.6004C0.400391 18.4004 1.70039 15.5044 3.80039 13.4004H4.20039L7.60039 16.8004L7.76039 17.3604Z'
-              fill='#D7342C'
-            />
-            <path
-              d='M11.9998 10L12.3998 10.4V15.2L11.9998 15.6C10.3438 15.6 8.8478 16.272 7.7598 17.36L3.7998 13.4C5.9038 11.3 8.7998 10 11.9998 10Z'
-              fill='#E99E32'
-            />
-            <path
-              d='M20.2 13.4L20.4 14L16.8 17.6L16.24 17.36C15.152 16.272 13.656 15.6 12 15.6V10C15.2 10 18.096 11.3 20.2 13.4Z'
-              fill='#F9C82B'
-            />
-            <path
-              d='M23.6002 21.6004C23.6002 21.8204 23.4202 22.0004 23.2002 22.0004H18.4002C18.1802 22.0004 18.0002 21.8204 18.0002 21.6004C18.0002 19.9444 17.3282 18.4484 16.2402 17.3604L20.2002 13.4004C22.3002 15.5044 23.6002 18.4004 23.6002 21.6004Z'
-              fill='#2AA869'
-            />
-            <path
-              d='M13.4876 22.5832C15.4076 21.5432 18.4276 19.7512 20.7076 18.3872C21.1236 18.1352 20.8316 17.5072 20.3756 17.6632C17.8596 18.5272 14.5476 19.6832 12.5156 20.4872L13.4876 22.5832Z'
-              fill='#0A365E'
-            />
-            <path
-              d='M12.0004 23.6004C12.884 23.6004 13.6004 22.884 13.6004 22.0004C13.6004 21.1167 12.884 20.4004 12.0004 20.4004C11.1167 20.4004 10.4004 21.1167 10.4004 22.0004C10.4004 22.884 11.1167 23.6004 12.0004 23.6004Z'
-              fill='#06293F'
-            />
-          </g>
-          <defs>
-            <clipPath id='clip0_1802_3396'>
-              <rect width='24' height='24' fill='white' />
-            </clipPath>
-          </defs>
-        </svg>
+        <Image src={"/icons/feedback.svg"} alt='feedback' width={20} height={20} className='mr-2' />
         <span className='ml-2 font-semibold text-text-muted'>4. Equity Details</span>
       </h3>
 
@@ -266,51 +363,94 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
               <tr key={index} className='border-b border-black/10'>
                 <td className='whitespace-nowrap p-4 text-xs text-text-muted/80'>{item.category}</td>
                 <td className='p-4'>
-                  {item.isReadOnly ? (
+                  {item.inputType === "dual" &&
+                  item.fields &&
+                  "percentage" in item.fields &&
+                  "amount" in item.fields ? (
+                    <div className='flex gap-2'>
+                      {item.isReadOnly ? (
+                        <>
+                          <Input
+                            type='text'
+                            value={item.fields.percentage.value || item.fields.percentage.placeholder}
+                            readOnly
+                            className='w-1/3 bg-transparent py-6 text-sm text-text-muted shadow-none'
+                          />
+                          <Input
+                            type='text'
+                            value={item.fields.amount.value || item.fields.amount.placeholder}
+                            readOnly
+                            className='w-2/3 bg-transparent py-6 text-sm text-text-muted shadow-none'
+                          />
+                        </>
+                      ) : (
+                        <>
+                          <PercentageInput
+                            value={value[item.fields.percentage.field as keyof EquityDetailsData] || ""}
+                            onChange={(newValue) =>
+                              handleInputChange(item.fields.percentage.field as keyof EquityDetailsData, newValue)
+                            }
+                            placeholder={item.fields.percentage.placeholder}
+                            className='h-[51px] w-1/2 bg-transparent text-xs shadow-none placeholder:text-xs'
+                          />
+                          <CurrencyInput
+                            value={value[item.fields.amount.field as keyof EquityDetailsData] || ""}
+                            onChange={(newValue) =>
+                              handleInputChange(item.fields.amount.field as keyof EquityDetailsData, newValue)
+                            }
+                            placeholder={item.fields.amount.placeholder}
+                            className='h-[51px] w-1/2 bg-transparent text-xs shadow-none placeholder:text-xs'
+                          />
+                        </>
+                      )}
+                    </div>
+                  ) : item.isReadOnly || item.inputType === "calculated" ? (
                     <Input
                       type='text'
                       value={item.placeholder}
                       readOnly
-                      className='w-full bg-gray-50 py-6 text-sm text-gray-500 shadow-none'
+                      className='w-full bg-transparent py-6 text-sm text-text-muted shadow-none'
                     />
-                  ) : item.inputType === "text" ? (
+                  ) : item.inputType === "text" && item.field ? (
                     <Input
                       type='text'
                       placeholder={item.placeholder}
-                      value={value[item.field] || ""}
-                      onChange={(e) => handleInputChange(item.field, e.target.value)}
+                      value={value[item.field as keyof EquityDetailsData] || ""}
+                      onChange={(e) => handleInputChange(item.field as keyof EquityDetailsData, e.target.value)}
                       className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
                     />
-                  ) : item.inputType === "currency" ? (
+                  ) : item.inputType === "currency" && item.field ? (
                     <CurrencyInput
-                      value={value[item.field] || ""}
-                      onChange={(value) => handleInputChange(item.field, value)}
+                      value={value[item.field as keyof EquityDetailsData] || ""}
+                      onChange={(value) => handleInputChange(item.field as keyof EquityDetailsData, value)}
                       placeholder={item.placeholder}
-                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                      className='h-[51px] w-full bg-transparent text-xs shadow-none placeholder:text-xs'
                     />
-                  ) : item.inputType === "percentage" ? (
+                  ) : item.inputType === "percentage" && item.field ? (
                     <PercentageInput
-                      value={value[item.field] || ""}
-                      onChange={(value) => handleInputChange(item.field, value)}
+                      value={value[item.field as keyof EquityDetailsData] || ""}
+                      onChange={(value) => handleInputChange(item.field as keyof EquityDetailsData, value)}
                       placeholder={item.placeholder}
-                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                      className='h-[51px] w-full bg-transparent text-xs shadow-none placeholder:text-xs'
                     />
-                  ) : item.inputType === "date-picker" ? (
+                  ) : item.inputType === "date-picker" && item.field ? (
                     <Input
                       type='date'
                       placeholder={item.placeholder}
-                      value={value[item.field] || ""}
-                      onChange={(e) => handleInputChange(item.field, e.target.value)}
+                      value={value[item.field as keyof EquityDetailsData] || ""}
+                      onChange={(e) => handleInputChange(item.field as keyof EquityDetailsData, e.target.value)}
                       className={`h-[51px] w-full text-xs shadow-none placeholder:text-xs md:text-xs ${
                         dateError && (item.field === "target_distribution_start" || item.field === "exit_date")
                           ? "border-red-500"
                           : ""
                       }`}
                     />
-                  ) : (
+                  ) : (item as SingleTableDataItem).field ? (
                     <Select
-                      value={value[item.field] || ""}
-                      onValueChange={(selectedValue) => handleInputChange(item.field, selectedValue)}
+                      value={value[(item as SingleTableDataItem).field as keyof EquityDetailsData] || ""}
+                      onValueChange={(selectedValue) =>
+                        handleInputChange((item as SingleTableDataItem).field as keyof EquityDetailsData, selectedValue)
+                      }
                     >
                       <SelectTrigger className='h-[51px] w-full text-xs shadow-none data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'>
                         <SelectValue placeholder={item.placeholder} />
@@ -327,7 +467,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
                         ))}
                       </SelectContent>
                     </Select>
-                  )}
+                  ) : null}
                 </td>
                 <td className='p-4 text-xs text-text-muted/80'>{item.briefInfo}</td>
               </tr>

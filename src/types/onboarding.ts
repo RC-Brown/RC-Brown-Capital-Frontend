@@ -62,6 +62,25 @@ export interface OnboardingSchema {
   phases: OnboardingPhase[];
 }
 
+// Document types for physical descriptions section
+export interface ClosingDocument {
+  document_name: string;
+  files: File[];
+}
+
+export interface OfferingDocument {
+  document_name: string;
+  files: File[];
+}
+
+export interface SiteDocuments {
+  floor_plan: File[];
+  survey_plan: File[];
+  site_plan: File[];
+  stacking_plan: File[];
+  others: File[];
+}
+
 // Union type for all possible form field values
 export type FormFieldValue =
   | string // text, textarea, simple select/radio
@@ -73,6 +92,9 @@ export type FormFieldValue =
   | Record<string, unknown> // complex custom components
   | unknown[] // arrays for various custom components
   | { text: string; files: File[] } // enhanced-textarea with both text and files
+  | ClosingDocument[] // closing documents array
+  | OfferingDocument[] // offering documents array
+  | SiteDocuments // site documents object
   | null
   | undefined;
 

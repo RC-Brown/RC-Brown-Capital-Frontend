@@ -47,6 +47,14 @@ export function useSaveProjectUploadStep() {
       const result = await saveProjectUploadStep(step, data, session.accessToken, finalProjectId);
 
       if (result.error) {
+        // Log the specific field errors if available
+        if (result.fieldErrors) {
+          console.error("Validation errors:", result.fieldErrors);
+          const errorDetails = Object.entries(result.fieldErrors)
+            .map(([field, errors]) => `${field}: ${errors.join(", ")}`)
+            .join("\n");
+          throw new Error(`Validation failed:\n${errorDetails}`);
+        }
         throw new Error(result.error);
       }
 
@@ -61,7 +69,14 @@ export function useSaveProjectUploadStep() {
       toast.success(data.message || "Step saved successfully!");
     },
     onError: (error: Error) => {
-      toast.error(error.message);
+      // Show validation errors in a more readable format
+      if (error.message.includes("Validation failed:")) {
+        toast.error(error.message.replace("Validation failed:\n", ""), {
+          duration: 5000, // Show longer for validation errors
+        });
+      } else {
+        toast.error(error.message);
+      }
     },
   });
 }
