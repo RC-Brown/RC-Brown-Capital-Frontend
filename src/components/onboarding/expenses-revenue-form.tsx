@@ -229,10 +229,20 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
           />
         </div>
 
+        <div>
+          <label className='text-sm font-normal -tracking-[3%] text-text-muted'>Total Equity Appreciation</label>
+          <CurrencyInput
+            value={value.totalEquityAppreciation || ""}
+            onChange={(value) => handleInputChange("totalEquityAppreciation", value)}
+            placeholder=''
+            className='mt-3 h-[51px] w-full rounded-md border-black/10 shadow-none'
+          />
+        </div>
+
         {/* Additional Expense Button - Positioned in the right column */}
-        <div className='col-span-2 grid grid-cols-2 items-end justify-end gap-6'>
-          <div></div>
-          <Button type='button' onClick={openModal} className='h-[51px] w-full text-sm font-semibold'>
+        <div className=''>
+          <div className='invisible'>placeholder</div>
+          <Button type='button' onClick={openModal} className='mt-3 h-[51px] w-full text-sm font-semibold'>
             Additional Expense
             <Plus className='ml-2 h-4 w-4' />
           </Button>

@@ -7,11 +7,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { FileText, X, Plus } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import Image from "next/image";
-
-interface OfferingDocument {
-  document_name: string;
-  files: File[];
-}
+import { useOnboardingFormData } from "@/src/lib/store/onboarding-store";
+import { OfferingDocument } from "@/src/types/onboarding";
 
 interface OfferingInformationProps {
   value?: OfferingDocument[];
@@ -34,13 +31,26 @@ const informationTypes = [
 ];
 
 export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingInformationProps>(
-  ({  onChange, error }, ref) => {
+  ({ onChange, error }, ref) => {
+    const { formData, updateFormData } = useOnboardingFormData();
     const [selectedType, setSelectedType] = useState("");
     const [uploadedFile, setUploadedFile] = useState<File | undefined>();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [validationError, setValidationError] = useState<string>("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Initialize from store
+    useEffect(() => {
+      const storedDocs = formData.offering_information as OfferingDocument[] | undefined;
+      if (storedDocs?.length) {
+        const doc = storedDocs[0];
+        setSelectedType(doc.document_name);
+        if (doc.files.length) {
+          setUploadedFile(doc.files[0]);
+        }
+      }
+    }, [formData.offering_information]);
 
     const acceptedFileTypes = [
       "application/pdf",
@@ -59,9 +69,13 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
       setSelectedType(informationType);
       const infoType = informationTypes.find((type) => type.value === informationType);
       if (infoType && uploadedFile) {
-        onChange([{ document_name: infoType.value, files: [uploadedFile] }]);
+        const docs = [{ document_name: infoType.value, files: [uploadedFile] }];
+        onChange(docs);
+        updateFormData({ offering_information: docs });
       } else if (infoType) {
-        onChange([{ document_name: infoType.value, files: [] }]);
+        const docs = [{ document_name: infoType.value, files: [] }];
+        onChange(docs);
+        updateFormData({ offering_information: docs });
       }
     };
 
@@ -85,7 +99,9 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
         setUploadedFile(file);
         const infoType = informationTypes.find((type) => type.value === selectedType);
         if (infoType) {
-          onChange([{ document_name: infoType.value, files: [file] }]);
+          const docs = [{ document_name: infoType.value, files: [file] }];
+          onChange(docs);
+          updateFormData({ offering_information: docs });
         }
       }
       closeModal();
@@ -111,7 +127,9 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
       setUploadedFile(undefined);
       const infoType = informationTypes.find((type) => type.value === selectedType);
       if (infoType) {
-        onChange([{ document_name: infoType.value, files: [] }]);
+        const docs = [{ document_name: infoType.value, files: [] }];
+        onChange(docs);
+        updateFormData({ offering_information: docs });
       }
       setValidationError("");
     };
@@ -255,7 +273,7 @@ export const OfferingInformation = forwardRef<OfferingInformationRef, OfferingIn
           </DialogContent>
         </Dialog>
 
-        {(error || validationError) && <p className='text-sm text-red-500'>{error || validationError}</p>}
+        {(error || validationError) && <p className='hidden text-sm text-red-500'>{error || validationError}</p>}
       </div>
     );
   }

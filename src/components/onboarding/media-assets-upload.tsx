@@ -18,9 +18,32 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
   const [dragOver, setDragOver] = useState<string | null>(null);
 
   const handleFileUpload = (type: string, files: FileList | null) => {
-    if (files && files.length > 0) {
-      const fileArray = Array.from(files);
-      onChange?.({ ...value, [type]: fileArray });
+    if (!files || files.length === 0) return;
+
+    const uploadArea = uploadAreas.find((area) => area.key === type);
+    if (!uploadArea) return;
+
+    // Validate file types and sizes
+    const validFiles = Array.from(files).filter((file) => {
+      // Check file size
+      if (file.size > uploadArea.maxSizeBytes) {
+        alert(`File "${file.name}" exceeds maximum size of ${uploadArea.maxSize}`);
+        return false;
+      }
+
+      // Check file type
+      const fileExt = `.${file.name.split(".").pop()?.toLowerCase()}`;
+      const acceptedTypes = uploadArea.acceptedTypes.split(",");
+      if (!acceptedTypes.includes(fileExt)) {
+        alert(`File "${file.name}" has an unsupported file type. Accepted types: ${uploadArea.acceptedTypes}`);
+        return false;
+      }
+
+      return true;
+    });
+
+    if (validFiles.length > 0) {
+      onChange?.({ ...value, [type]: validFiles });
     }
   };
 
@@ -43,30 +66,33 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
 
   const uploadAreas = [
     {
-      key: "video",
+      key: "video_uploads",
       src: "/images/video.gif",
       title: "Video File",
-      description: "Select and upload a video file (MP4, MOV). Max size: 500 MB.",
-      acceptedTypes: ".mp4,.mov",
-      maxSize: "500 MB",
-      multiple: false,
+      description: "Select and upload a video file (MP4, MOV, AVI, WEBM). Max size: 50 MB.",
+      acceptedTypes: ".mp4,.mov,.avi,.webm",
+      maxSize: "50 MB",
+      maxSizeBytes: 51200 * 1024, // 50MB in bytes
+      multiple: true,
     },
     {
-      key: "slides",
+      key: "slides_uploads",
       src: "/images/slide.gif",
       title: "Slides File",
-      description: "Upload presentation slides (PDF, PPTX). Max size: 20 MB",
-      acceptedTypes: ".pdf,.pptx",
-      maxSize: "20 MB",
-      multiple: false,
+      description: "Upload presentation slides (PDF, PPT, PPTX, Images). Max size: 10 MB",
+      acceptedTypes: ".pdf,.ppt,.pptx,.jpeg,.jpg,.png,.gif,.svg",
+      maxSize: "10 MB",
+      maxSizeBytes: 10240 * 1024, // 10MB in bytes
+      multiple: true,
     },
     {
-      key: "pictures",
+      key: "picture_uploads",
       src: "/images/photo-gallery.gif",
       title: "Pictures File",
-      description: "Choose image files (JPG, PNG). You can upload multiple. Max size per file: 10 MB",
-      acceptedTypes: ".jpg,.jpeg,.png",
-      maxSize: "10 MB",
+      description: "Choose image files (JPEG, PNG, GIF, SVG). Max size per file: 5 MB",
+      acceptedTypes: ".jpg,.jpeg,.png,.gif,.svg",
+      maxSize: "5 MB",
+      maxSizeBytes: 5120 * 1024, // 5MB in bytes
       multiple: true,
     },
   ];

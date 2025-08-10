@@ -36,7 +36,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
               }
             );
 
-            console.log({ res });
+            // console.log({ res });
 
             if (res.status !== 200 || !res.data.token) {
               return null;

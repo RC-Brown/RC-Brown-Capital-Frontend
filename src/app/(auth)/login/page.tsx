@@ -52,7 +52,7 @@ export default function LoginPage() {
       }
 
       toast.success("Welcome Back");
-      if (session.user?.role === "investor") {
+      if (session.user?.role === "Investor") {
         router.push("/");
       } else {
         // temporary redirect to sponsor onboarding

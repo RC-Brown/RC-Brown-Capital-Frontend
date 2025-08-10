@@ -11,6 +11,7 @@ interface FileUploadProps {
   onChange: (files: File[]) => void;
   multiple?: boolean;
   acceptedFileTypes?: string[];
+  maxSize?: number;
 }
 
 export function FileUpload({
@@ -18,6 +19,7 @@ export function FileUpload({
   onChange,
   multiple = true,
   acceptedFileTypes = [".pdf", ".doc", ".docx", ".jpg", ".png"],
+  // maxSize,
 }: FileUploadProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [dragActive, setDragActive] = useState(false);

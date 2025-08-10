@@ -439,26 +439,22 @@ export default function FormPage({ params }: FormPageProps) {
         const apiData = convertToApiFormat() as ProjectUploadInput;
         const step = getCurrentStep();
 
-        // Temporarily skip backend save for step 4, 5, and 6 if there are issues
-        if (step === 4 || step === 5 || step === 6 || step === 7 || step === 8 || step === 9) {
-          markSectionCompleted(currentSectionData.key);
-        } else {
-          const result = await saveProjectUploadStepMutation.mutateAsync({
-            step,
-            data: apiData,
-            projectId: projectId || undefined,
-          });
+        // Enable backend save for all steps
+        const result = await saveProjectUploadStepMutation.mutateAsync({
+          step,
+          data: apiData,
+          projectId: projectId || undefined,
+        });
 
-          // Store project ID from step 1 response
-          if (step === 1 && result.project?.id) {
-            setProjectId(result.project.id);
-            // Also save to onboarding store
-            updateFormData({ project_id: result.project.id });
-          }
-
-          // Mark section as completed
-          markSectionCompleted(currentSectionData.key);
+        // Store project ID from step 1 response
+        if (step === 1 && result.project?.id) {
+          setProjectId(result.project.id);
+          // Also save to onboarding store
+          updateFormData({ project_id: result.project.id });
         }
+
+        // Mark section as completed
+        markSectionCompleted(currentSectionData.key);
 
         // The mutation success handler in the hook will update the store automatically
       } catch (error) {
@@ -705,7 +701,8 @@ export default function FormPage({ params }: FormPageProps) {
                     ) : (
                       <>
                         <span className='mr-2'>
-                          {resolvedParams.phase === "project-upload" && currentSectionData?.key === "media-acknowledgement"
+                          {resolvedParams.phase === "project-upload" &&
+                          currentSectionData?.key === "media-acknowledgement"
                             ? "Submit project"
                             : "Next"}
                         </span>
