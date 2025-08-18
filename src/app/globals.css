@@ -4,6 +4,7 @@
 
 :root {
   --font-pps: var(--font-pps);
+  --font-oxy: var(--font-oxy);
 }
 
 @layer utilities {
@@ -60,6 +61,10 @@ body {
   font-family: var(--font-pps);
 }
 
+.oxy {
+  font-family: var(--font-oxy);
+}
+
 @layer base {
   * {
     border-color: hsl(var(--border));
@@ -68,4 +73,13 @@ body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
   }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

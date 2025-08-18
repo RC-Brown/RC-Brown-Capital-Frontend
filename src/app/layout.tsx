@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Oxygen, Poppins } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
 import NextTopLoader from "nextjs-toploader";
@@ -9,6 +9,13 @@ import Navbar from "../components/molecules/navbar";
 const pps = Poppins({
   variable: "--font-pps",
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  adjustFontFallback: false,
+  subsets: ["latin"],
+  display: "swap",
+});
+const oxy = Oxygen({
+  variable: "--font-oxy",
+  weight: ["300", "400", "700"],
   adjustFontFallback: false,
   subsets: ["latin"],
   display: "swap",
@@ -31,11 +38,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en' suppressHydrationWarning={true} className='h-full'>
-      <body className={`${pps.variable} antialiased`} suppressHydrationWarning={true}>
+      <body className={`${pps.variable} ${oxy.variable} antialiased`} suppressHydrationWarning={true}>
         <Providers>
           <main>
             <Navbar />
-            <div className='mt-24 h-full min-h-[calc(100vh-100px)] bg-background-secondary'>{children}</div>
+            <div className='relative h-full min-h-[calc(100vh-100px)] bg-background-secondary'>{children}</div>
           </main>
           <NextTopLoader color='#1F3B5F' showSpinner={false} />
           <Toaster richColors={true} closeButton position='top-center' />
