@@ -73,6 +73,14 @@ export const LoginSchema = z.object({
   password: z.string(),
 });
 
+export const AddProjectMilestonesSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  description: z.string().min(1, { message: "Description is required" }),
+  amount: z.number().min(1, { message: "Amount is required" }),
+  reason: z.string().min(1, { message: "Reason is required" }),
+});
+
 export type RegisterInvestorType = z.infer<typeof RegisterInvestorSchema>;
 export type RegisterSponsorType = z.infer<typeof RegisterSponsorSchema>;
 export type LoginType = z.infer<typeof LoginSchema>;
+export type AddProjectMilestonesType = z.infer<typeof AddProjectMilestonesSchema>;

@@ -15,7 +15,7 @@ const nextConfig = {
         hostname: "lh3.googleusercontent.com",
       },
     ],
-    domains: ["firebasestorage.googleapis.com", "storage.googleapis.com"],
+    domains: ["firebasestorage.googleapis.com", "storage.googleapis.com", "placehold.co", "picsum.photos"],
   },
 };
 
