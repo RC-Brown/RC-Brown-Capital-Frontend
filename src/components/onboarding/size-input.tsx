@@ -8,6 +8,7 @@ interface SizeInputProps {
   label?: string;
   placeholder?: string;
   error?: string;
+  className?: string;
   required?: boolean;
 }
 
@@ -18,7 +19,7 @@ const UNIT_OPTIONS = [
   { label: "Hectares (hectares)", value: "hectares" },
 ];
 
-export const SizeInput: React.FC<SizeInputProps> = ({ value, onChange, error }) => {
+export const SizeInput: React.FC<SizeInputProps> = ({ value, onChange, error, className }) => {
   // Parse initial value
   const [size, setSize] = useState("");
   const [unit, setUnit] = useState("sq ft");
@@ -99,14 +100,14 @@ export const SizeInput: React.FC<SizeInputProps> = ({ value, onChange, error }) 
             value={size}
             onChange={(e) => handleSizeChange(e.target.value)}
             placeholder='e.g 12,000 or 1,200'
-            className={`${error ? "border-red-500" : ""} border-black/80 py-6 text-xs shadow-none placeholder:text-xs md:text-xs`}
+            className={`${error ? "border-red-500" : ""} ${className || "border-black/80 py-6 text-xs shadow-none placeholder:text-xs md:text-xs"}`}
           />
         </div>
 
         <div className='w-32'>
           <Select value={unit} onValueChange={handleUnitChange}>
             <SelectTrigger
-              className={`${error ? "border-red-500" : ""} "md:text-xs border-black/80 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80`}
+              className={`${error ? "border-red-500" : ""} ${className || "border-black/80 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80"}`}
             >
               <SelectValue className='text-xs text-text-muted/80 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80' />
             </SelectTrigger>

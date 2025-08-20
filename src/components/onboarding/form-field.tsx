@@ -53,7 +53,7 @@ import BudgetTabs from "./budget-tabs";
 import { EnhancedTextarea } from "./enhanced-textarea";
 import { CurrencyInput } from "./currency-input";
 import { PercentageInput } from "./percentage-input";
-import { NumberInput } from "./number-input";
+
 import MediaAssetsUpload from "./media-assets-upload";
 import FundWallet from "./fund-wallet";
 import AcknowledgeSignDocs from "./acknowledge-sign-docs";
@@ -125,14 +125,20 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
       // Replace hardcoded currency symbols with dynamic currency symbol
       const dynamicLabel = label.replace(/\(\$\)/g, `(${currencySymbol})`);
 
+      // Apply labelType styling
+      const labelClassName = cn(
+        "text-sm font-normal -tracking-[3%] text-text-muted",
+        field.labelType === "no-wrap" && "whitespace-nowrap"
+      );
+
       if (field.tooltip) {
         return (
           <Tooltip content={field.tooltip}>
-            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{dynamicLabel}</span>
+            <span className={labelClassName}>{dynamicLabel}</span>
           </Tooltip>
         );
       }
-      return <span className='text-sm font-normal -tracking-[3%] text-text-muted'>{dynamicLabel}</span>;
+      return <span className={labelClassName}>{dynamicLabel}</span>;
     };
 
     const renderField = () => {
@@ -172,20 +178,36 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
             );
           }
 
-          // Handle number fields with units
+          // Handle size fields with units
           if (field.key === "sq_ft_leased") {
+            // Parse string value back to object format for SizeInput
+            let parsedValue: { size: string; unit: string } | string = value as string;
+            if (typeof value === "string" && value.trim()) {
+              const match = value.match(/^(\d+(?:,\d+)*\.?\d*)\s*(sq\s*ft|sq\s*m|acres)$/i);
+              if (match) {
+                parsedValue = {
+                  size: match[1].replace(/,/g, ""), // Remove commas for display
+                  unit: match[2].toLowerCase().replace(/\s+/g, " "),
+                };
+              }
+            }
+
             return (
-              <NumberInput
-                value={value as string | number}
-                onChange={(val) => onChange(val.toString())}
+              <SizeInput
+                value={parsedValue}
+                onChange={(sizeValue) => {
+                  // Convert the size object to a formatted string for consistency with other fields
+                  if (typeof sizeValue === "object" && sizeValue.size && sizeValue.unit) {
+                    const formattedSize = sizeValue.size.replace(/,/g, ""); // Remove commas for storage
+                    const formattedString = `${formattedSize} ${sizeValue.unit}`;
+                    onChange(formattedString);
+                  } else {
+                    onChange(sizeValue);
+                  }
+                }}
                 placeholder={field.placeholder}
                 error={error}
-                className={cn(
-                  error && "border-red-500",
-                  "h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50"
-                )}
                 required={field.validation?.required}
-                unit='sq ft'
               />
             );
           }
@@ -278,7 +300,11 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
           // Handle special currency select case
           if (field.options === "currencies") {
             // Use CurrencyDropdown for currency_of_account field, CurrencySelect for others
-            if (field.key === "currency_of_account" || field.key === "company_currency") {
+            if (
+              field.key === "currency_of_account" ||
+              field.key === "company_currency" ||
+              field.key === "project_currency"
+            ) {
               return (
                 <CurrencyDropdown
                   value={(value as string) || ""}

@@ -90,7 +90,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             title: "You're Off to a Great Start",
             description:
               "Your company's story is now part of our journey. Let's head over and showcase your project track record",
-            ctaText: "Project Portfolio",
+            ctaText: "Project Track Record",
           },
         },
         {
@@ -246,7 +246,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             title: "Looking Solid",
             description:
               "Thanks for sharing your investment structure. Up next — Let's learn about your experience with Capital and Risk Management.",
-            ctaText: "Investor History",
+            ctaText: "Risk & Compliance",
           },
         },
         {
@@ -618,12 +618,9 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             {
               key: "project_currency",
               label: "Select the currency in which this project is being raised.",
-              description: "Only USD and NGN are currently supported",
+              description: "Only USD, NGN, EUR and GBP are currently supported",
               type: "select",
-              options: [
-                { label: "NGN", value: "NGN" },
-                { label: "USD", value: "USD" },
-              ],
+              options: "currencies",
               gridSpan: 2,
               validation: { required: true },
             },
@@ -905,6 +902,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "text",
               placeholder: "Input (Number, Sq. Ft)",
               validation: { required: true },
+              gridSpan: 1,
             },
           ],
           congratsMessage: {
@@ -1178,6 +1176,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               type: "select",
               gridSpan: 1,
               layout: "inline",
+              labelType: "no-wrap",
               options: [
                 { label: "Equity", value: "equity" },
                 { label: "Debt", value: "debt" },

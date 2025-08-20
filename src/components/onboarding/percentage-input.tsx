@@ -112,9 +112,19 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Don't auto-select text, let user control cursor position
     const input = e.target;
     const valueLength = input.value.length;
+
+    // If the input is empty or doesn't end with the percentage symbol, add it
+    if (valueLength === 0 || !input.value.endsWith("%")) {
+      setDisplayValue("%");
+      // Set cursor position before the symbol
+      setTimeout(() => {
+        input.setSelectionRange(0, 0);
+      }, 0);
+      return;
+    }
+
     // Only set cursor at the end if there's no existing selection
     if (valueLength > 1 && input.selectionStart === input.selectionEnd) {
       input.setSelectionRange(valueLength - 1, valueLength - 1);

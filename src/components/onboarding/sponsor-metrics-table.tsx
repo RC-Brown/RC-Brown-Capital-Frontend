@@ -6,6 +6,7 @@ import { Input } from "@/src/components/ui/input";
 import { cn } from "@/src/lib/utils";
 import { CurrencyInput } from "./currency-input";
 import { NumberInput } from "./number-input";
+import { SizeInput } from "./size-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 
 interface SponsorMetricsData {
@@ -64,9 +65,8 @@ const metricsConfig = [
   {
     key: "totalSquareFeetManaged",
     label: "Total Square Feet Managed",
-    type: "number",
+    type: "size",
     placeholder: "e.g 500,000",
-    unit: "sq ft",
     info: "Combined size of all properties under the sponsor's management.",
   },
   {
@@ -311,12 +311,44 @@ export const SponsorMetricsTable = forwardRef<SponsorMetricsTableRef, SponsorMet
                             "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
                           )}
                         />
+                      ) : metric.type === "size" ? (
+                        <SizeInput
+                          value={(() => {
+                            // Parse string value back to object format for SizeInput
+                            const value = metrics[metric.key as keyof SponsorMetricsData] || "";
+                            if (typeof value === "string" && value.trim()) {
+                              const match = value.match(/^(\d+(?:,\d+)*\.?\d*)\s*(sq\s*ft|sq\s*m|acres)$/i);
+                              if (match) {
+                                return {
+                                  size: match[1].replace(/,/g, ""), // Remove commas for display
+                                  unit: match[2].toLowerCase().replace(/\s+/g, " "),
+                                };
+                              }
+                            }
+                            return value;
+                          })()}
+                          onChange={(value) => {
+                            // Convert the size object to a formatted string for consistency
+                            if (typeof value === "object" && value.size && value.unit) {
+                              const formattedSize = value.size.replace(/,/g, ""); // Remove commas for storage
+                              const formattedString = `${formattedSize} ${value.unit}`;
+                              handleMetricChange(metric.key, formattedString);
+                            } else if (typeof value === "string") {
+                              handleMetricChange(metric.key, value);
+                            }
+                          }}
+                          placeholder={metric.placeholder || "Enter value"}
+                          error={fieldErrors[metric.key]}
+                          className={cn(
+                            (error || fieldErrors[metric.key]) && "border-red-500",
+                            "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
+                          )}
+                        />
                       ) : metric.type === "number" ? (
                         <NumberInput
                           value={metrics[metric.key as keyof SponsorMetricsData] || ""}
                           onChange={(value) => handleMetricChange(metric.key, value)}
                           placeholder={metric.placeholder || "Enter value"}
-                          unit={metric.unit}
                           className={cn(
                             (error || fieldErrors[metric.key]) && "border-red-500",
                             "border border-black/10 py-6 text-sm shadow-none placeholder:text-sm"
