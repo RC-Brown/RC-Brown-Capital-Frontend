@@ -3,11 +3,12 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Label } from "@/src/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Tooltip } from "../ui/tooltip";
 import { cn } from "@/src/lib/utils";
 import { PercentageInput } from "./percentage-input";
+import { TimelineInput } from "./timeline-input";
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group";
+import { CurrencyInput } from "./currency-input";
 
 type DebtTenure =
   | "1_year"
@@ -118,27 +119,6 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [error, value]);
 
-    const debtTenureOptions = [
-      { label: "One year", value: "1_year" },
-      { label: "Two years", value: "2_years" },
-      { label: "Three years", value: "3_years" },
-      { label: "Four years", value: "4_years" },
-    ];
-
-    const equityTenureOptions = [
-      { label: "One year", value: "1_year" },
-      { label: "Two years", value: "2_years" },
-      { label: "Three years", value: "3_years" },
-      { label: "Four years", value: "4_years" },
-    ];
-
-    const timelineOfCompletionOptions = [
-      { label: "12 months", value: "12_months" },
-      { label: "18 months", value: "18_months" },
-      { label: "24 months", value: "24_months" },
-      { label: "30 months", value: "30_months" },
-      { label: "> 36 months", value: "36_months" },
-    ];
 
     return (
       <div>
@@ -154,48 +134,25 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                 <span className='pr-4 text-xs font-normal text-text-muted'>Projected Valuation</span>
               </Tooltip>
               <div className='ml-9 md:col-span-2'>
-                <Input
-                  className='h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs'
-                  placeholder='Estimated property value upon completion'
+                <CurrencyInput
                   value={value.projected_valuation || ""}
-                  onChange={(e) => updateField("projected_valuation", e.target.value)}
+                  onChange={(newValue) => updateField("projected_valuation", newValue)}
+                  placeholder='Estimated property value upon completion'
+                  className='h-[51px] border border-black/10 py-6 shadow-none placeholder:text-xs'
                 />
               </div>
             </div>
 
             <div className='grid grid-cols-1 gap-5 md:grid-cols-3 md:items-center'>
-              <Label className='pr-4 text-xs font-normal text-text-muted'>Timeline of Completion (Months)*</Label>
+              <Label className='pr-4 text-xs font-normal text-text-muted'>Timeline of Completion*</Label>
               <div className='ml-9 md:col-span-2'>
-                <Select
+                <TimelineInput
                   value={value.timeline_completion || ""}
-                  onValueChange={(selectedValue) => updateField("timeline_completion", selectedValue)}
-                >
-                  <SelectTrigger
-                    className={cn(
-                      "h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
-                      fieldErrors.timeline_completion && "border-red-500"
-                    )}
-                  >
-                    <SelectValue
-                      placeholder='Select timeline of completion'
-                      className='text-xs font-normal placeholder:text-xs data-[placeholder]:text-xs'
-                    />
-                  </SelectTrigger>
-                  <SelectContent className='bg-white'>
-                    {timelineOfCompletionOptions.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className='cursor-pointer hover:bg-primary hover:text-white'
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {fieldErrors.timeline_completion && (
-                  <p className='mt-1 text-xs text-red-500'>{fieldErrors.timeline_completion}</p>
-                )}
+                  onChange={(selectedValue) => updateField("timeline_completion", selectedValue)}
+                  placeholder='Enter timeline'
+                  error={fieldErrors.timeline_completion}
+                  className='h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'
+                />
               </div>
             </div>
 
@@ -234,28 +191,12 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
             <div className='grid grid-cols-1 gap-5 md:grid-cols-3 md:items-center'>
               <Label className='pr-4 text-xs font-normal text-text-muted'>Debt Investment Tenure</Label>
               <div className='ml-9 md:col-span-2'>
-                <Select
+                <TimelineInput
                   value={value.debt_investment_tenure || ""}
-                  onValueChange={(selectedValue) => updateField("debt_investment_tenure", selectedValue)}
-                >
-                  <SelectTrigger className='h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'>
-                    <SelectValue
-                      placeholder='Select debt investment tenure'
-                      className='text-xs font-normal placeholder:text-xs data-[placeholder]:text-xs'
-                    />
-                  </SelectTrigger>
-                  <SelectContent className='bg-white'>
-                    {debtTenureOptions.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className='cursor-pointer hover:bg-primary hover:text-white'
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  onChange={(selectedValue) => updateField("debt_investment_tenure", selectedValue)}
+                  placeholder='Enter debt investment tenure'
+                  className='h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'
+                />
               </div>
             </div>
 
@@ -277,14 +218,14 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                 <RadioGroup
                   value={value.periodic_payments || ""}
                   onValueChange={(selectedValue) => {
-                    onChange({ periodic_payments: selectedValue });
+                    updateField("periodic_payments", selectedValue);
                   }}
                 >
                   <div className='flex gap-3'>
                     <div
                       className='flex h-[51px] w-full cursor-pointer items-center justify-between rounded-md border border-black/10 px-4'
                       onClick={() => {
-                        onChange({ periodic_payments: "yes" });
+                        updateField("periodic_payments", "yes");
                       }}
                     >
                       <Label
@@ -302,7 +243,7 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
                     <div
                       className='flex h-[51px] w-full cursor-pointer items-center justify-between rounded-md border border-black/10 px-4'
                       onClick={() => {
-                        onChange({ periodic_payments: "no" });
+                        updateField("periodic_payments", "no");
                       }}
                     >
                       <Label htmlFor='no' className='cursor-pointer text-xs font-normal -tracking-[3%] text-text-muted'>
@@ -322,36 +263,12 @@ export const KeyDealPoints = forwardRef<KeyDealPointsRef, KeyDealPointsProps>(
             <div className='grid grid-cols-1 gap-5 md:grid-cols-3 md:items-center'>
               <Label className='pr-4 text-xs font-normal text-text-muted'>Equity Investment Tenure *</Label>
               <div className='ml-9 md:col-span-2'>
-                <Select
+                <TimelineInput
                   value={value.equity_investment_tenure || ""}
-                  onValueChange={(selectedValue) => updateField("equity_investment_tenure", selectedValue)}
-                >
-                  <SelectTrigger
-                    className={cn(
-                      "h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
-                      fieldErrors.equity_investment_tenure && "border-red-500"
-                    )}
-                  >
-                    <SelectValue
-                      placeholder='Select equity investment tenure'
-                      className='text-xs font-normal placeholder:text-xs data-[placeholder]:text-xs'
-                    />
-                  </SelectTrigger>
-                  <SelectContent className='bg-white'>
-                    {equityTenureOptions.map((option) => (
-                      <SelectItem
-                        key={option.value}
-                        value={option.value}
-                        className='cursor-pointer hover:bg-primary hover:text-white'
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {fieldErrors.equity_investment_tenure && (
-                  <p className='mt-1 text-xs text-red-500'>{fieldErrors.equity_investment_tenure}</p>
-                )}
+                  onChange={(selectedValue) => updateField("equity_investment_tenure", selectedValue)}
+                  placeholder='Enter equity investment tenure'
+                  className='h-[51px] border border-black/10 py-6 text-xs text-text-muted/80 shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80'
+                />
               </div>
             </div>
 

@@ -21,6 +21,7 @@ export interface OnboardingField {
   customComponent?: string;
   gridSpan?: 1 | 2; // Optional grid span configuration
   layout?: "default" | "inline"; // Layout option for special cases
+  labelType?: "wrap" | "no-wrap"; // Label wrapping behavior
   condition?: {
     // Optional condition for showing this field
     dependsOn: string; // The field key this depends on

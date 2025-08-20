@@ -112,10 +112,20 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    // Don't auto-select text, let user control cursor position
     const input = e.target;
     const symbolLength = currencySymbol.length;
     const valueLength = input.value.length;
+
+    // If the input is empty or doesn't start with the currency symbol, add it
+    if (valueLength === 0 || !input.value.startsWith(currencySymbol)) {
+      setDisplayValue(currencySymbol);
+      // Set cursor position after the symbol
+      setTimeout(() => {
+        input.setSelectionRange(symbolLength, symbolLength);
+      }, 0);
+      return;
+    }
+
     // Only set cursor at the end if there's no existing selection
     if (valueLength > symbolLength && input.selectionStart === input.selectionEnd) {
       input.setSelectionRange(valueLength, valueLength);
