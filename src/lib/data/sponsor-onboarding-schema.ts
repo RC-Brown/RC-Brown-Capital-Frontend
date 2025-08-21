@@ -351,6 +351,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
                 { label: "Quarterly", value: "quarterly" },
                 { label: "Annually", value: "annually" },
                 { label: "Bi-Annually", value: "bi-annually" },
+                { label: "At Maturity", value: "at_maturity" },
               ],
               validation: { required: true },
             },
