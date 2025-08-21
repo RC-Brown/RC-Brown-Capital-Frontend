@@ -176,6 +176,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     { label: "Quarterly", value: "quarterly" },
     { label: "Semi-annually", value: "semi_annually" },
     { label: "Annually", value: "annually" },
+    { label: "At Maturity", value: "at_maturity" },
   ];
 
   const targetHoldPeriodOptions = [
