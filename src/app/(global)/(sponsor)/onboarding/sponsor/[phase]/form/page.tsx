@@ -153,7 +153,7 @@ export default function FormPage({ params }: FormPageProps) {
         }
 
         // Custom component validations
-        if (field.type === "custom-component" && field.validation.required) {
+        if (field.type === "custom-component" && field.validation.required && shouldShowField(field)) {
           if (Array.isArray(value) && value.length === 0) {
             realtimeErrors[field.key] = "This field is required";
           } else if (typeof value === "object" && value !== null && Object.keys(value).length === 0) {
@@ -172,8 +172,10 @@ export default function FormPage({ params }: FormPageProps) {
       const hasExistingError = errors[field.key];
 
       // If field is required, empty, and has an existing error, preserve it
+      // Only for fields that are currently visible
       if (
         field.validation.required &&
+        shouldShowField(field) &&
         hasExistingError &&
         (!value ||
           value === "" ||
@@ -252,6 +254,27 @@ export default function FormPage({ params }: FormPageProps) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentSection]);
 
+  // Clear errors for hidden fields when form data changes
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      const newErrors = { ...errors };
+      let hasChanges = false;
+
+      // Check each error and remove it if the field is now hidden
+      Object.keys(newErrors).forEach((errorKey) => {
+        const field = currentSectionData?.fields?.find((f) => f.key === errorKey);
+        if (field && !shouldShowField(field)) {
+          delete newErrors[errorKey];
+          hasChanges = true;
+        }
+      });
+
+      if (hasChanges) {
+        setErrors(newErrors);
+      }
+    }
+  }, [formData, currentSectionData, shouldShowField, errors]);
+
   // Real-time validation with debounce
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -309,7 +332,8 @@ export default function FormPage({ params }: FormPageProps) {
       }
 
       // Check if field is required and empty
-      if (field.validation.required) {
+      // Only validate required fields that are currently visible (no condition or condition is met)
+      if (field.validation.required && shouldShowField(field)) {
         if (
           !value ||
           value === "" ||

@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { CurrencyInput } from "./currency-input";
 import { PercentageInput } from "./percentage-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
 import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
+import { getFormNumbering } from "@/src/lib/utils/onboarding-field-mapping";
 import Image from "next/image";
 
 type DistributionFrequency = "monthly" | "quarterly" | "semi_annually" | "annually";
@@ -23,6 +24,8 @@ interface BaseTableDataItem {
   briefInfo: string;
   isReadOnly?: boolean;
   options?: Array<{ label: string; value: string }>;
+  validation?: () => string | null;
+  minVsMaxValidation?: () => string | null;
 }
 
 interface DualTableDataItem extends BaseTableDataItem {
@@ -63,8 +66,41 @@ interface EquityDetailsFormProps {
 
 const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onChange }) => {
   const { formatCurrency } = useCurrencySafe();
-  const [dateError, setDateError] = useState<string>("");
   const { formData } = useOnboardingStoreWithUser();
+
+  // Get dynamic numbering based on what's currently visible
+  const formNumber = getFormNumbering("equity_details_form", formData.what_are_you_offering as string | undefined);
+
+  // Calculate exit date based on target distribution start date + target hold period
+  const calculateExitDate = (): string => {
+    const targetDistributionStart = value.target_distribution_start;
+    const targetHoldPeriod = value.target_hold_period;
+
+    if (!targetDistributionStart || !targetHoldPeriod) {
+      return "Please complete required fields";
+    }
+
+    try {
+      const startDate = new Date(targetDistributionStart);
+      if (isNaN(startDate.getTime())) {
+        return "Invalid start date";
+      }
+
+      const holdPeriodYears = parseInt(targetHoldPeriod, 10);
+      const exitDate = new Date(startDate);
+      exitDate.setFullYear(exitDate.getFullYear() + holdPeriodYears);
+
+      // Format as DD/MM/YYYY
+      const day = exitDate.getDate().toString().padStart(2, "0");
+      const month = (exitDate.getMonth() + 1).toString().padStart(2, "0");
+      const year = exitDate.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error("Error calculating exit date:", error);
+      return "Calculation error";
+    }
+  };
 
   // Calculate ROI percentages based on shared store data
   const calculateROIPercentages = () => {
@@ -74,8 +110,11 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
 
     // Extract required values with proper type casting (fixed field names)
     const totalCapitalRequired = parseFloat(String(offerDetailsData?.total_capitalization || "0"));
-    // const totalDebtAllocation = parseFloat(String(offerDetailsData?.debt_allocation || "0"));
-    const totalEquityAllocation = parseFloat(String(offerDetailsData?.equity_allocation || "0")); // This is the total equity allocation in dollars
+    const equityAllocationPercentage = parseFloat(String(offerDetailsData?.equity_allocation || "0")); // This is the equity allocation percentage from offers details
+
+    // Calculate the actual dollar amount of equity allocation for ROI calculations
+    const totalEquityAllocation = (equityAllocationPercentage / 100) * totalCapitalRequired;
+
     const totalRentalIncome = parseFloat(String(expensesRevenueData?.["totalRentalIncome"] || "0"));
     const totalEquityAppreciation = parseFloat(String(expensesRevenueData?.["totalEquityAppreciation"] || "0"));
     const totalExpenses = parseFloat(String(expensesRevenueData?.["totalExpense"] || "0"));
@@ -88,40 +127,41 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       maxROIPercentage: 0,
       minROIAmount: 0,
       maxROIAmount: 0,
-      equityAllocationPercentage: 0,
+      equityAllocationPercentage: equityAllocationPercentage,
       equityAllocationAmount: totalEquityAllocation,
     };
-
-    // Calculate equity allocation percentage
-    calculations.equityAllocationPercentage = (totalEquityAllocation / totalCapitalRequired) * 100;
 
     if (totalEquityAllocation > 0 && minInvestment > 0) {
       // Step 1: Calculate percentage of equity invested for minimum investment
       const minEquityPercent = (minInvestment / totalEquityAllocation) * 100;
-      // Step 2: Calculate ROI value for minimum investment
-      // ROI = % of equity invested × (Total Rental Income + Total Equity Appreciation - Total Expenses)
-      const totalReturns = totalRentalIncome + totalEquityAppreciation - totalExpenses;
-      const minROIValue = (minEquityPercent / 100) * totalReturns;
+
+      // Step 2: Calculate Y = total rental income + total equity appreciation
+      const Y = totalRentalIncome + totalEquityAppreciation;
+
+      // Step 3: Calculate expected min return = [(min percentage of equity invested / 100) × Y] - total expenses
+      const minROIValue = (minEquityPercent / 100) * Y - totalExpenses;
 
       // Store monetary value
       calculations.minROIAmount = minROIValue;
 
-      // Step 3: Calculate ROI percentage
-      // ROI % = (ROI value / Investment Amount) × 100
+      // Step 4: Calculate ROI percentage = (expected min return / min investment) × 100
       calculations.minROIPercentage = (minROIValue / minInvestment) * 100;
     }
 
     if (totalEquityAllocation > 0 && maxInvestment > 0) {
       // Step 1: Calculate percentage of equity invested for maximum investment
       const maxEquityPercent = (maxInvestment / totalEquityAllocation) * 100;
-      // Step 2: Calculate ROI value for maximum investment
-      const totalReturns = totalRentalIncome + totalEquityAppreciation - totalExpenses;
-      const maxROIValue = (maxEquityPercent / 100) * totalReturns;
+
+      // Step 2: Calculate Y = total rental income + total equity appreciation
+      const Y = totalRentalIncome + totalEquityAppreciation;
+
+      // Step 3: Calculate expected max return = [(max percentage of equity invested / 100) × Y] - total expenses
+      const maxROIValue = (maxEquityPercent / 100) * Y - totalExpenses;
 
       // Store monetary value
       calculations.maxROIAmount = maxROIValue;
 
-      // Step 3: Calculate ROI percentage
+      // Step 4: Calculate ROI percentage = (expected max return / max investment) × 100
       calculations.maxROIPercentage = (maxROIValue / maxInvestment) * 100;
     }
 
@@ -140,36 +180,50 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
   const handleInputChange = (field: keyof EquityDetailsData, inputValue: string) => {
     const newValue = { ...value, [field]: inputValue };
 
-    // Validate dates when either date field changes
-    if (field === "target_distribution_start" || field === "exit_date") {
-      validateDates(newValue);
-    }
-
+    // No need to validate dates since exit date is now calculated
     onChange?.(newValue);
   };
 
-  const validateDates = (formData: EquityDetailsData) => {
-    const distributionStart = formData.target_distribution_start;
-    const exitDate = formData.exit_date;
+  // Validate maximum investment amount against equity allocation
+  const validateMaxInvestmentAmount = (): string | null => {
+    const maxInvestment = parseFloat(value.maximum_investment || "0");
+    const equityAllocation = equityAllocationAmount;
 
-    if (distributionStart && exitDate) {
-      const startDate = new Date(distributionStart);
-      const endDate = new Date(exitDate);
-
-      if (endDate <= startDate) {
-        setDateError("Exit date must be after the Target Distribution Start date");
-      } else {
-        setDateError("");
-      }
-    } else {
-      setDateError("");
+    if (maxInvestment > 0 && equityAllocation > 0 && maxInvestment > equityAllocation) {
+      return `Maximum investment cannot exceed the total equity allocation (${formatCurrency(equityAllocation.toString())})`;
     }
+    return null;
   };
 
-  // Validate dates on component mount and when value changes
+  // Validate minimum investment amount against equity allocation
+  const validateMinInvestmentAmount = (): string | null => {
+    const minInvestment = parseFloat(value.minimum_investment || "0");
+    const equityAllocation = equityAllocationAmount;
+
+    if (minInvestment > 0 && equityAllocation > 0 && minInvestment > equityAllocation) {
+      return `Minimum investment cannot exceed the total equity allocation (${formatCurrency(equityAllocation.toString())})`;
+    }
+    return null;
+  };
+
+  // Validate minimum investment amount against maximum investment amount
+  const validateMinVsMaxInvestment = (): string | null => {
+    const minInvestment = parseFloat(value.minimum_investment || "0");
+    const maxInvestment = parseFloat(value.maximum_investment || "0");
+
+    if (minInvestment > 0 && maxInvestment > 0 && minInvestment > maxInvestment) {
+      return `Minimum investment cannot exceed maximum investment amount`;
+    }
+    return null;
+  };
+
+  // Remove the validateDates function since it's no longer needed
+
+  // Update exit date calculation when dependent fields change
   useEffect(() => {
-    validateDates(value);
-  }, [value.target_distribution_start, value.exit_date, value]);
+    // Force re-render to update calculated exit date
+    // The calculateExitDate function will be called on each render
+  }, [value.target_distribution_start, value.target_hold_period]);
 
   const distributionFrequencyOptions = [
     { label: "Monthly", value: "monthly" },
@@ -262,8 +316,12 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       fields: {
         percentage: {
           field: "equity_allocation_percentage",
-          placeholder: equityAllocationPercentage ? `${equityAllocationPercentage.toFixed(2)}%` : "0.00%",
-          value: equityAllocationPercentage ? `${equityAllocationPercentage.toFixed(2)}%` : "0.00%",
+          placeholder: equityAllocationPercentage
+            ? `${equityAllocationPercentage % 1 === 0 ? equityAllocationPercentage : equityAllocationPercentage.toFixed(2)}%`
+            : "0%",
+          value: equityAllocationPercentage
+            ? `${equityAllocationPercentage % 1 === 0 ? equityAllocationPercentage : equityAllocationPercentage.toFixed(2)}%`
+            : "0%",
           inputType: "percentage",
         },
         amount: {
@@ -285,6 +343,14 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       briefInfo: "Select how frequently equity returns are paid",
     },
     {
+      category: "Target Hold Period (Years)",
+      inputType: "select",
+      field: "target_hold_period",
+      placeholder: "1",
+      options: targetHoldPeriodOptions,
+      briefInfo: "Select the expected time frame the equity will be held before an exit event",
+    },
+    {
       category: "Target Distribution Start",
       inputType: "date-picker",
       field: "target_distribution_start",
@@ -292,25 +358,28 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       briefInfo: "Enter the date when equity return distributions are expected to begin",
     },
     {
-      category: `Minimum Investment (${formatCurrency("")})`,
-      inputType: "currency",
-      field: "minimum_investment",
-      placeholder: "",
-      briefInfo: "Enter the lowest amount an investor can contribute toward the equity portion of this deal.",
-    },
-    {
       category: `Maximum Investment (${formatCurrency("")})`,
       inputType: "currency",
       field: "maximum_investment",
       placeholder: "",
       briefInfo: "Enter the highest amount a single investor is allowed to invest in equity",
+      validation: validateMaxInvestmentAmount,
+    },
+    {
+      category: `Minimum Investment (${formatCurrency("")})`,
+      inputType: "currency",
+      field: "minimum_investment",
+      placeholder: "",
+      briefInfo: "Enter the lowest amount an investor can contribute toward the equity portion of this deal.",
+      validation: validateMinInvestmentAmount,
+      minVsMaxValidation: validateMinVsMaxInvestment,
     },
     {
       category: "Exit Date",
-      inputType: "date-picker",
+      inputType: "calculated",
       field: "exit_date",
-      placeholder: "2/5/27",
-      briefInfo: "Choose the projected date when the investment will end and equity will be returned to investors",
+      placeholder: calculateExitDate(),
+      briefInfo: "The projected date when the investment will end and equity will be returned to investors",
     },
     {
       category: "Return on Investment (%)",
@@ -326,7 +395,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       fields: {
         percentage: {
           field: "expected_min_return_percentage",
-          placeholder: `${minROIPercentage.toFixed(2)}%`,
+          placeholder: `${minROIPercentage % 1 === 0 ? minROIPercentage : minROIPercentage.toFixed(2)}%`,
           inputType: "percentage",
         },
         amount: {
@@ -344,7 +413,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       fields: {
         percentage: {
           field: "expected_max_return_percentage",
-          placeholder: `${maxROIPercentage.toFixed(2)}%`,
+          placeholder: `${maxROIPercentage % 1 === 0 ? maxROIPercentage : maxROIPercentage.toFixed(2)}%`,
           inputType: "percentage",
         },
         amount: {
@@ -356,30 +425,16 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       briefInfo: "This is automatically calculated to show the highest possible return investors might earn on equity",
       isReadOnly: true,
     },
-    {
-      category: "Target Hold Period (Years)",
-      inputType: "select",
-      field: "target_hold_period",
-      placeholder: "1",
-      options: targetHoldPeriodOptions,
-      briefInfo: "Select the expected time frame the equity will be held before an exit event",
-    },
   ];
 
   return (
     <div className='mb-0 w-full pb-0'>
       <h3 className='mb-7 flex items-center'>
         <Image src={"/icons/feedback.svg"} alt='feedback' width={20} height={20} className='mr-2' />
-        <span className='ml-2 font-semibold text-text-muted'>4. Equity Details</span>
+        <span className='ml-2 font-semibold text-text-muted'>{formNumber}. Equity Details</span>
       </h3>
 
-      {/* Date validation error message */}
-      {dateError && (
-        <div className='mb-4 rounded-md border border-red-200 bg-red-50 p-3'>
-          <p className='text-sm text-red-600'>{dateError}</p>
-        </div>
-      )}
-
+      {/* Remove the date validation error message section */}
       <div className='overflow-x-auto'>
         <table className='w-full border-collapse'>
           <thead>
@@ -451,12 +506,20 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
                       className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
                     />
                   ) : item.inputType === "currency" && item.field ? (
-                    <CurrencyInput
-                      value={value[item.field as keyof EquityDetailsData] || ""}
-                      onChange={(value) => handleInputChange(item.field as keyof EquityDetailsData, value)}
-                      placeholder={item.placeholder}
-                      className='h-[51px] w-full bg-transparent text-xs shadow-none placeholder:text-xs'
-                    />
+                    <div>
+                      <CurrencyInput
+                        value={value[item.field as keyof EquityDetailsData] || ""}
+                        onChange={(value) => handleInputChange(item.field as keyof EquityDetailsData, value)}
+                        placeholder={item.placeholder}
+                        className='h-[51px] w-full bg-transparent text-xs shadow-none placeholder:text-xs'
+                      />
+                      {item.validation && item.validation() && (
+                        <p className='mt-1 text-xs text-red-500'>{item.validation()}</p>
+                      )}
+                      {item.minVsMaxValidation && item.minVsMaxValidation() && (
+                        <p className='mt-1 text-xs text-red-500'>{item.minVsMaxValidation()}</p>
+                      )}
+                    </div>
                   ) : item.inputType === "percentage" && item.field ? (
                     <PercentageInput
                       value={value[item.field as keyof EquityDetailsData] || ""}
@@ -470,11 +533,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
                       placeholder={item.placeholder}
                       value={value[item.field as keyof EquityDetailsData] || ""}
                       onChange={(e) => handleInputChange(item.field as keyof EquityDetailsData, e.target.value)}
-                      className={`h-[51px] w-full text-xs shadow-none placeholder:text-xs md:text-xs ${
-                        dateError && (item.field === "target_distribution_start" || item.field === "exit_date")
-                          ? "border-red-500"
-                          : ""
-                      }`}
+                      className={`h-[51px] w-full text-xs shadow-none placeholder:text-xs md:text-xs`}
                     />
                   ) : (item as SingleTableDataItem).field ? (
                     <Select

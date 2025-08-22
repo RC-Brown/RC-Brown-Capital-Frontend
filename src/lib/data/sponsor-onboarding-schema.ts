@@ -677,7 +677,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               validation: { required: true },
             },
             {
-              key: "years_operating",
+              key: "years_of_active_operation",
               label: "How many years has your company been actively operating",
               type: "select",
               options: [
@@ -1200,6 +1200,10 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               customComponent: "DebtDetailsForm",
               gridSpan: 2,
               validation: { required: true },
+              condition: {
+                dependsOn: "what_are_you_offering",
+                value: ["debt", "both_equity_and_debt"],
+              },
             },
             {
               key: "expenses_revenue_form",
@@ -1216,6 +1220,10 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               customComponent: "EquityDetailsForm",
               gridSpan: 2,
               validation: { required: true },
+              condition: {
+                dependsOn: "what_are_you_offering",
+                value: ["equity", "both_equity_and_debt"],
+              },
             },
           ],
         },

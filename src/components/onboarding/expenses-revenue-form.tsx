@@ -4,6 +4,8 @@ import { Button } from "@/src/components/ui/button";
 import { Plus } from "lucide-react";
 import { CurrencyInput } from "./currency-input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/src/components/ui/dialog";
+import { getFormNumbering } from "@/src/lib/utils/onboarding-field-mapping";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 import Image from "next/image";
 
 interface AdditionalExpense {
@@ -31,9 +33,13 @@ interface ExpensesRevenueFormProps {
 }
 
 const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, onChange }) => {
+  const { formData } = useOnboardingStoreWithUser();
   const [additionalExpenses, setAdditionalExpenses] = useState<AdditionalExpense[]>(value.additionalExpenses || []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newExpense, setNewExpense] = useState<AdditionalExpense>({ name: "", amount: "" });
+
+  // Get dynamic numbering based on what's currently visible
+  const formNumber = getFormNumbering("expenses_revenue_form", formData.what_are_you_offering as string | undefined);
 
   // Helper function to parse currency values
   const parseCurrencyValue = (value: string): number => {
@@ -144,7 +150,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
       <div className='mb-5 flex items-center gap-2'>
         <Image src='/icons/feedback.svg' alt='feedback icon' width={24} height={24} />
 
-        <h3 className='font-semibold text-text-muted'>3. Expenses</h3>
+        <h3 className='font-semibold text-text-muted'>{formNumber}. Expenses</h3>
       </div>
 
       {/* Main Fields Grid */}

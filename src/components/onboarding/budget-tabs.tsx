@@ -145,23 +145,52 @@ const BudgetTabs: React.FC<BudgetTabsProps> = ({ value = {}, onChange, error }) 
           <div className='space-y-4'>
             <div className='flex items-center gap-2'>
               <label className='text-sm font-medium text-gray-700'>How many months will the project take?</label>
-              <Input
-                placeholder='Enter number of months'
+              <Select
                 value={modalData.projectMonths || ""}
-                onChange={(e) => setModalData({ ...modalData, projectMonths: e.target.value })}
-                className='w-full max-w-[270px] py-6 text-xs text-text-muted shadow-none placeholder:text-xs'
-              />
+                onValueChange={(selectedValue) => setModalData({ ...modalData, projectMonths: selectedValue })}
+              >
+                <SelectTrigger className='w-full max-w-[270px] py-6 text-xs text-text-muted shadow-none placeholder:text-xs'>
+                  <SelectValue placeholder='Select project duration' />
+                </SelectTrigger>
+                <SelectContent className='bg-white'>
+                  <SelectItem value='12_months' className='hover:bg-primary hover:text-white'>
+                    12 Months
+                  </SelectItem>
+                  <SelectItem value='18_months' className='hover:bg-primary hover:text-white'>
+                    18 Months
+                  </SelectItem>
+                  <SelectItem value='24_months' className='hover:bg-primary hover:text-white'>
+                    24 Months
+                  </SelectItem>
+                  <SelectItem value='30_months' className='hover:bg-primary hover:text-white'>
+                    30 Months
+                  </SelectItem>
+                  <SelectItem value='36_months' className='hover:bg-primary hover:text-white'>
+                    &gt; 36 Months
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className='flex items-center gap-2'>
               <label className='text-sm font-medium text-gray-700'>
                 Are you adding square footage to this property?
               </label>
-              <Input
-                placeholder='Yes/No'
+              <Select
                 value={modalData.addingSquareFootage || ""}
-                onChange={(e) => setModalData({ ...modalData, addingSquareFootage: e.target.value })}
-                className='w-full max-w-[270px] py-6 text-xs text-text-muted shadow-none placeholder:text-xs'
-              />
+                onValueChange={(selectedValue) => setModalData({ ...modalData, addingSquareFootage: selectedValue })}
+              >
+                <SelectTrigger className='w-full max-w-[270px] py-6 text-xs text-text-muted shadow-none placeholder:text-xs'>
+                  <SelectValue placeholder='Select yes/no' />
+                </SelectTrigger>
+                <SelectContent className='bg-white'>
+                  <SelectItem value='yes' className='hover:bg-primary hover:text-white'>
+                    Yes
+                  </SelectItem>
+                  <SelectItem value='no' className='hover:bg-primary hover:text-white'>
+                    No
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className='flex items-center gap-2'>
               <label className='text-sm font-medium text-gray-700'>How do you plan to expand the square footage?</label>

@@ -17,12 +17,13 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   value,
   onChange,
   placeholder,
-  // error,
+  error,
   className,
   required,
 }) => {
   const { currencySymbol } = useCurrencySafe();
   const [displayValue, setDisplayValue] = useState("");
+  const [validationError, setValidationError] = useState<string>("");
 
   const formatCurrencyValue = (input: string): string => {
     // Remove all non-numeric characters except decimal points
@@ -48,6 +49,20 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     return currencySymbol;
   };
 
+  const validateInput = (inputValue: string): string => {
+    // Check if only currency symbol remains
+    if (inputValue === currencySymbol) {
+      return "Please enter a valid amount";
+    }
+
+    // Check if input is empty
+    if (!inputValue || inputValue.length === 0) {
+      return "Amount is required";
+    }
+
+    return "";
+  };
+
   // Parse initial value and format it
   useEffect(() => {
     if (value) {
@@ -57,15 +72,44 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       if (cleanValue) {
         const formattedValue = formatCurrencyValue(cleanValue);
         setDisplayValue(formattedValue);
+        setValidationError("");
       } else {
         setDisplayValue("");
+        setValidationError("");
       }
     } else {
       setDisplayValue("");
+      setValidationError("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, currencySymbol]);
 
+  const handleBeforeInput = (e: React.FormEvent<HTMLInputElement> & { nativeEvent: InputEvent }) => {
+    const target = e.target as HTMLInputElement;
+    const currentValue = target.value;
+    const selectionStart = target.selectionStart || 0;
+    const selectionEnd = target.selectionEnd || 0;
+
+    // If this is a deletion operation
+    if (e.nativeEvent.inputType === "deleteContentBackward" || e.nativeEvent.inputType === "deleteContentForward") {
+      // Calculate what the value would be after deletion
+      const beforeSelection = currentValue.substring(0, selectionStart);
+      const afterSelection = currentValue.substring(selectionEnd);
+      const wouldBeValue = beforeSelection + afterSelection;
+
+      // If deletion would remove the currency symbol, prevent it
+      if (wouldBeValue.length < currencySymbol.length || !wouldBeValue.startsWith(currencySymbol)) {
+        e.preventDefault();
+        return;
+      }
+
+      // If deletion would leave only the currency symbol, prevent it
+      if (wouldBeValue === currencySymbol) {
+        e.preventDefault();
+        return;
+      }
+    }
+  };
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = e.target.value;
     const cursorPosition = e.target.selectionStart;
@@ -75,12 +119,39 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
       return;
     }
 
+    // Check if the input still starts with the currency symbol
+    if (!inputValue.startsWith(currencySymbol)) {
+      // If the symbol was deleted, restore it and add any remaining numeric content
+      const numericPart = inputValue.replace(/[^0-9.]/g, "");
+      const formattedValue = formatCurrencyValue(numericPart);
+      setDisplayValue(formattedValue);
+
+      // Validate the input
+      const error = validateInput(formattedValue);
+      setValidationError(error);
+
+      // Extract clean numeric value for the onChange callback
+      onChange(numericPart);
+
+      // Set cursor position after the restored symbol
+      setTimeout(() => {
+        const input = e.target;
+        const newPosition = Math.min(currencySymbol.length + (cursorPosition || 0), formattedValue.length);
+        input.setSelectionRange(newPosition, newPosition);
+      }, 0);
+      return;
+    }
+
     // Extract the numeric part (everything after the currency symbol)
     const numericPart = inputValue.substring(currencySymbol.length);
 
     // Format the value
     const formattedValue = formatCurrencyValue(numericPart);
     setDisplayValue(formattedValue);
+
+    // Validate the input
+    const error = validateInput(formattedValue);
+    setValidationError(error);
 
     // Extract clean numeric value for the onChange callback (without currency symbol and commas)
     const cleanNumericValue = numericPart.replace(/[^0-9.]/g, "");
@@ -132,6 +203,15 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
     }
   };
 
+  const handleBlur = () => {
+    // Validate on blur to catch edge cases
+    const error = validateInput(displayValue);
+    setValidationError(error);
+  };
+
+  // Determine which error to show (prop error takes precedence)
+  const finalError = error || validationError;
+
   return (
     <div className='relative'>
       <Input
@@ -140,10 +220,13 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         onFocus={handleFocus}
+        onBlur={handleBlur}
+        onBeforeInput={handleBeforeInput}
         placeholder={placeholder || currencySymbol}
-        className={className}
+        className={`${className} ${finalError ? "border-red-500 focus:border-red-500" : ""}`}
         required={required}
       />
+      {finalError && <p className='mt-1 text-sm text-red-500'>{finalError}</p>}
     </div>
   );
 };

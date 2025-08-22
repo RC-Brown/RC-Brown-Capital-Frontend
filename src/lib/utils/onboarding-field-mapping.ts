@@ -393,3 +393,38 @@ export function debugFieldMapping(formData: Record<string, unknown>, userId: num
 
   return { formData, apiData };
 }
+
+/**
+ * Calculate dynamic numbering for forms based on what's currently visible
+ */
+export function getFormNumbering(
+  currentFormKey: string,
+  whatAreYouOffering: string | undefined,
+  formOrder: string[] = ["offer_details_table", "debt_details_form", "expenses_revenue_form", "equity_details_form"]
+): number {
+  if (!whatAreYouOffering) {
+    // Default to original numbering if no selection
+    return formOrder.indexOf(currentFormKey) + 1;
+  }
+
+  // Filter visible forms based on selection
+  let visibleForms: string[] = [];
+
+  switch (whatAreYouOffering) {
+    case "equity":
+      visibleForms = ["offer_details_table", "expenses_revenue_form", "equity_details_form"];
+      break;
+    case "debt":
+      visibleForms = ["offer_details_table", "debt_details_form", "expenses_revenue_form"];
+      break;
+    case "both_equity_and_debt":
+      visibleForms = ["offer_details_table", "debt_details_form", "expenses_revenue_form", "equity_details_form"];
+      break;
+    default:
+      visibleForms = formOrder;
+  }
+
+  // Return the position of the current form in the visible forms list
+  const position = visibleForms.indexOf(currentFormKey);
+  return position >= 0 ? position + 1 : 1;
+}

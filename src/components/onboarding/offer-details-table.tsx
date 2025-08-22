@@ -3,6 +3,8 @@ import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { CurrencyInput } from "./currency-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { PercentageInput } from "./percentage-input";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 
 type SponsorCoInvestPercentage = "5.0" | "6.0" | "7.0" | "8.0" | "9.0" | "10.0";
 type AssetType = "residential" | "commercial" | "industrial" | "retail" | "office" | "hospitality" | "mixed_use";
@@ -27,11 +29,64 @@ interface OfferDetailsTableProps {
   onChange?: (value: OfferDetailsData) => void;
 }
 
+interface TableDataItem {
+  category: string;
+  inputType: "text" | "currency" | "percentage" | "date-picker" | "select";
+  field: string;
+  placeholder: string;
+  briefInfo: string;
+  options?: Array<{ label: string; value: string }>;
+  isReadOnly?: boolean;
+}
+
 const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onChange }) => {
   const { formatCurrency } = useCurrencySafe();
+  const { formData } = useOnboardingStoreWithUser();
+
+  // Check what's being offered to determine field behavior
+  const whatAreYouOffering = formData.what_are_you_offering as string | undefined;
+  const isDebtOnly = whatAreYouOffering === "debt";
+  const isEquityOnly = whatAreYouOffering === "equity";
+
+  // Auto-populate allocations based on selection when component mounts or selection changes
+  React.useEffect(() => {
+    if (isDebtOnly && (!value.debt_allocation || value.debt_allocation !== "100")) {
+      onChange?.({ ...value, debt_allocation: "100", equity_allocation: "0" });
+    } else if (isEquityOnly && (!value.equity_allocation || value.equity_allocation !== "100")) {
+      onChange?.({ ...value, debt_allocation: "0", equity_allocation: "100" });
+    }
+  }, [whatAreYouOffering, value, onChange, isDebtOnly, isEquityOnly]);
 
   const handleInputChange = (field: string, inputValue: string) => {
-    onChange?.({ ...value, [field]: inputValue });
+    const newValue = { ...value, [field]: inputValue };
+
+    // Auto-calculate allocation percentages to ensure they add up to 100%
+    if (field === "debt_allocation" && inputValue) {
+      const debtPercentage = parseFloat(inputValue);
+      if (!isNaN(debtPercentage)) {
+        if (debtPercentage > 100) {
+          // Don't allow debt allocation to exceed 100%
+          return;
+        }
+        const equityPercentage = 100 - debtPercentage;
+        // Only show decimal places if they're actually needed
+        newValue.equity_allocation =
+          equityPercentage % 1 === 0 ? equityPercentage.toString() : equityPercentage.toFixed(2);
+      }
+    } else if (field === "equity_allocation" && inputValue) {
+      const equityPercentage = parseFloat(inputValue);
+      if (!isNaN(equityPercentage)) {
+        if (equityPercentage > 100) {
+          // Don't allow equity allocation to exceed 100%
+          return;
+        }
+        const debtPercentage = 100 - equityPercentage;
+        // Only show decimal places if they're actually needed
+        newValue.debt_allocation = debtPercentage % 1 === 0 ? debtPercentage.toString() : debtPercentage.toFixed(2);
+      }
+    }
+
+    onChange?.(newValue);
   };
 
   //   const requiredFields = [
@@ -79,7 +134,7 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
     { label: "Cash Flow", value: "cash_flow" },
   ];
 
-  const tableData = [
+  const tableData: TableDataItem[] = [
     {
       category: `Total Capitalization (${formatCurrency("")})`,
       inputType: "currency",
@@ -88,18 +143,28 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
       briefInfo: "Enter the total amount of capital required for the investment",
     },
     {
-      category: `Debt Allocation (${formatCurrency("")})`,
-      inputType: "currency",
+      category: `Debt Allocation (%)`,
+      inputType: "percentage",
       field: "debt_allocation",
       placeholder: "",
-      briefInfo: "Specify the portion of the total capitalization that will be funded through debt.",
+      briefInfo: isDebtOnly
+        ? "Automatically set to 100% for debt-only offering"
+        : isEquityOnly
+          ? "Automatically set to 0% for equity-only offering"
+          : "Specify the portion of the total capitalization that will be funded through debt.",
+      isReadOnly: isDebtOnly || isEquityOnly,
     },
     {
-      category: `Equity Allocation (${formatCurrency("")})`,
-      inputType: "currency",
+      category: `Equity Allocation (%)`,
+      inputType: "percentage",
       field: "equity_allocation",
       placeholder: "",
-      briefInfo: "Specify the amount of equity funding being raised as part of the total capitalization",
+      briefInfo: isEquityOnly
+        ? "Automatically set to 100% for equity-only offering"
+        : isDebtOnly
+          ? "Automatically set to 0% for debt-only offering"
+          : "Specify the portion of equity funding being raised as part of the total capitalization",
+      isReadOnly: isDebtOnly || isEquityOnly,
     },
     {
       category: "Sponsor Co-invest",
@@ -222,12 +287,18 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
                       className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
                     />
                   ) : item.inputType === "currency" ? (
-                    <CurrencyInput
-                      value={value[item.field] || ""}
-                      onChange={(value) => handleInputChange(item.field, value)}
-                      placeholder={item.placeholder}
-                      className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
-                    />
+                    item.isReadOnly ? (
+                      <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 bg-gray-50 px-3 text-xs text-text-muted/80'>
+                        {value[item.field] || "0"}
+                      </div>
+                    ) : (
+                      <CurrencyInput
+                        value={value[item.field] || ""}
+                        onChange={(value) => handleInputChange(item.field, value)}
+                        placeholder={item.placeholder}
+                        className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                      />
+                    )
                   ) : item.inputType === "date-picker" ? (
                     <Input
                       type='date'
@@ -235,7 +306,21 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
                       value={value[item.field] || ""}
                       onChange={(e) => handleInputChange(item.field, e.target.value)}
                       className='h-[51px] w-full text-xs shadow-none placeholder:text-xs data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80 md:text-xs'
+                      readOnly={item.isReadOnly}
                     />
+                  ) : item.inputType === "percentage" ? (
+                    item.isReadOnly ? (
+                      <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 bg-gray-50 px-3 text-xs text-text-muted/80'>
+                        {value[item.field] || "0"}%
+                      </div>
+                    ) : (
+                      <PercentageInput
+                        value={value[item.field] || ""}
+                        onChange={(value) => handleInputChange(item.field, value)}
+                        placeholder={item.placeholder}
+                        className='h-[51px] w-full text-xs shadow-none placeholder:text-xs'
+                      />
+                    )
                   ) : (
                     <Select
                       value={value[item.field] || ""}

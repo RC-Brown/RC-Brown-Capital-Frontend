@@ -25,6 +25,27 @@ export function useProjectUploadIntegration() {
   // State
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Function to check if a field should be shown based on conditions
+  const shouldShowField = useCallback(
+    (field: OnboardingField): boolean => {
+      if (!field.condition) return true;
+
+      const dependentValue = formData[field.condition.dependsOn];
+      const targetValues = Array.isArray(field.condition.value) ? field.condition.value : [field.condition.value];
+
+      const actualValue =
+        typeof dependentValue === "object" &&
+        dependentValue !== null &&
+        !Array.isArray(dependentValue) &&
+        "selectedValue" in dependentValue
+          ? (dependentValue as { selectedValue: string }).selectedValue
+          : dependentValue;
+
+      return targetValues.includes(actualValue as string);
+    },
+    [formData]
+  );
+
   // Load project data when available
   useEffect(() => {
     if (projectData && !isLoadingProjectData) {
@@ -68,7 +89,12 @@ export function useProjectUploadIntegration() {
         const value = formData[field.key];
         const validation = field.validation;
 
-        if (validation?.required && (!value || (typeof value === "string" && value.trim() === ""))) {
+        // Only validate required fields that are currently visible
+        if (
+          validation?.required &&
+          shouldShowField(field) &&
+          (!value || (typeof value === "string" && value.trim() === ""))
+        ) {
           newErrors[field.key] = `${field.label} is required`;
           hasErrors = true;
         }
@@ -87,7 +113,7 @@ export function useProjectUploadIntegration() {
       setErrors(newErrors);
       return !hasErrors;
     },
-    [formData]
+    [formData, shouldShowField]
   );
 
   /**
