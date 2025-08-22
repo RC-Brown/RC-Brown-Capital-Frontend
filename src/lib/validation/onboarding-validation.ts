@@ -304,7 +304,7 @@ export const ProjectUploadSchema = z.object({
   project_name: z.string().min(1, "Project name is required"),
   project_subtitle: z.string().min(1, "Project subtitle is required"),
   project_summary: z.string().min(1, "Project summary is required"),
-  years_operating: z.string().min(1, "Years operating is required"),
+  years_of_active_operation: z.string().min(1, "Years operating is required"),
   historical_portfolio_activity: z.string().min(1, "Historical portfolio activity is required"),
   assets_under_management: z.string().min(1, "Assets under management is required"),
   number_of_realized_projects: z.string().min(1, "Number of realized projects is required"),

@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Input } from "@/src/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Tooltip } from "../ui/tooltip";
 import { CurrencyInput } from "./currency-input";
-import { PercentageInput } from "./percentage-input";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
+import { getFormNumbering } from "@/src/lib/utils/onboarding-field-mapping";
+import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 import Image from "next/image";
 
 type DistributionPeriod = "monthly" | "quarterly" | "semi_annually" | "annually";
@@ -20,7 +21,8 @@ interface DebtDetailsData {
   expected_min_annual_return?: string;
   exit_date?: string;
   target_hold_period?: TargetHoldPeriod;
-  return_on_investment?: string;
+  min_return_on_investment?: string;
+  max_return_on_investment?: string;
 }
 
 interface DebtDetailsFormProps {
@@ -30,10 +32,118 @@ interface DebtDetailsFormProps {
 
 const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange }) => {
   const { currencySymbol } = useCurrencySafe();
+  const { formData } = useOnboardingStoreWithUser();
+
+  // Get dynamic numbering based on what's currently visible
+  const formNumber = getFormNumbering("debt_details_form", formData.what_are_you_offering as string | undefined);
+
+  // Auto-calculate debt allocation amount based on percentage and total capitalization
+  const calculateDebtAllocation = (): string => {
+    // Access the nested offer_details_table data
+    const offerDetailsData = formData.offer_details_table as Record<string, unknown> | undefined;
+
+    const debtAllocationPercentage = parseFloat(String(offerDetailsData?.debt_allocation || "0"));
+    const totalCapitalization = parseFloat(String(offerDetailsData?.total_capitalization || "0"));
+
+    if (debtAllocationPercentage > 0 && totalCapitalization > 0) {
+      const debtAllocationAmount = (debtAllocationPercentage / 100) * totalCapitalization;
+      return debtAllocationAmount.toLocaleString();
+    }
+
+    return "0";
+  };
+
+  // Get the numeric debt allocation amount for validation
+  const getDebtAllocationNumeric = (): number => {
+    const offerDetailsData = formData.offer_details_table as Record<string, unknown> | undefined;
+    const debtAllocationPercentage = parseFloat(String(offerDetailsData?.debt_allocation || "0"));
+    const totalCapitalization = parseFloat(String(offerDetailsData?.total_capitalization || "0"));
+
+    if (debtAllocationPercentage > 0 && totalCapitalization > 0) {
+      return (debtAllocationPercentage / 100) * totalCapitalization;
+    }
+    return 0;
+  };
+
+  // Validate maximum investment amount against debt allocation
+  const validateMaxInvestmentAmount = (): string | null => {
+    const maxInvestment = parseFloat(value.max_investment_amount || "0");
+    const debtAllocation = getDebtAllocationNumeric();
+
+    if (maxInvestment > 0 && debtAllocation > 0 && maxInvestment > debtAllocation) {
+      return `Maximum investment cannot exceed the total debt allocation (${currencySymbol}${debtAllocation.toLocaleString()})`;
+    }
+    return null;
+  };
+
+  // Validate minimum investment amount against debt allocation
+  const validateMinInvestmentAmount = (): string | null => {
+    const minInvestment = parseFloat(value.min_investment_amount || "0");
+    const debtAllocation = getDebtAllocationNumeric();
+
+    if (minInvestment > 0 && debtAllocation > 0 && minInvestment > debtAllocation) {
+      return `Minimum investment cannot exceed the total debt allocation (${currencySymbol}${debtAllocation.toLocaleString()})`;
+    }
+    return null;
+  };
+
+  // Validate minimum investment amount against maximum investment amount
+  const validateMinVsMaxInvestment = (): string | null => {
+    const minInvestment = parseFloat(value.min_investment_amount || "0");
+    const maxInvestment = parseFloat(value.max_investment_amount || "0");
+
+    if (minInvestment > 0 && maxInvestment > 0 && minInvestment > maxInvestment) {
+      return `Minimum investment cannot exceed maximum investment amount`;
+    }
+    return null;
+  };
+
+  // Calculate exit date based on target distribution start date + target hold period
+  const calculateExitDate = (): string => {
+    const targetDistributionStart = value.target_distribution_start;
+    const targetHoldPeriod = value.target_hold_period;
+
+    if (!targetDistributionStart || !targetHoldPeriod) {
+      return "Please complete required fields";
+    }
+
+    try {
+      const startDate = new Date(targetDistributionStart);
+      if (isNaN(startDate.getTime())) {
+        return "Invalid start date";
+      }
+
+      const holdPeriodYears = parseInt(targetHoldPeriod, 10);
+      const exitDate = new Date(startDate);
+      exitDate.setFullYear(exitDate.getFullYear() + holdPeriodYears);
+
+      // Format as DD/MM/YYYY
+      const day = exitDate.getDate().toString().padStart(2, "0");
+      const month = (exitDate.getMonth() + 1).toString().padStart(2, "0");
+      const year = exitDate.getFullYear();
+
+      return `${day}/${month}/${year}`;
+    } catch (error) {
+      console.error("Error calculating exit date:", error);
+      return "Calculation error";
+    }
+  };
 
   const handleInputChange = (field: string, inputValue: string) => {
     onChange?.({ ...value, [field]: inputValue });
   };
+
+  // Update exit date calculation when dependent fields change
+  useEffect(() => {
+    // Force re-render to update calculated exit date
+    // The calculateExitDate function will be called on each render
+  }, [value.target_distribution_start, value.target_hold_period]);
+
+  // Update debt allocation calculation when dependent values change
+  useEffect(() => {
+    // Force re-render to update calculated debt allocation
+    // The calculateDebtAllocation function will be called on each render
+  }, [formData.offer_details_table]);
 
   //   const requiredFields = [
   //     "debt_allocation",
@@ -136,20 +246,20 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
     <div>
       <div className='mb-5 flex items-center gap-2'>
         <Image src='/icons/feedback.svg' alt='feedback icon' width={24} height={24} />
-        <h3 className='font-semibold text-text-muted'>2. Debt Details</h3>
+        <h3 className='font-semibold text-text-muted'>{formNumber}. Debt Details</h3>
       </div>
       <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
         {/* Debt % Allocation */}
         <div className='space-y-2'>
-          <Tooltip content='This is automatically calculated and shows what percentage of the total capital is allocated as debt'>
-            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Debt % Allocation *</span>
+          <Tooltip content='This is automatically calculated and shows what amount of the total capital is allocated as debt'>
+            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>
+              Debt Allocation ({currencySymbol}) *
+            </span>
           </Tooltip>
-          <PercentageInput
-            value={value.debt_allocation || ""}
-            onChange={(value) => handleInputChange("debt_allocation", value)}
-            placeholder='Enter allocation'
-            className='h-[51px] w-full py-5 text-sm shadow-none'
-          />
+          <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 bg-gray-50 px-3 text-sm text-text-muted/80'>
+            {currencySymbol}
+            {calculateDebtAllocation()}
+          </div>
         </div>
 
         {/* Distribution Period */}
@@ -166,6 +276,28 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
             </SelectTrigger>
             <SelectContent className='bg-white'>
               {distributionPeriodOptions.map((option) => (
+                <SelectItem className='hover:bg-primary hover:text-white' key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Target Hold Period */}
+        <div className='space-y-2'>
+          <Tooltip content='Select the expected duration, in years, that the debt investment will be held before repayment'>
+            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Target Hold Period (Years) *</span>
+          </Tooltip>
+          <Select
+            value={value.target_hold_period || ""}
+            onValueChange={(selectedValue) => handleInputChange("target_hold_period", selectedValue)}
+          >
+            <SelectTrigger className='h-[51px] w-full py-5 text-sm text-text-muted/80 shadow-none'>
+              <SelectValue placeholder='Select Target Hold Period' className='text-sm' />
+            </SelectTrigger>
+            <SelectContent className='bg-white'>
+              {targetHoldPeriodOptions.map((option) => (
                 <SelectItem className='hover:bg-primary hover:text-white' key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
@@ -201,6 +333,9 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
             placeholder=''
             className='h-[51px] w-full py-5 text-sm shadow-none'
           />
+          {validateMaxInvestmentAmount() && (
+            <p className='mt-1 text-xs text-red-500'>{validateMaxInvestmentAmount()}</p>
+          )}
         </div>
 
         {/* Minimum Investment Amount */}
@@ -214,17 +349,41 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
             placeholder=''
             className='h-[51px] w-full py-5 text-sm shadow-none'
           />
+          {validateMinInvestmentAmount() && (
+            <p className='mt-1 text-xs text-red-500'>{validateMinInvestmentAmount()}</p>
+          )}
+          {validateMinVsMaxInvestment() && <p className='mt-1 text-xs text-red-500'>{validateMinVsMaxInvestment()}</p>}
         </div>
 
-        {/* Return on Investment (% ) */}
+        {/* Minimum Return on Investment (%) */}
         <div className='space-y-2'>
-          <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Return on Investment (%) *</span>
+          <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Minimum Return on Investment (%) *</span>
           <Select
-            value={value.return_on_investment || ""}
-            onValueChange={(selectedValue) => handleInputChange("return_on_investment", selectedValue)}
+            value={value.min_return_on_investment || ""}
+            onValueChange={(selectedValue) => handleInputChange("min_return_on_investment", selectedValue)}
           >
             <SelectTrigger className='h-[51px] w-full py-5 text-sm text-text-muted/80 shadow-none'>
-              <SelectValue placeholder='Select Return on Investment' className='text-sm' />
+              <SelectValue placeholder='Select Minimum Return on Investment' className='text-sm' />
+            </SelectTrigger>
+            <SelectContent className='bg-white'>
+              {returnOnInvestmentOptions.map((option) => (
+                <SelectItem className='hover:bg-primary hover:text-white' key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Maximum Return on Investment (%) */}
+        <div className='space-y-2'>
+          <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Maximum Return on Investment (%) *</span>
+          <Select
+            value={value.max_return_on_investment || ""}
+            onValueChange={(selectedValue) => handleInputChange("max_return_on_investment", selectedValue)}
+          >
+            <SelectTrigger className='h-[51px] w-full py-5 text-sm text-text-muted/80 shadow-none'>
+              <SelectValue placeholder='Select Maximum Return on Investment' className='text-sm' />
             </SelectTrigger>
             <SelectContent className='bg-white'>
               {returnOnInvestmentOptions.map((option) => (
@@ -246,11 +405,11 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 px-3 text-sm text-text-muted/80'>
             {(() => {
               const minAmount = parseFloat(value.min_investment_amount || "0");
-              const roiPercent = parseFloat(value.return_on_investment || "0");
+              const roiPercent = parseFloat(value.min_return_on_investment || "0");
               const calculatedReturn = (minAmount * roiPercent) / 100;
               return calculatedReturn > 0
                 ? `${currencySymbol}${calculatedReturn.toLocaleString()}`
-                : `${currencySymbol}950`;
+                : `${currencySymbol}0`;
             })()}
           </div>
         </div>
@@ -265,51 +424,23 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
           <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 px-3 text-sm text-text-muted/80'>
             {(() => {
               const maxAmount = parseFloat(value.max_investment_amount || "0");
-              const roiPercent = parseFloat(value.return_on_investment || "0");
+              const roiPercent = parseFloat(value.max_return_on_investment || "0");
               const calculatedReturn = (maxAmount * roiPercent) / 100;
               return calculatedReturn > 0
                 ? `${currencySymbol}${calculatedReturn.toLocaleString()}`
-                : `${currencySymbol}950`;
+                : `${currencySymbol}0`;
             })()}
           </div>
         </div>
 
-        {/* Target Hold Period */}
-        <div className='space-y-2'>
-          <Tooltip content='Select the expected duration, in years, that the debt investment will be held before repayment'>
-            <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Target Hold Period (Years) *</span>
-          </Tooltip>
-          <Select
-            value={value.target_hold_period || ""}
-            onValueChange={(selectedValue) => handleInputChange("target_hold_period", selectedValue)}
-          >
-            <SelectTrigger className='h-[51px] w-full py-5 text-sm text-text-muted/80 shadow-none'>
-              <SelectValue placeholder='Select Target Hold Period' className='text-sm' />
-            </SelectTrigger>
-            <SelectContent className='bg-white'>
-              {targetHoldPeriodOptions.map((option) => (
-                <SelectItem className='hover:bg-primary hover:text-white' key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Exit Date */}
         <div className='space-y-2'>
-          <Tooltip content='Select the projected end date of the debt investment when the principal and final returns are due.'>
+          <Tooltip content='This is automatically calculated and shows the projected end date of the debt investment when the principal and final returns are due.'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Exit Date *</span>
           </Tooltip>
-          <Input
-            id='exit_date'
-            type='date'
-            placeholder='1/3/27'
-            value={value.exit_date || ""}
-            onChange={(e) => handleInputChange("exit_date", e.target.value)}
-            className='h-[51px] w-full py-5 text-sm shadow-none placeholder:text-sm md:text-sm'
-            data-placeholder='DD/MM/YY'
-          />
+          <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 bg-gray-50 px-3 text-sm text-text-muted/80'>
+            {calculateExitDate()}
+          </div>
         </div>
       </div>
     </div>

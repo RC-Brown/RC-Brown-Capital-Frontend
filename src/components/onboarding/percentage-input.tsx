@@ -21,6 +21,8 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
   required,
 }) => {
   const [displayValue, setDisplayValue] = useState("");
+  const [showMaxError, setShowMaxError] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
 
   // Parse initial value and format it
   useEffect(() => {
@@ -31,12 +33,25 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
       if (cleanValue) {
         const formattedValue = formatPercentageValue(cleanValue);
         setDisplayValue(formattedValue);
+
+        // Check if we should show warning for the new value
+        const numericValue = parseFloat(cleanValue);
+        if (!isNaN(numericValue) && numericValue >= 90 && numericValue <= 100) {
+          setShowWarning(true);
+        } else {
+          setShowWarning(false);
+        }
       } else {
         setDisplayValue("");
+        setShowWarning(false);
       }
     } else {
       setDisplayValue("");
+      setShowWarning(false);
     }
+
+    // Clear error state when value changes
+    setShowMaxError(false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
@@ -78,12 +93,33 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
     // Extract the numeric part (everything before the % symbol)
     const numericPart = inputValue.endsWith("%") ? inputValue.slice(0, -1) : inputValue;
 
+    // Check if the numeric value exceeds 100%
+    const cleanNumericValue = numericPart.replace(/[^0-9.]/g, "");
+    const numericValue = parseFloat(cleanNumericValue);
+
+    if (!isNaN(numericValue) && numericValue > 100) {
+      // Don't allow values over 100%
+      setShowMaxError(true);
+      setShowWarning(false);
+      setTimeout(() => setShowMaxError(false), 3000);
+      return;
+    }
+
+    // Show warning when approaching 100%
+    if (!isNaN(numericValue) && numericValue >= 90 && numericValue <= 100) {
+      setShowWarning(true);
+    } else {
+      setShowWarning(false);
+    }
+
+    // Clear error message when input is valid
+    setShowMaxError(false);
+
     // Format the value
     const formattedValue = formatPercentageValue(numericPart);
     setDisplayValue(formattedValue);
 
     // Extract clean numeric value for the onChange callback (without % symbol and commas)
-    const cleanNumericValue = numericPart.replace(/[^0-9.]/g, "");
     onChange(cleanNumericValue);
 
     // Restore cursor position after formatting
@@ -115,6 +151,10 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
     const input = e.target;
     const valueLength = input.value.length;
 
+    // Clear any existing error or warning states
+    setShowMaxError(false);
+    setShowWarning(false);
+
     // If the input is empty or doesn't end with the percentage symbol, add it
     if (valueLength === 0 || !input.value.endsWith("%")) {
       setDisplayValue("%");
@@ -138,11 +178,13 @@ export const PercentageInput: React.FC<PercentageInputProps> = ({
         value={displayValue}
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
-        onFocus={handleFocus}
+        onFocus={handleFocus}   
         placeholder={placeholder || "%"}
         className={className}
         required={required}
       />
+      {showMaxError && <div className='mt-1 text-xs text-red-500'>Percentage cannot exceed 100%</div>}
+      {showWarning && !showMaxError && <div className='mt-1 text-xs text-amber-600'>Approaching maximum (100%)</div>}
     </div>
   );
 };

@@ -33,15 +33,15 @@ export interface ProjectUploadData {
   project_name: string;
   project_subtitle: string;
   project_summary: string;
-  years_operating: string;
+  years_of_active_operation: string;
   historical_portfolio_activity: string;
   assets_under_management: string;
   number_of_realized_projects: string;
   rc_brown_capital_offerings: string;
   projected_valuation: string;
-  timeline_of_completion_months: number;
+  timeline_of_completion_months: string;
   total_capital_required: string;
-  total_debt_allocation_percent: number;
+  total_debt_allocation_percent: string;
   debt_investment_tenure_months: number;
   projected_returns_equity_percent: number;
   total_equity_percent: number;
@@ -56,7 +56,7 @@ export interface ProjectUploadData {
   anchor_buyer_details?: string;
   percent_leased: number;
   sq_ft_leased: number;
-  investment_hold_period_years: number;
+  investment_hold_period: number;
   acquisition_date: string;
   closing_date: string;
   target_exit_date_debt: string;
@@ -65,19 +65,20 @@ export interface ProjectUploadData {
   offer_closing_date: string;
   funds_due_date: string;
   target_escrow_closing_date: string;
-  targeted_distribution_start_date: string;
+  targeted_distribution_start_date_debt: string;
+  targeted_distribution_start_date_equity: string;
   distributions_anticipated_begin_date: string;
   frequency_of_distributions: string;
   sponsor_background: string;
   years_in_operation: string;
   historical_portfolio_activity_amount: string;
-  projects_under_management_amount: string;
+  project_under_management_amount: string;
   total_square_feet_managed: string;
   deals_funded_by_rc_brown: number;
   number_of_properties_under_management: number;
   total_number_of_realized_projects: number;
-  number_properties_developed: number;
-  number_properties_built_sold: number;
+  number_of_properties_developed: number;
+  number_of_properties_built_sold: number;
   highest_budget_for_project: string;
   average_length_of_completion_months: number;
   full_track_record?: string;
@@ -179,7 +180,7 @@ const step2Schema = baseProjectUploadSchema.extend({
   project_name: z.string().min(1, "Project name is required"),
   project_subtitle: z.string().min(1, "Project subtitle is required"),
   project_summary: z.string().min(1, "Project summary is required"),
-  years_operating: z.string().min(1, "Years operating is required"),
+  years_of_active_operation: z.string().min(1, "Years operating is required"),
   historical_portfolio_activity: z.string().min(1, "Historical portfolio activity is required"),
   assets_under_management: z.string().min(1, "Assets under management is required"),
   realized_projects: z.string().min(1, "Number of realized projects is required"),
@@ -202,20 +203,24 @@ const step4Schema = baseProjectUploadSchema.extend({
   property_address: z.any().optional(),
   location_description: z.string().optional(),
   occupancy_status: z.string().optional(),
+  occupancy: z.string().optional(),
   about_property: z.string().optional(),
   detailed_project_description: z.string().optional(),
   anchor_tenant: z.string().optional(),
   anchor_tenant_details: z.string().optional(),
   anchor_buyer: z.string().optional(),
   anchor_buyer_details: z.string().optional(),
+  has_anchor_tenant: z.boolean().optional(),
+  has_anchor_buyer: z.boolean().optional(),
   percentage_leased: z.string().optional(),
+  percent_leased: z.string().optional(),
   sq_ft_leased: z.string().optional(),
 
   // Backend expected fields for Step 4
   projected_valuation: z.number().optional(),
-  timeline_of_completion_months: z.number().optional(),
-  total_capital_required: z.number().optional(),
-  total_debt_allocation_percent: z.number().optional(),
+  timeline_of_completion_months: z.string().optional(),
+  total_capital_required: z.string().optional(),
+  total_debt_allocation_percent: z.string().optional(),
   debt_investment_tenure_months: z.number().optional(),
   projected_returns_equity_percent: z.number().optional(),
   total_equity_percent: z.number().optional(),
@@ -224,7 +229,7 @@ const step4Schema = baseProjectUploadSchema.extend({
 
 const step5Schema = baseProjectUploadSchema.extend({
   // Investment Returns (Step 5)
-  investment_hold_period: z.string().optional(),
+  investment_hold_period: z.number().optional(),
   acquisition_date: z.string().optional(),
   closing_date: z.string().optional(),
   target_exit_date_debt: z.string().optional(),
@@ -237,8 +242,8 @@ const step5Schema = baseProjectUploadSchema.extend({
   targeted_distribution_start_date_debt: z.string().optional(),
   targeted_distribution_start_date_equity: z.string().optional(),
   funds_modification_notice: z.any().optional(),
-  distributions_begin_date: z.string().optional(),
-  distribution_frequency: z.string().optional(),
+  distributions_anticipated_begin_date: z.string().optional(),
+  frequency_of_distributions: z.string().optional(),
 });
 
 const step6Schema = baseProjectUploadSchema.extend({
@@ -246,13 +251,13 @@ const step6Schema = baseProjectUploadSchema.extend({
   sponsor_background: z.string().min(1, "Sponsor background is required"),
   years_in_operation: z.number().min(0, "Years in operation must be at least 0"),
   historical_portfolio_activity_amount: z.number().min(0, "Historical portfolio activity amount must be at least 0"),
-  asset_under_management_amount: z.number().min(0, "Asset under management amount must be at least 0"),
-  total_square_feet_managed: z.number().min(0, "Total square feet managed must be at least 0"),
+  project_under_management_amount: z.number().min(0, "Project under management amount must be at least 0"),
+  total_square_feet_managed: z.string().min(1, "Total square feet managed is required"),
   deals_funded_by_rc_brown: z.number().min(0, "Deals funded by RC Brown must be at least 0"),
-  number_properties_under_management: z.number().min(0, "Number of properties under management must be at least 0"),
-  total_realized_projects: z.number().min(0, "Total realized projects must be at least 0"),
-  number_properties_developed: z.number().min(0, "Number of properties developed must be at least 0"),
-  number_properties_built_sold: z.number().min(0, "Number of properties built/sold must be at least 0"),
+  number_of_properties_under_management: z.number().min(0, "Number of properties under management must be at least 0"),
+  total_number_of_realized_projects: z.number().min(0, "Total number of realized projects must be at least 0"),
+  number_of_properties_developed: z.number().min(0, "Number of properties developed must be at least 0"),
+  number_of_properties_built_sold: z.number().min(0, "Number of properties built/sold must be at least 0"),
   highest_budget_for_project: z.number().min(0, "Highest budget for project must be at least 0"),
   average_length_of_completion_months: z.number().min(1, "Average length of completion must be at least 1 month"),
   track_record_documents: z.array(z.any()).min(1, "At least one track record document is required"),
@@ -364,7 +369,7 @@ const projectUploadSchema = z.object({
   project_name: z.string().optional(),
   project_subtitle: z.string().optional(),
   project_summary: z.string().optional(),
-  years_operating: z.string().optional(),
+  years_of_active_operation: z.string().optional(),
   historical_portfolio_activity: z.string().optional(),
   assets_under_management: z.string().optional(),
   number_of_realized_projects: z.string().optional(),
@@ -383,20 +388,24 @@ const projectUploadSchema = z.object({
   property_address: z.any().optional(),
   location_description: z.string().optional(),
   occupancy_status: z.string().optional(),
+  occupancy: z.string().optional(),
   about_property: z.string().optional(),
   detailed_project_description: z.string().optional(),
   anchor_tenant: z.string().optional(),
   anchor_tenant_details: z.string().optional(),
   anchor_buyer: z.string().optional(),
   anchor_buyer_details: z.string().optional(),
+  has_anchor_tenant: z.boolean().optional(),
+  has_anchor_buyer: z.boolean().optional(),
   percentage_leased: z.string().optional(),
+  percent_leased: z.string().optional(),
   sq_ft_leased: z.string().optional(),
 
   // Backend expected fields for Step 4
   projected_valuation: z.number().optional(),
-  timeline_of_completion_months: z.number().optional(),
-  total_capital_required: z.number().optional(),
-  total_debt_allocation_percent: z.number().optional(),
+  timeline_of_completion_months: z.string().optional(),
+  total_capital_required: z.string().optional(),
+  total_debt_allocation_percent: z.string().optional(),
   debt_investment_tenure_months: z.number().optional(),
   projected_returns_equity_percent: z.number().optional(),
   total_equity_percent: z.number().optional(),
@@ -423,13 +432,13 @@ const projectUploadSchema = z.object({
   sponsor_background: z.string().optional(),
   years_in_operation: z.number().optional(),
   historical_portfolio_activity_amount: z.number().optional(),
-  asset_under_management_amount: z.number().optional(),
-  total_square_feet_managed: z.number().optional(),
+  project_under_management_amount: z.number().optional(),
+  total_square_feet_managed: z.string().optional(),
   deals_funded_by_rc_brown: z.number().optional(),
-  number_properties_under_management: z.number().optional(),
-  total_realized_projects: z.number().optional(),
-  number_properties_developed: z.number().optional(),
-  number_properties_built_sold: z.number().optional(),
+  number_of_properties_under_management: z.number().optional(),
+  total_number_of_realized_projects: z.number().optional(),
+  number_of_properties_developed: z.number().optional(),
+  number_of_properties_built_sold: z.number().optional(),
   highest_budget_for_project: z.number().optional(),
   average_length_of_completion_months: z.number().optional(),
   track_record_documents: z.array(z.any()).optional(),
@@ -585,7 +594,7 @@ export async function saveProjectUploadStep(
       if (!projectId) {
         throw new Error("Project ID is required for steps 2-10");
       }
-      endpoint = `${BASE_URL}/api/sponsor-projects/${projectId}/save-step/${step}`;
+      endpoint = `${BASE_URL}/api/sponsor-projects/${projectId}/save-step${step}`;
       // responseType = "ProjectUploadStepResponse";
     }
 
