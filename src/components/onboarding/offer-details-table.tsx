@@ -51,9 +51,11 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
   // Auto-populate allocations based on selection when component mounts or selection changes
   React.useEffect(() => {
     if (isDebtOnly && (!value.debt_allocation || value.debt_allocation !== "100")) {
-      onChange?.({ ...value, debt_allocation: "100", equity_allocation: "0" });
+      const newValue = { ...value, debt_allocation: "100", equity_allocation: "0" };
+      onChange?.(newValue);
     } else if (isEquityOnly && (!value.equity_allocation || value.equity_allocation !== "100")) {
-      onChange?.({ ...value, debt_allocation: "0", equity_allocation: "100" });
+      const newValue = { ...value, debt_allocation: "0", equity_allocation: "100" };
+      onChange?.(newValue);
     }
   }, [whatAreYouOffering, value, onChange, isDebtOnly, isEquityOnly]);
 

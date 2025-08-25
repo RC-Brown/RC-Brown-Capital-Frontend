@@ -90,12 +90,13 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       const exitDate = new Date(startDate);
       exitDate.setFullYear(exitDate.getFullYear() + holdPeriodYears);
 
-      // Format as DD/MM/YYYY
+      // Format as DD/MM/YYYY for display
       const day = exitDate.getDate().toString().padStart(2, "0");
       const month = (exitDate.getMonth() + 1).toString().padStart(2, "0");
       const year = exitDate.getFullYear();
 
-      return `${day}/${month}/${year}`;
+      const result = `${day}/${month}/${year}`;
+      return result;
     } catch (error) {
       console.error("Error calculating exit date:", error);
       return "Calculation error";
@@ -184,6 +185,30 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     onChange?.(newValue);
   };
 
+  // Calculate and save exit_date when dependent fields change
+  useEffect(() => {
+    if (value.target_distribution_start && value.target_hold_period) {
+      const calculatedExitDate = calculateExitDate();
+
+      // Only save if it's a valid date (not an error message)
+      if (
+        !calculatedExitDate.includes("Please complete") &&
+        !calculatedExitDate.includes("Invalid") &&
+        !calculatedExitDate.includes("Calculation error")
+      ) {
+        // Convert DD/MM/YYYY to YYYY-MM-DD format for backend
+        const [day, month, year] = calculatedExitDate.split("/");
+        const formattedExitDate = `${year}-${month}-${day}`;
+
+        // Only update if the exit_date has actually changed
+        if (value.exit_date !== formattedExitDate) {
+          onChange?.({ ...value, exit_date: formattedExitDate });
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.target_distribution_start, value.target_hold_period, value.exit_date]);
+
   // Validate maximum investment amount against equity allocation
   const validateMaxInvestmentAmount = (): string | null => {
     const maxInvestment = parseFloat(value.maximum_investment || "0");
@@ -219,11 +244,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
 
   // Remove the validateDates function since it's no longer needed
 
-  // Update exit date calculation when dependent fields change
-  useEffect(() => {
-    // Force re-render to update calculated exit date
-    // The calculateExitDate function will be called on each render
-  }, [value.target_distribution_start, value.target_hold_period]);
+  // Remove the complex useEffect - just use the current value when user clicks next
 
   const distributionFrequencyOptions = [
     { label: "Monthly", value: "monthly" },
@@ -378,7 +399,10 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       category: "Exit Date",
       inputType: "calculated",
       field: "exit_date",
-      placeholder: calculateExitDate(),
+      placeholder: (() => {
+        const calculatedDate = calculateExitDate();
+        return calculatedDate;
+      })(),
       briefInfo: "The projected date when the investment will end and equity will be returned to investors",
     },
     {
