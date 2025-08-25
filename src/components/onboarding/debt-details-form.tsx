@@ -98,6 +98,8 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
     return null;
   };
 
+
+
   // Calculate exit date based on target distribution start date + target hold period
   const calculateExitDate = (): string => {
     const targetDistributionStart = value.target_distribution_start;
@@ -117,12 +119,13 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
       const exitDate = new Date(startDate);
       exitDate.setFullYear(exitDate.getFullYear() + holdPeriodYears);
 
-      // Format as DD/MM/YYYY
+      // Format as DD/MM/YYYY for display
       const day = exitDate.getDate().toString().padStart(2, "0");
       const month = (exitDate.getMonth() + 1).toString().padStart(2, "0");
       const year = exitDate.getFullYear();
 
-      return `${day}/${month}/${year}`;
+      const result = `${day}/${month}/${year}`;
+      return result;
     } catch (error) {
       console.error("Error calculating exit date:", error);
       return "Calculation error";
@@ -133,17 +136,29 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
     onChange?.({ ...value, [field]: inputValue });
   };
 
-  // Update exit date calculation when dependent fields change
+  // Calculate and save exit_date when dependent fields change
   useEffect(() => {
-    // Force re-render to update calculated exit date
-    // The calculateExitDate function will be called on each render
-  }, [value.target_distribution_start, value.target_hold_period]);
+    if (value.target_distribution_start && value.target_hold_period) {
+      const calculatedExitDate = calculateExitDate();
 
-  // Update debt allocation calculation when dependent values change
-  useEffect(() => {
-    // Force re-render to update calculated debt allocation
-    // The calculateDebtAllocation function will be called on each render
-  }, [formData.offer_details_table]);
+      // Only save if it's a valid date (not an error message)
+      if (
+        !calculatedExitDate.includes("Please complete") &&
+        !calculatedExitDate.includes("Invalid") &&
+        !calculatedExitDate.includes("Calculation error")
+      ) {
+        // Convert DD/MM/YYYY to YYYY-MM-DD format for backend
+        const [day, month, year] = calculatedExitDate.split("/");
+        const formattedExitDate = `${year}-${month}-${day}`;
+
+        // Only update if the exit_date has actually changed
+        if (value.exit_date !== formattedExitDate) {
+          onChange?.({ ...value, exit_date: formattedExitDate });
+        }
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value.target_distribution_start, value.target_hold_period, value.exit_date]);
 
   //   const requiredFields = [
   //     "debt_allocation",
@@ -439,7 +454,10 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>Exit Date *</span>
           </Tooltip>
           <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 bg-gray-50 px-3 text-sm text-text-muted/80'>
-            {calculateExitDate()}
+            {(() => {
+              const calculatedDate = calculateExitDate();
+              return calculatedDate;
+            })()}
           </div>
         </div>
       </div>

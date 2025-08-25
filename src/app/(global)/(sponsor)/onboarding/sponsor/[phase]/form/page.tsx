@@ -3,7 +3,6 @@
 
 import { useState, useEffect, useRef, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useSession } from "next-auth/react";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { SectionProgressTracker } from "@/src/components/molecules/progress-tracker";
@@ -18,15 +17,11 @@ import {
   useSaveBusinessInformationStep,
   useSaveCompanyRepresentativeStep,
 } from "@/src/lib/hooks/use-onboarding-mutations";
-import { BusinessInformationInput, CompanyRepresentativeInput } from "@/src/services/onboarding";
 import {
-  transformFormDataToApi,
   getSectionStepNumber,
-  transformCompanyRepDataToApi,
   getCompanyRepSectionStepNumber,
 } from "@/src/lib/utils/onboarding-field-mapping";
 import { useSaveProjectUploadStep } from "@/src/lib/hooks/use-project-upload-mutations";
-import { ProjectUploadInput } from "@/src/services/project-upload";
 import { transformFormToBackendData } from "@/src/lib/utils/project-upload-field-mapping";
 import { OnboardingField } from "@/src/types/onboarding";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
@@ -49,7 +44,6 @@ interface CongratsMessage {
 export default function FormPage({ params }: FormPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const { data: session } = useSession();
   const store = useOnboardingStoreWithUser();
   const { formatCurrency } = useCurrencySafe();
   const {
@@ -402,22 +396,10 @@ export default function FormPage({ params }: FormPageProps) {
   };
 
   // Convert form data to API format
-  const convertToApiFormat = (): BusinessInformationInput | CompanyRepresentativeInput | ProjectUploadInput => {
-    if (!session?.user?.id) {
-      throw new Error("User ID not available");
-    }
-
-    if (resolvedParams.phase === "business-information") {
-      return transformFormDataToApi(formData, parseInt(session.user.id));
-    } else if (resolvedParams.phase === "company-representative") {
-      return transformCompanyRepDataToApi(formData, parseInt(session.user.id));
-    } else if (resolvedParams.phase === "project-upload") {
-      const result = transformFormToBackendData(formData as ProjectUploadInput);
-      return result;
-    }
-
-    // Fallback for other phases
-    return transformFormDataToApi(formData, parseInt(session.user.id));
+  const convertToApiFormat = (formData: any, step: number): any => {
+    console.log(step)
+    const apiData = transformFormToBackendData(formData);
+    return apiData;
   };
 
   const handleNext = async () => {
@@ -426,7 +408,7 @@ export default function FormPage({ params }: FormPageProps) {
     // Save to backend for phases that have backend integration
     if (resolvedParams.phase === "business-information") {
       try {
-        const apiData = convertToApiFormat() as BusinessInformationInput;
+        const apiData = convertToApiFormat(formData, getCurrentStep());
         const step = getCurrentStep();
 
         await saveBusinessStepMutation.mutateAsync({
@@ -443,7 +425,7 @@ export default function FormPage({ params }: FormPageProps) {
       }
     } else if (resolvedParams.phase === "company-representative") {
       try {
-        const apiData = convertToApiFormat() as CompanyRepresentativeInput;
+        const apiData = convertToApiFormat(formData, getCurrentStep());
         const step = getCurrentStep();
 
         await saveCompanyRepStepMutation.mutateAsync({
@@ -460,7 +442,7 @@ export default function FormPage({ params }: FormPageProps) {
       }
     } else if (resolvedParams.phase === "project-upload") {
       try {
-        const apiData = convertToApiFormat() as ProjectUploadInput;
+        const apiData = convertToApiFormat(formData, getCurrentStep());
         const step = getCurrentStep();
 
         // Enable backend save for all steps
@@ -534,7 +516,7 @@ export default function FormPage({ params }: FormPageProps) {
 
       // Save to backend for phases that have backend integration
       if (resolvedParams.phase === "business-information") {
-        const apiData = convertToApiFormat() as BusinessInformationInput;
+        const apiData = convertToApiFormat(formData, getCurrentStep());
         const step = getCurrentStep();
 
         // Save as draft
@@ -544,7 +526,7 @@ export default function FormPage({ params }: FormPageProps) {
           sectionKey: currentSectionData.key,
         });
       } else if (resolvedParams.phase === "company-representative") {
-        const apiData = convertToApiFormat() as CompanyRepresentativeInput;
+        const apiData = convertToApiFormat(formData, getCurrentStep());
         const step = getCurrentStep();
 
         // Save as draft
@@ -554,7 +536,7 @@ export default function FormPage({ params }: FormPageProps) {
           sectionKey: currentSectionData.key,
         });
       } else if (resolvedParams.phase === "project-upload") {
-        const apiData = convertToApiFormat() as ProjectUploadInput;
+        const apiData = convertToApiFormat(formData, getCurrentStep());
         const step = getCurrentStep();
 
         // Save as draft

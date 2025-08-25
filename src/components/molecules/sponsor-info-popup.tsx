@@ -68,7 +68,14 @@ export function SponsorInfoPopup({
 
                 {/* Action Buttons */}
                 <div className='flex gap-3 p-6 pt-0'>
-                  <Link href='#' className='flex-1 no-underline hover:no-underline'>
+                  <Link
+                    href={
+                      phase === "project-upload" && currentSectionData?.key === "media-acknowledgement"
+                        ? "/dashboard"
+                        : "#"
+                    }
+                    className='flex-1 no-underline hover:no-underline'
+                  >
                     <Button
                       asChild
                       variant='link'

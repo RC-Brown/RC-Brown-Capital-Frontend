@@ -105,6 +105,15 @@ export const PROJECT_UPLOAD_FIELD_MAPPING = {
   strategy: "strategy",
   objective: "objective",
 
+  // Step 8 specific fields that were missing
+  investment_structure_preamble: "investment_structure_preamble",
+  what_are_you_offering: "what_are_you_offering",
+  offer_details_table: "offer_details_table",
+  debt_details_form: "debt_details_form",
+  expenses_revenue_form: "expenses_revenue_form",
+  equity_details_form: "equity_details_form",
+  sponsor_co_invest: "sponsor_co_invest",
+
   // Debt Details
   debt_allocation_percent: "debt_allocation_percent",
   debt_distribution_period: "debt_distribution_period",
@@ -177,486 +186,78 @@ export function transformFormToBackendData(formData: ProjectUploadInput): any {
     const backendKey = PROJECT_UPLOAD_FIELD_MAPPING[frontendKey as keyof typeof PROJECT_UPLOAD_FIELD_MAPPING];
 
     if (backendKey) {
-      // Debug logging for track_record_documents related fields
-      if (frontendKey === "track_record_attachment" || frontendKey === "sponsor_information_docs") {
-        console.log(`Processing field: ${frontendKey} -> ${backendKey}`);
-        console.log(`Value:`, value);
-      }
-      // Handle special transformations
-      if (frontendKey === "anchor_tenant") {
-        backendData[backendKey] = value === "yes";
-      } else if (frontendKey === "anchor_buyer") {
-        backendData[backendKey] = value === "yes";
-      } else if (frontendKey === "percentage_leased") {
-        backendData[backendKey] = parseFloat(value as string) || 0;
-      } else if (frontendKey === "sq_ft_leased") {
-        backendData[backendKey] = value as string;
-      } else if (frontendKey === "investment_hold_period") {
-        backendData[backendKey] = parseInt(value as string) || 0;
-      } else if (
-        frontendKey === "years_in_operation" ||
-        frontendKey === "historical_portfolio_activity_amount" ||
-        frontendKey === "project_under_management_amount" ||
-        frontendKey === "deals_funded_by_rc_brown" ||
-        frontendKey === "number_of_properties_under_management" ||
-        frontendKey === "total_number_of_realized_projects" ||
-        frontendKey === "number_of_properties_developed" ||
-        frontendKey === "number_of_properties_built_sold" ||
-        frontendKey === "highest_budget_for_project" ||
-        frontendKey === "average_length_of_completion_months"
-      ) {
-        backendData[backendKey] = parseFloat(value as string) || 0;
-      } else if (frontendKey === "key_deal_points" && typeof value === "object" && value !== null) {
-        const keyDealPoints = value as Record<string, string>;
-        // Map all required fields with proper validation
-        backendData["projected_valuation"] = parseFloat(keyDealPoints.projected_valuation) || 0;
-        backendData["timeline_of_completion_months"] = keyDealPoints.timeline_completion || "";
-        backendData["total_capital_required"] = keyDealPoints.total_capital_required || "0";
-        backendData["total_debt_allocation_percent"] = keyDealPoints.total_debt_allocation || "0";
-        backendData["debt_investment_tenure"] = keyDealPoints.debt_investment_tenure || "";
-        backendData["debt_yield_percent"] = parseFloat(keyDealPoints.percentage_yield_debt) || 0;
-        backendData["debt_periodic_payment"] = keyDealPoints.periodic_payments === "yes" ? "monthly" : "at_maturity";
-        backendData["equity_investment_tenure"] = keyDealPoints.equity_investment_tenure || "";
-        backendData["projected_returns_equity_percent"] = parseFloat(keyDealPoints.projected_returns_equity) || 0;
-        backendData["equity_periodic_payment"] = keyDealPoints.periodic_payments === "yes" ? "monthly" : "at_maturity";
-        backendData["total_equity_allocation"] = parseFloat(keyDealPoints.total_equity) || 0;
-      } else if (frontendKey === "properties" && Array.isArray(value) && value.length > 0) {
-        // Extract occupancy from the first property and map it to root level
-        const firstProperty = value[0];
-        if (firstProperty && typeof firstProperty === "object") {
-          backendData["occupancy"] = firstProperty.occupancy || "";
-        }
-      } else if (
-        frontendKey === "acquisition_date" ||
-        frontendKey === "closing_date" ||
-        frontendKey === "target_exit_date_debt" ||
-        frontendKey === "target_exit_date_equity" ||
-        frontendKey === "offer_live_date" ||
-        frontendKey === "offer_closing_date" ||
-        frontendKey === "funds_due_date" ||
-        frontendKey === "target_escrow_closing_date" ||
-        frontendKey === "targeted_distribution_start_date_debt" ||
-        frontendKey === "targeted_distribution_start_date_equity" ||
-        frontendKey === "distributions_begin_date"
-      ) {
-        // Ensure dates are in the correct format (YYYY-MM-DD)
-        try {
-          if (!value) {
-            backendData[backendKey] = null;
-          } else {
-            // Handle acquisition_date special case (q1_2025 format)
-            if (frontendKey === "acquisition_date" && typeof value === "string") {
-              const match = value.match(/^q(\d)_(\d{4})$/);
-              if (match) {
-                const quarter = parseInt(match[1]);
-                const year = parseInt(match[2]);
-                // Convert quarter to month (Q1=01, Q2=04, Q3=07, Q4=10)
-                const month = ((quarter - 1) * 3 + 1).toString().padStart(2, "0");
-                // Use 15th of the month as default day
-                const day = "15";
-                backendData[backendKey] = `${year}-${month}-${day}`;
-              } else {
-                backendData[backendKey] = null;
-              }
-            } else if (/^\d{4}-\d{2}-\d{2}$/.test(value as string)) {
-              // If value is already in YYYY-MM-DD format, use it directly
-              backendData[backendKey] = value;
-            } else {
-              // Try to parse and format the date
-              const date = new Date(value as string);
-              if (isNaN(date.getTime())) {
-                backendData[backendKey] = null;
-              } else {
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, "0");
-                const day = String(date.getDate()).padStart(2, "0");
-                backendData[backendKey] = `${year}-${month}-${day}`;
-              }
-            }
-          }
-        } catch (error) {
-          console.error(`Error formatting date for ${frontendKey}:`, error);
-          backendData[backendKey] = null;
-        }
-      } else if (frontendKey === "investment_hold_period") {
-        // Ensure investment hold period is an integer
-        backendData[backendKey] = parseInt(value as string) || 1;
-      } else if (frontendKey === "distribution_frequency") {
-        // Validate distribution frequency matches backend enum
-        const validFrequencies = ["monthly", "quarterly", "annually", "at_maturity"];
-        backendData[backendKey] = validFrequencies.includes(value as string) ? value : "monthly";
-      } else if (frontendKey === "sponsor_background_section" && typeof value === "string") {
-        // SponsorBackgroundSection returns a simple string
-        backendData["sponsor_background"] = value || "";
-      } else if (frontendKey === "sponsor_metrics" && typeof value === "object" && value !== null) {
-        // SponsorMetricsTable returns a complex object with individual metrics
-        const metrics = value as Record<string, string>;
-
-        // Map all required fields exactly as backend expects
-        backendData["sponsor_background"] = backendData["sponsor_background"] || ""; // Ensure this exists
-        backendData["years_in_operation"] = parseInt(metrics.yearsInOperation) || 0;
-        backendData["historical_portfolio_activity_amount"] = parseFloat(metrics.historicalPortfolioActivity || "0");
-        backendData["project_under_management_amount"] = parseFloat(metrics.projectsUnderManagement || "0");
-        // Handle total_square_feet_managed as a string with units
-        if (
-          metrics.totalSquareFeetManaged &&
-          typeof metrics.totalSquareFeetManaged === "object" &&
-          "size" in metrics.totalSquareFeetManaged &&
-          "unit" in metrics.totalSquareFeetManaged
-        ) {
-          const sizeData = metrics.totalSquareFeetManaged as { size: string; unit: string };
-          backendData["total_square_feet_managed"] = `${sizeData.size} ${sizeData.unit}`;
-        } else {
-          backendData["total_square_feet_managed"] = metrics.totalSquareFeetManaged || "0";
-        }
-        backendData["deals_funded_by_rc_brown"] = parseInt(metrics.dealsFundedByRC) || 0;
-        backendData["number_of_properties_under_management"] = parseInt(metrics.propertiesUnderManagement) || 0;
-        backendData["total_number_of_realized_projects"] = parseInt(metrics.totalRealizedProjects) || 0;
-        backendData["number_of_properties_developed"] = parseInt(metrics.propertiesDeveloped) || 0;
-        backendData["number_of_properties_built_sold"] = parseInt(metrics.propertiesBuiltAndSold) || 0;
-        backendData["highest_budget_for_project"] = parseFloat(metrics.highestBudgetProject || "0");
-        backendData["average_length_of_completion_months"] = parseInt(metrics.averageCompletionLength) || 0;
-      } else if (frontendKey === "track_record_attachment") {
-        // Handle track record documents (required field)
-        console.log("Processing track_record_attachment with value:", value);
-        console.log("Value type:", typeof value);
-        console.log("Value constructor:", value?.constructor?.name);
-        console.log("Is Array:", Array.isArray(value));
-        console.log("Is File:", value instanceof File);
-
-        let files: File[] = [];
-
-        if (value instanceof File) {
-          console.log("Value is a File object");
-          files = [value];
-        } else if (Array.isArray(value)) {
-          console.log("Value is an array, length:", value.length);
-          console.log("Array contents:", value);
-
-          // Filter out empty objects and ensure we have actual File objects
-          files = value.filter((file): file is File => {
-            const isValid = file instanceof File;
-            console.log("File validation:", { file, isValid, type: typeof file, constructor: file?.constructor?.name });
-            return isValid;
-          });
-
-          console.log("Filtered files:", files);
-        } else {
-          console.log("Value is neither File nor Array:", value);
-        }
-
-        // Ensure we have at least one file as it's required
-        if (files.length > 0) {
-          // Additional validation to ensure no empty objects slip through
-          const validFiles = files.filter((file) => file instanceof File && file.size > 0);
-          console.log("Valid files after size check:", validFiles);
-
-          if (validFiles.length > 0) {
-            backendData["track_record_documents"] = validFiles;
-            console.log("Set track_record_documents to:", validFiles);
-          } else {
-            console.warn("track_record_documents: files found but they appear to be invalid or empty");
-            backendData["track_record_documents"] = [];
-          }
-        } else {
-          console.warn("track_record_documents is required but no valid files were provided");
-          console.warn("Value received:", value);
-          console.warn("Files filtered:", files);
-          // Since this is required, provide a default empty array
-          backendData["track_record_documents"] = [];
-        }
-      } else if (frontendKey === "sponsor_logo" && Array.isArray(value) && value.length > 0) {
-        // Sponsor logo is an array of files, but we only need the first one
-        backendData[backendKey] = value[0];
-      } else if (frontendKey === "sponsor_logo" && value instanceof File) {
-        // Sponsor logo is a File object
-        backendData[backendKey] = value;
-      } else if (frontendKey === "sponsor_logo" && Array.isArray(value)) {
-        // Sponsor logo is an array of files
-        backendData[backendKey] = value;
-      } else if (frontendKey === "sponsor_information_docs" && typeof value === "object" && value !== null) {
-        // SponsorInformationDocs returns { trackRecord?: File; additionalDocs?: SponsorDocument[] }
-        console.log("Processing sponsor_information_docs with value:", value);
-        const sponsorDocs = value as { trackRecord?: File; additionalDocs?: Array<{ file?: File }> };
-
-        const trackRecordFiles: File[] = [];
-
-        // Add track record file if it exists and is valid
-        if (sponsorDocs.trackRecord && sponsorDocs.trackRecord instanceof File && sponsorDocs.trackRecord.size > 0) {
-          console.log("Found valid trackRecord:", sponsorDocs.trackRecord);
-          trackRecordFiles.push(sponsorDocs.trackRecord);
-        } else if (sponsorDocs.trackRecord) {
-          console.log("Found invalid trackRecord:", sponsorDocs.trackRecord);
-          console.log("trackRecord type:", typeof sponsorDocs.trackRecord);
-          console.log("trackRecord constructor:", sponsorDocs.trackRecord?.constructor?.name);
-          console.log("trackRecord instanceof File:", sponsorDocs.trackRecord instanceof File);
-        }
-
-        // Add additional docs files if they exist and are valid
-        if (sponsorDocs.additionalDocs) {
-          console.log("Found additionalDocs:", sponsorDocs.additionalDocs);
-          sponsorDocs.additionalDocs.forEach((doc) => {
-            if (doc.file && doc.file instanceof File && doc.file.size > 0) {
-              console.log("Found valid additional doc file:", doc.file);
-              trackRecordFiles.push(doc.file);
-            } else if (doc.file) {
-              console.log("Found invalid additional doc file:", doc.file);
-              console.log("doc.file type:", typeof doc.file);
-              console.log("doc.file constructor:", doc.file?.constructor?.name);
-              console.log("doc.file instanceof File:", doc.file instanceof File);
-            }
-          });
-        }
-
-        if (trackRecordFiles.length > 0) {
-          // Final validation to ensure no empty objects slip through
-          const finalValidFiles = trackRecordFiles.filter((file) => file instanceof File && file.size > 0);
-          if (finalValidFiles.length > 0) {
-            // Check if track_record_documents already has valid files from track_record_attachment
-            const existingFiles = backendData["track_record_documents"];
-            if (existingFiles && Array.isArray(existingFiles) && existingFiles.length > 0) {
-              const existingValidFiles = existingFiles.filter((file) => file instanceof File && file.size > 0);
-              if (existingValidFiles.length > 0) {
-                console.log(
-                  "Keeping existing valid track_record_documents from track_record_attachment:",
-                  existingValidFiles
-                );
-                // Don't override if we already have valid files
-                return;
-              }
-            }
-
-            console.log("Setting track_record_documents from sponsor_information_docs:", finalValidFiles);
-            backendData["track_record_documents"] = finalValidFiles;
-          } else {
-            console.log("No valid files after final validation in sponsor_information_docs");
-            // Don't override track_record_documents if we don't have valid files
-            // This prevents empty objects from overriding valid files set by track_record_attachment
-          }
-        } else {
-          console.log("No valid files found in sponsor_information_docs");
-          // Don't override track_record_documents if we don't have valid files
-          // This prevents empty objects from overriding valid files set by track_record_attachment
-        }
-      } else if (frontendKey === "physical_descriptions" && Array.isArray(value)) {
-        // PhysicalDescriptionsTabs returns an array of { description_title: string, description: string }
-        const physicalDescriptions = value as Array<{ description_title: string; description: string }>;
-
-        // Filter out empty descriptions and ensure required fields
-        const validDescriptions = physicalDescriptions
-          .filter((desc) => desc.description_title && desc.description && desc.description.trim() !== "")
-          .map((desc) => ({
-            description_title: desc.description_title.trim(),
-            description: desc.description.trim(),
-          }));
-
-        // Backend requires at least one description
-        backendData[backendKey] =
-          validDescriptions.length > 0
-            ? validDescriptions
-            : [
-                {
-                  description_title: "General Description",
-                  description: "Property description pending",
-                },
-              ];
-      } else if (frontendKey === "site_documents" && typeof value === "object" && value !== null) {
-        // SiteDocumentsUpload returns an object with floor_plan, survey_plan, site_plan, stacking_plan, others arrays
-        const siteDocuments = value as {
-          floor_plan: File[];
-          survey_plan: File[];
-          site_plan: File[];
-          stacking_plan: File[];
-          others: File[];
-        };
-
-        // Filter out empty arrays and ensure files are valid
-        const validatedDocs = Object.entries(siteDocuments).reduce(
-          (acc, [key, files]) => {
-            if (Array.isArray(files)) {
-              const validFiles = files.filter((file) => file instanceof File);
-              if (validFiles.length > 0) {
-                acc[key] = validFiles;
-              }
-            }
-            return acc;
-          },
-          {} as Record<string, File[]>
-        );
-
-        // Backend requires at least one document category
-        backendData[backendKey] =
-          Object.keys(validatedDocs).length > 0
-            ? validatedDocs
-            : {
-                others: [], // Provide empty array for optional category
-              };
-      } else if (frontendKey === "closing_documents" && Array.isArray(value)) {
-        // ClosingDocuments returns an array of { document_name: string, files: File[] }
-        const closingDocuments = value as Array<{ document_name: string; files: File[] }>;
-
-        // Filter out empty documents and ensure files are valid
-        const validDocuments = closingDocuments
-          .filter((doc) => doc.document_name && doc.files && doc.files.length > 0)
-          .map((doc) => ({
-            document_name: doc.document_name,
-            files: doc.files.filter((file) => file instanceof File),
-          }))
-          .filter((doc) => doc.files.length > 0);
-
-        // Backend expects this to be nullable
-        if (validDocuments.length > 0) {
-          backendData[backendKey] = validDocuments;
-        }
-      } else if (frontendKey === "offering_information" && Array.isArray(value)) {
-        // OfferingInformation returns an array of { document_name: string, files: File[] }
-        const offeringDocuments = value as Array<{ document_name: string; files: File[] }>;
-
-        // Filter out empty documents and ensure files are valid
-        const validDocuments = offeringDocuments
-          .filter((doc) => doc.document_name && doc.files && doc.files.length > 0)
-          .map((doc) => ({
-            document_name: doc.document_name,
-            files: doc.files.filter((file) => file instanceof File),
-          }))
-          .filter((doc) => doc.files.length > 0);
-
-        // Backend expects this to be nullable
-        if (validDocuments.length > 0) {
-          backendData[backendKey] = validDocuments;
-        }
-      } else if (frontendKey === "project_timeline_months") {
-        backendData[backendKey] = parseInt(value as string) || 1;
-      } else if (frontendKey === "adding_square_footage") {
-        backendData[backendKey] = value === true || value === "true";
-      } else if (frontendKey === "budget_items" && Array.isArray(value)) {
-        // Transform budget items array
-        backendData[backendKey] = value.map((item) => ({
-          line_item: item.line_item || "",
-          description: item.description || "",
-          scope_of_work: item.scope_of_work || "",
-          budget_amount: parseFloat(item.budget_amount?.toString() || "0") || 0,
-        }));
-      } else if (
-        frontendKey === "picture_uploads" ||
-        frontendKey === "slides_uploads" ||
-        frontendKey === "video_uploads"
-      ) {
-        // Handle file uploads - pass the File objects directly
-        if (Array.isArray(value) && value.length > 0) {
-          backendData[backendKey] = value;
-        }
-      } else if (frontendKey === "fund_wallet_amount") {
-        // Convert fund wallet amount to number
-        backendData[backendKey] = parseFloat(value as string) || 0;
-      } else if (frontendKey === "signed_acknowledgement_form") {
+      if (frontendKey === "signed_acknowledgement_form") {
         // Handle signed acknowledgement form file
         if (value instanceof File) {
           backendData[backendKey] = value;
         }
+      } else if (frontendKey === "offer_details_table" && typeof value === "object" && value !== null) {
+        // Handle offer_details_table - extract individual fields and map them to backend
+        const offerDetails = value as Record<string, any>;
+
+        // Map individual fields from offer_details_table to backend fields
+        if (offerDetails.total_capitalization) {
+          backendData["total_capitalization"] = offerDetails.total_capitalization;
+        }
+        if (offerDetails.debt_allocation) {
+          backendData["debt_allocation"] = offerDetails.debt_allocation;
+        }
+        if (offerDetails.equity_allocation) {
+          backendData["equity_allocation"] = offerDetails.equity_allocation;
+        }
+        if (offerDetails.sponsor_co_invest) {
+          backendData["sponsor_co_invest"] = offerDetails.sponsor_co_invest;
+        }
+        if (offerDetails.offer_deadline) {
+          backendData["offer_deadline"] = offerDetails.offer_deadline;
+        }
+        if (offerDetails.location) {
+          backendData["location"] = offerDetails.location;
+        }
+        if (offerDetails.asset_type) {
+          backendData["asset_type"] = offerDetails.asset_type;
+        }
+        if (offerDetails.strategy) {
+          backendData["strategy"] = offerDetails.strategy;
+        }
+        if (offerDetails.objective) {
+          backendData["objective"] = offerDetails.objective;
+        }
       } else {
+        // Regular field mapping
         backendData[backendKey] = value;
       }
     }
   });
 
-  // Special handling for Step 4 - Create properties array
-  if (formData.property_address || formData.location_description || formData.occupancy_status) {
-    const property = {
-      property_address: formData.property_address || "",
-      location_description: formData.location_description || "",
-      occupancy: formData.occupancy_status || "",
-      about_property: formData.about_property || "",
-      detailed_project_description: formData.detailed_project_description || "",
-      has_anchor_tenant: formData.anchor_tenant === "yes",
-      anchor_tenant_details: formData.anchor_tenant_details || "",
-      has_anchor_buyer: formData.anchor_buyer === "yes",
-      anchor_buyer_details: formData.anchor_buyer_details || "",
-      percent_leased: parseFloat(formData.percentage_leased as string) || 0,
-      sq_ft_leased: formData.sq_ft_leased || "",
-    };
+  // Special handling for step 8 - transform to new backend format
+  if (
+    formData.what_are_you_offering ||
+    formData.offer_details_table ||
+    formData.debt_details_form ||
+    formData.equity_details_form ||
+    formData.expenses_revenue_form
+  ) {
+    const step8Data = transformStep8ToBackendFormat(formData);
 
-    backendData.properties = [property];
-  } else if (formData.properties && Array.isArray(formData.properties) && formData.properties.length > 0) {
-    // If properties array is already provided, use it directly
-    backendData.properties = formData.properties;
+    // Merge the transformed data into backendData
+    Object.assign(backendData, step8Data);
   }
 
-  // Special handling for Step 5 - Set default values for missing required fields
-  if (!backendData.offer_live_date) {
-    // If offer_live_date is not provided, set it to the same as offer_closing_date
-    // or use a default date based on acquisition_date
-    if (backendData.offer_closing_date) {
-      backendData.offer_live_date = backendData.offer_closing_date;
-    } else if (backendData.acquisition_date) {
-      // Set offer_live_date to 30 days before acquisition_date
-      const acquisitionDate = new Date(backendData.acquisition_date);
-      const offerLiveDate = new Date(acquisitionDate);
-      offerLiveDate.setDate(acquisitionDate.getDate() - 30);
-      backendData.offer_live_date = offerLiveDate.toISOString().split("T")[0];
-    } else {
-      // Default to current date
-      const today = new Date();
-      backendData.offer_live_date = today.toISOString().split("T")[0];
-    }
+  // Special handling for step 9 - transform to new backend format
+  if (formData.budget_tabs || formData.budget_table) {
+    const transformedStep9Data = transformStep9ToBackendFormat(formData);
+
+    // Merge the transformed data into backendData
+    Object.assign(backendData, transformedStep9Data);
   }
 
-  // Ensure frequency_of_distributions has a default value
-  if (!backendData.frequency_of_distributions) {
-    backendData.frequency_of_distributions = "quarterly";
-  }
+  // Special handling for step 10 - transform to new backend format
+  if (formData.media_assets_upload || formData.fund_wallet || formData.acknowledge_sign_docs) {
+    const transformedStep10Data = transformStep10ToBackendFormat(formData);
 
-  // Final check for track_record_documents
-  console.log("Final track_record_documents value:", backendData.track_record_documents);
-  if (backendData.track_record_documents && Array.isArray(backendData.track_record_documents)) {
-    console.log("track_record_documents array contents:", backendData.track_record_documents);
-    console.log("track_record_documents array length:", backendData.track_record_documents.length);
-    backendData.track_record_documents.forEach((item: any, index: number) => {
-      console.log(`Item ${index}:`, item);
-      console.log(`Item ${index} type:`, typeof item);
-      console.log(`Item ${index} constructor:`, item?.constructor?.name);
-      console.log(`Item ${index} instanceof File:`, item instanceof File);
-    });
-  }
-
-  // Handle key deal points financial data
-  if (formData.key_deal_points && typeof formData.key_deal_points === "object") {
-    const keyDealPoints = formData.key_deal_points as Record<string, string>;
-
-    backendData.projected_valuation = parseFloat(keyDealPoints.projected_valuation) || 0;
-    backendData.timeline_of_completion_months = keyDealPoints.timeline_completion || "";
-    backendData.total_capital_required = keyDealPoints.total_capital_required || "0";
-    backendData.total_debt_allocation_percent = keyDealPoints.total_debt_allocation || "0";
-    backendData.debt_investment_tenure = keyDealPoints.debt_investment_tenure || "";
-    backendData.debt_yield_percent = parseFloat(keyDealPoints.debt_yield) || 0;
-    backendData.debt_periodic_payment = keyDealPoints.debt_periodic_payment || "";
-    backendData.equity_investment_tenure = keyDealPoints.equity_investment_tenure || "";
-    backendData.projected_returns_equity_percent = parseFloat(keyDealPoints.projected_returns_equity) || 0;
-    backendData.equity_periodic_payment = keyDealPoints.equity_periodic_payment || "";
-    backendData.total_equity_allocation = parseFloat(keyDealPoints.total_equity) || 0;
-  }
-
-  // Extract occupancy from properties array and map to root level
-  if (formData.occupancy) {
-    // If occupancy is provided directly in form data, use it
-    backendData.occupancy = formData.occupancy;
-  } else if (formData.occupancy_status) {
-    // If occupancy_status is provided directly in form data, use it
-    backendData.occupancy = formData.occupancy_status;
-  } else if (formData.properties && Array.isArray(formData.properties) && formData.properties.length > 0) {
-    // Extract occupancy from the first property if not provided directly
-    const firstProperty = formData.properties[0];
-    if (firstProperty && typeof firstProperty === "object") {
-      backendData.occupancy = firstProperty.occupancy || "";
-    }
-  }
-
-  // Ensure has_anchor_tenant and has_anchor_buyer are set at root level
-  if (formData.anchor_tenant !== undefined) {
-    backendData.has_anchor_tenant = formData.anchor_tenant === "yes";
-  }
-  if (formData.anchor_buyer !== undefined) {
-    backendData.has_anchor_buyer = formData.anchor_buyer === "yes";
+    // Merge the transformed data into backendData
+    Object.assign(backendData, transformedStep10Data);
   }
 
   // Ensure percent_leased is set at root level
@@ -843,6 +444,15 @@ export function getStepFieldMapping(step: number): Record<string, string> {
       "strategy",
       "objective",
 
+      // Step 8 specific fields that were missing
+      "investment_structure_preamble",
+      "what_are_you_offering",
+      "offer_details_table",
+      "debt_details_form",
+      "expenses_revenue_form",
+      "equity_details_form",
+      "sponsor_co_invest",
+
       // Debt Details
       "debt_allocation_percent",
       "debt_distribution_period",
@@ -903,4 +513,151 @@ export function getStepFieldMapping(step: number): Record<string, string> {
   });
 
   return stepMapping;
+}
+
+/**
+ * Transform step 8 data from source format to backend format
+ */
+export function transformStep8ToBackendFormat(sourceData: any): any {
+  const offerDetailsTable = sourceData.offer_details_table || {};
+  const debtDetailsForm = sourceData.debt_details_form || {};
+  const equityDetailsForm = sourceData.equity_details_form || {};
+  const expensesRevenueForm = sourceData.expenses_revenue_form || {};
+
+  const transformOfferings = (offering: string): string => {
+    if (!offering) return "both";
+    if (offering === "both_equity_and_debt") return "both";
+    if (offering === "equity_only") return "equity";
+    if (offering === "debt_only") return "debt";
+    return "both";
+  };
+
+  const transformSponsorCoInvest = (coInvest: string): string => {
+    if (!coInvest) return "0%";
+    if (coInvest === "<=5.0") return "0% - 5%";
+    if (coInvest === "5.1-10.0") return "5.1% - 10%";
+    if (coInvest === "10.1-15.0") return "10.1% - 15%";
+    if (coInvest === "15.1-20.0") return "15.1% - 20%";
+    if (coInvest === ">20.0") return ">20%";
+    return coInvest;
+  };
+
+  const totalCapitalization = parseFloat(offerDetailsTable.total_capitalization || "0");
+  const debtAllocationPercent = parseFloat(offerDetailsTable.debt_allocation || "0");
+  const equityAllocationPercent = parseFloat(offerDetailsTable.equity_allocation || "0");
+
+  const debtAmount = (debtAllocationPercent / 100) * totalCapitalization;
+  const equityAmount = (equityAllocationPercent / 100) * totalCapitalization;
+
+  const backendData = {
+    offerings: transformOfferings(sourceData.what_are_you_offering),
+    total_capitalization: offerDetailsTable.total_capitalization || "0",
+    sponsor_co_invest_range: transformSponsorCoInvest(offerDetailsTable.sponsor_co_invest),
+    debt_allocation_percent: `${offerDetailsTable.debt_allocation || "0"}%`,
+    equity_allocation_percent: `${offerDetailsTable.equity_allocation || "0"}%`,
+    offer_deadline: offerDetailsTable.offer_deadline || "",
+    location: offerDetailsTable.location || "",
+    asset_type: offerDetailsTable.asset_type || "",
+    strategy: offerDetailsTable.strategy || "",
+    objective: offerDetailsTable.objective || "",
+    debt_details: {
+      amount: debtAmount.toString(),
+      distribution_period: debtDetailsForm.distribution_period || "annually",
+      target_distribution_start_date: debtDetailsForm.target_distribution_start || "",
+      minimum_investment_amount: debtDetailsForm.min_investment_amount || "0",
+      maximum_investment_amount: debtDetailsForm.max_investment_amount || "0",
+      maximum_return_on_investment_percent: `${debtDetailsForm.max_return_on_investment || "0"}%`,
+      minimum_return_on_investment_percent: `${debtDetailsForm.min_return_on_investment || "0"}%`,
+      expected_min_annual_return: `${debtDetailsForm.min_return_on_investment || "0"}%`,
+      expected_max_annual_return: `${debtDetailsForm.max_return_on_investment || "0"}%`,
+      target_hold_period_years: debtDetailsForm.target_hold_period || "0",
+      exit_date: debtDetailsForm.exit_date || "",
+    },
+    equity_details: {
+      allocation_amount: equityAmount.toString(),
+      distribution_frequency: equityDetailsForm.distribution_frequency || "annually",
+      target_distribution_start_date: equityDetailsForm.target_distribution_start || "",
+      minimum_investment: equityDetailsForm.minimum_investment || "0",
+      maximum_investment: equityDetailsForm.maximum_investment || "0",
+      return_on_investment: `${equityDetailsForm.return_on_investment || "0"}%`,
+      expected_min_return: `${equityDetailsForm.expected_min_return_percentage || "0"}%`,
+      expected_max_return: `${equityDetailsForm.expected_max_return_percentage || "0"}%`,
+      target_hold_period_years: equityDetailsForm.target_hold_period || "0",
+      exit_date: equityDetailsForm.exit_date || "",
+    },
+    expenses_taxes: expensesRevenueForm.taxes || "0",
+    expenses_insurance: expensesRevenueForm.insurance || "0",
+    expenses_management: expensesRevenueForm.management || "0",
+    expenses_repairs: expensesRevenueForm.repairs || "0",
+    expenses_utilities: expensesRevenueForm.utilities || "0",
+    expenses_interest: expensesRevenueForm.interest || "0",
+    expenses_total: expensesRevenueForm.totalExpense || "0",
+    expenses_total_equity_appreciation: expensesRevenueForm.totalEquityAppreciation || "0",
+    expenses_total_rental_income: expensesRevenueForm.totalRentalIncome || "0",
+    expenses_additional: expensesRevenueForm.additionalExpenses || [],
+  };
+
+  return backendData;
+}
+
+/**
+ * Transform step 9 data from source format to backend format
+ */
+export function transformStep9ToBackendFormat(sourceData: any): any {
+  const budgetTabs = sourceData.budget_tabs || {};
+  const budgetTable = sourceData.budget_table || {};
+
+  // Extract data from budget tabs
+  const propertyAddress = budgetTabs["property-address"] || {};
+  const descriptionWork = budgetTabs["description-work"] || {};
+  const projectTimeline = budgetTabs["project-timeline"] || {};
+
+  // Transform budget table data to the expected format
+  const budgetItems = Object.entries(budgetTable).map(([lineItem, itemData]: [string, any]) => ({
+    line_item: lineItem,
+    description: itemData.description || "",
+    scope_of_work: itemData.scope || "",
+    budget_amount: parseFloat(itemData.budget?.replace(/[^0-9.-]+/g, "") || "0"),
+  }));
+
+  const backendData = {
+    budget_sheet_property_address: propertyAddress.address || "",
+    city: propertyAddress.city || "",
+    state: propertyAddress.state || "",
+    zip_code: propertyAddress.zipCode || "",
+    in_depth_description_of_work: descriptionWork.description || "",
+    project_timeline_months: parseInt(projectTimeline.projectMonths || "0", 10),
+    adding_square_footage:
+      projectTimeline.addingSquareFootage === "true" || projectTimeline.addingSquareFootage === true,
+    square_footage_expansion_plan: projectTimeline.expansionMethod || "",
+    budget_items: budgetItems,
+  };
+
+  return backendData;
+}
+
+/**
+ * Transform step 10 data from source format to backend format
+ */
+export function transformStep10ToBackendFormat(sourceData: any): any {
+  console.log("🔍 [STEP 10 DEBUG] Input data:", sourceData);
+
+  const mediaAssetsUpload = sourceData.media_assets_upload || {};
+  const fundWallet = sourceData.fund_wallet || {};
+  const acknowledgeSignDocs = sourceData.acknowledge_sign_docs || {};
+
+  console.log("🔍 [STEP 10 DEBUG] mediaAssetsUpload:", mediaAssetsUpload);
+  console.log("🔍 [STEP 10 DEBUG] fundWallet:", fundWallet);
+  console.log("🔍 [STEP 10 DEBUG] acknowledgeSignDocs:", acknowledgeSignDocs);
+
+  const backendData = {
+    picture_uploads: mediaAssetsUpload.picture_uploads || [],
+    slides_uploads: mediaAssetsUpload.slides_uploads || [],
+    video_uploads: mediaAssetsUpload.video_uploads || [],
+    signed_acknowledgement_form: acknowledgeSignDocs.signedDocumentFile || null,
+    fund_wallet_amount: fundWallet.amount || "0",
+  };
+
+  console.log("🔍 [STEP 10 DEBUG] Transformed data:", backendData);
+  return backendData;
 }

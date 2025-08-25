@@ -303,7 +303,71 @@ const step7Schema = baseProjectUploadSchema.extend({
 });
 
 const step8Schema = baseProjectUploadSchema.extend({
-  // Investment Structure (Step 8)
+  // Investment Structure (Step 8) - New Backend Format
+  offerings: z.enum(["both", "equity", "debt"]).optional(),
+  total_capitalization: z.string().optional(),
+  sponsor_co_invest_range: z.string().optional(),
+  debt_allocation_percent: z.string().optional(),
+  equity_allocation_percent: z.string().optional(),
+  offer_deadline: z.string().optional(),
+  location: z.string().optional(),
+  asset_type: z.string().optional(),
+  strategy: z.string().optional(),
+  objective: z.string().optional(),
+
+  // Debt Details
+  debt_details: z
+    .object({
+      amount: z.string().optional(),
+      distribution_period: z.enum(["monthly", "quarterly", "semi_annually", "annually"]).optional(),
+      target_distribution_start_date: z.string().optional(),
+      minimum_investment_amount: z.string().optional(),
+      maximum_investment_amount: z.string().optional(),
+      maximum_return_on_investment_percent: z.string().optional(),
+      minimum_return_on_investment_percent: z.string().optional(),
+      expected_min_annual_return: z.string().optional(),
+      expected_max_annual_return: z.string().optional(),
+      target_hold_period_years: z.string().optional(),
+      exit_date: z.string().optional(),
+    })
+    .optional(),
+
+  // Equity Details
+  equity_details: z
+    .object({
+      allocation_amount: z.string().optional(),
+      distribution_frequency: z.enum(["monthly", "quarterly", "semi_annually", "annually"]).optional(),
+      target_distribution_start_date: z.string().optional(),
+      minimum_investment: z.string().optional(),
+      maximum_investment: z.string().optional(),
+      return_on_investment: z.string().optional(),
+      expected_min_return: z.string().optional(),
+      expected_max_return: z.string().optional(),
+      target_hold_period_years: z.string().optional(),
+      exit_date: z.string().optional(),
+    })
+    .optional(),
+
+  // Expenses (Flattened)
+  expenses_taxes: z.string().optional(),
+  expenses_insurance: z.string().optional(),
+  expenses_management: z.string().optional(),
+  expenses_repairs: z.string().optional(),
+  expenses_utilities: z.string().optional(),
+  expenses_interest: z.string().optional(),
+  expenses_total: z.string().optional(),
+  expenses_total_equity_appreciation: z.string().optional(),
+  expenses_total_rental_income: z.string().optional(),
+  expenses_additional: z
+    .array(
+      z.object({
+        title: z.string(),
+        amount: z.string(),
+      })
+    )
+    .optional(),
+
+  // Legacy fields for backward compatibility (optional)
   investment_structure_preamble: z.any().optional(),
   what_are_you_offering: z.string().optional(),
   offer_details_table: z.any().optional(),
@@ -313,13 +377,43 @@ const step8Schema = baseProjectUploadSchema.extend({
 });
 
 const step9Schema = baseProjectUploadSchema.extend({
-  // Budget Sheet (Step 9)
+  // Budget Sheet (Step 9) - Backend Format
+  budget_sheet_property_address: z.string().min(1, "The budget sheet property address field is required."),
+  city: z.string().min(1, "City is required"),
+  state: z.string().min(1, "State is required"),
+  zip_code: z.string().min(1, "Zip code is required"),
+  in_depth_description_of_work: z.string().min(1, "Description of work is required"),
+  project_timeline_months: z.number().min(1, "Project timeline must be at least 1 month"),
+  adding_square_footage: z.boolean(),
+  square_footage_expansion_plan: z.string().min(1, "Square footage expansion plan is required"),
+  budget_items: z
+    .array(
+      z.object({
+        line_item: z.string().min(1, "Line item is required"),
+        description: z.string().min(1, "Description is required"),
+        scope_of_work: z.string().min(1, "Scope of work is required"),
+        budget_amount: z.number().min(0, "Budget amount must be non-negative"),
+      })
+    )
+    .min(1, "At least one budget item is required"),
+
+  // Legacy fields for backward compatibility (optional)
   budget_tabs: z.any().optional(),
   budget_table: z.any().optional(),
 });
 
 const step10Schema = baseProjectUploadSchema.extend({
-  // Expenses & Revenue (Step 10)
+  // Media and Acknowledgement (Step 10) - Backend Format
+  picture_uploads: z.array(z.any()).min(1, "At least one picture upload is required"),
+  slides_uploads: z.array(z.any()).min(1, "At least one slides upload is required"),
+  video_uploads: z.array(z.any()).min(1, "At least one video upload is required"),
+  signed_acknowledgement_form: z
+    .any()
+    .refine((val) => val !== null && val !== undefined, "Signed acknowledgement form is required")
+    .optional(),
+  fund_wallet_amount: z.string().min(1, "Fund wallet amount is required"),
+
+  // Legacy fields for backward compatibility (optional)
   media_assets_upload: z.any().optional(),
   fund_wallet: z.any().optional(),
   acknowledge_sign_docs: z.any().optional(),
@@ -489,10 +583,37 @@ const projectUploadSchema = z.object({
   equity_details_form: z.any().optional(),
 
   // Budget Sheet (Step 9)
+  budget_sheet_property_address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip_code: z.string().optional(),
+  in_depth_description_of_work: z.string().optional(),
+  project_timeline_months: z.number().optional(),
+  adding_square_footage: z.boolean().optional(),
+  square_footage_expansion_plan: z.string().optional(),
+  budget_items: z
+    .array(
+      z.object({
+        line_item: z.string(),
+        description: z.string(),
+        scope_of_work: z.string(),
+        budget_amount: z.number(),
+      })
+    )
+    .optional(),
+
+  // Legacy fields for backward compatibility
   budget_tabs: z.any().optional(),
   budget_table: z.any().optional(),
 
-  // Expenses & Revenue (Step 10)
+  // Media and Acknowledgement (Step 10)
+  picture_uploads: z.array(z.any()).optional(),
+  slides_uploads: z.array(z.any()).optional(),
+  video_uploads: z.array(z.any()).optional(),
+  signed_acknowledgement_form: z.any().optional(),
+  fund_wallet_amount: z.string().optional(),
+
+  // Legacy fields for backward compatibility
   media_assets_upload: z.any().optional(),
   fund_wallet: z.any().optional(),
   acknowledge_sign_docs: z.any().optional(),
@@ -532,6 +653,11 @@ export async function saveProjectUploadStep(
   fieldErrors?: Record<string, string[]>;
 }> {
   try {
+    // Simple log for step 8 payload
+    if (step === 8) {
+      console.log("📤 Step 8 Payload to Backend:", data);
+    }
+
     // Clean and transform the data before validation
     const cleanedData: any = {};
     Object.entries(data).forEach(([key, value]) => {
@@ -567,6 +693,11 @@ export async function saveProjectUploadStep(
     }
 
     const { data: validatedData } = validatedFields;
+
+    // Log final validated data for step 8
+    if (step === 8) {
+      console.log("📤 Step 8 Final Validated Payload:", validatedData);
+    }
 
     // Determine if we need to use FormData (for file uploads)
     const hasFiles = hasFileFields(validatedData);
@@ -605,6 +736,7 @@ export async function saveProjectUploadStep(
         ...(contentType === "application/json" && { "Content-Type": "application/json" }),
       },
     });
+
     return { success: response.data };
   } catch (error) {
     if (axios.isAxiosError(error)) {
