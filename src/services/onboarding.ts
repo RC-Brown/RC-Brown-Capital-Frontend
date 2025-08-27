@@ -540,9 +540,11 @@ export async function saveBusinessInformationStep(
       }
     });
 
+    console.log("🔍 [DEBUG] Data before validation:", cleanedData);
     const validatedFields = businessInformationSchema.safeParse(cleanedData);
 
     if (!validatedFields.success) {
+      console.log("🔍 [DEBUG] Validation failed:", validatedFields.error.flatten());
       return {
         error: "Invalid input data",
         fieldErrors: validatedFields.error.flatten().fieldErrors as Record<string, string[]>,

@@ -111,14 +111,40 @@ const createOnboardingStore = (userEmail: string | null) => {
       {
         name: storageKey,
         // Only persist form data and progress, not temporary states
-        partialize: (state) => ({
-          userEmail: state.userEmail,
-          currentPhase: state.currentPhase,
-          currentSection: state.currentSection,
-          formData: state.formData,
-          completedSections: state.completedSections,
-          lastSavedAt: state.lastSavedAt,
-        }),
+        partialize: (state) => {
+          // Filter out file fields from formData before persistence
+          const cleanFormData = { ...state.formData };
+
+          // List of fields that contain File objects and should not be persisted
+          const fileFields = [
+            "sponsor_logo",
+            "picture_uploads",
+            "slides_uploads",
+            "video_uploads",
+            "track_record_documents",
+            "site_documents",
+            "closing_documents",
+            "offering_information",
+            "utility_bill",
+            "signed_acknowledgement_form",
+          ];
+
+          // Remove file fields from persisted data
+          fileFields.forEach((field) => {
+            if (cleanFormData[field] !== undefined) {
+              delete cleanFormData[field];
+            }
+          });
+
+          return {
+            userEmail: state.userEmail,
+            currentPhase: state.currentPhase,
+            currentSection: state.currentSection,
+            formData: cleanFormData,
+            completedSections: state.completedSections,
+            lastSavedAt: state.lastSavedAt,
+          };
+        },
       }
     )
   );

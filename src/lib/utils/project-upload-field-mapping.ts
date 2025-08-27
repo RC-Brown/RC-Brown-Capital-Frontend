@@ -191,6 +191,55 @@ export function transformFormToBackendData(formData: ProjectUploadInput): any {
         if (value instanceof File) {
           backendData[backendKey] = value;
         }
+      } else if (frontendKey === "sponsor_logo") {
+        // Handle sponsor logo file - extract first file from array
+        console.log("🔍 [DEBUG] Processing sponsor_logo field:", {
+          frontendKey,
+          value,
+          isArray: Array.isArray(value),
+          length: Array.isArray(value) ? value.length : "N/A",
+        });
+        if (Array.isArray(value) && value.length > 0) {
+          const firstFile = value[0];
+          console.log("🔍 [DEBUG] First file in array:", {
+            firstFile,
+            isFile: firstFile instanceof File,
+            type: typeof firstFile,
+          });
+          if (firstFile instanceof File) {
+            backendData[backendKey] = firstFile;
+            console.log("🔍 [DEBUG] Successfully set sponsor_logo file");
+          } else {
+            console.warn("⚠️ [WARNING] First item in sponsor_logo array is not a File:", firstFile);
+          }
+        } else {
+          console.warn("⚠️ [WARNING] sponsor_logo value is not an array or is empty:", value);
+        }
+      } else if (
+        frontendKey === "picture_uploads" ||
+        frontendKey === "slides_uploads" ||
+        frontendKey === "video_uploads"
+      ) {
+        // Handle media upload arrays - extract files from arrays
+        if (Array.isArray(value) && value.length > 0) {
+          const files = value.filter((item) => item instanceof File);
+          if (files.length > 0) {
+            backendData[backendKey] = files;
+          }
+        }
+      } else if (
+        frontendKey === "track_record_documents" ||
+        frontendKey === "site_documents" ||
+        frontendKey === "closing_documents" ||
+        frontendKey === "offering_information"
+      ) {
+        // Handle document upload arrays - extract files from arrays
+        if (Array.isArray(value) && value.length > 0) {
+          const files = value.filter((item) => item instanceof File);
+          if (files.length > 0) {
+            backendData[backendKey] = files;
+          }
+        }
       } else if (frontendKey === "offer_details_table" && typeof value === "object" && value !== null) {
         // Handle offer_details_table - extract individual fields and map them to backend
         const offerDetails = value as Record<string, any>;

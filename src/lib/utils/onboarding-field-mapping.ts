@@ -98,11 +98,20 @@ export function transformFormDataToApi(
         (apiData as any)[parentKey][childKey] = value;
       }
       // Handle enhanced-textarea fields (text + files)
-      else if (frontendKey === "company_description" && typeof value === "object" && value?.text) {
-        (apiData as any)[backendKey] = {
-          text: value.text,
-          files: value.files || [],
-        };
+      else if (frontendKey === "company_description") {
+        if (typeof value === "object" && value?.text) {
+          // Enhanced format with text and files
+          (apiData as any)[backendKey] = {
+            text: value.text,
+            files: value.files || [],
+          };
+        } else if (typeof value === "string") {
+          // Simple string format - convert to object format
+          (apiData as any)[backendKey] = {
+            text: value,
+            files: [],
+          };
+        }
       }
       // Handle array fields
       else if (frontendKey === "primary_focus" && typeof value === "string") {
