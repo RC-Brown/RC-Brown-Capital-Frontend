@@ -1,37 +1,13 @@
 import Image from "next/image";
 import React from "react";
+import { UpcomingPayout } from "@/src/types/dashboard";
+import { formatCurrency } from "@/src/lib/utils";
 
-const payoutsData = [
-  {
-    id: 1,
-    project: "Lekki Pearl Residences",
-    payoutType: "ROI",
-    investor: "Investor #105",
-    amount: "₦1,200,000",
-    dueDate: "June 28, 2025",
-    status: "Upcoming",
-  },
-  {
-    id: 2,
-    project: "Lekki Pearl Residences",
-    payoutType: "Dividend",
-    investor: "Investor #209",
-    amount: "₦800,000",
-    dueDate: "July 15, 2025",
-    status: "Upcoming",
-  },
-  {
-    id: 3,
-    project: "Lekki Pearl Residences",
-    payoutType: "ROI",
-    investor: "Investor #105",
-    amount: "₦1,200,000",
-    dueDate: "June 28, 2025",
-    status: "Upcoming",
-  },
-];
+interface UpcomingPayoutsAndDividendsTableProps {
+  payouts?: UpcomingPayout[];
+}
 
-export default function UpcomingPayoutsAndDividendsTable() {
+export default function UpcomingPayoutsAndDividendsTable({ payouts = [] }: UpcomingPayoutsAndDividendsTableProps) {
   return (
     <div className=''>
       <div className='mb-6 flex items-center justify-between px-5 py-6'>
@@ -40,7 +16,7 @@ export default function UpcomingPayoutsAndDividendsTable() {
             Upcoming Payouts & Dividends
           </h2>
           <span className='flex size-5 items-center justify-center rounded-full bg-[#FAA7A7] text-xs'>
-            {payoutsData.length}
+            {payouts.length}
           </span>
         </div>
       </div>
@@ -58,28 +34,34 @@ export default function UpcomingPayoutsAndDividendsTable() {
 
         {/* Rows */}
         <div className='mt-2 flex flex-col gap-2 px-5 py-4'>
-          {payoutsData.map((payout) => (
-            <div
-              key={payout.id}
-              className='grid grid-cols-[1.5fr,1fr,1fr,1fr,1fr,1fr] gap-4 rounded-[10px] border border-black/5 p-5'
-            >
-              <div className='text-sm text-text-muted'>{payout.project}</div>
-              <div className='text-sm text-text-muted'>{payout.payoutType}</div>
-              <div className='text-sm text-text-muted'>{payout.investor}</div>
-              <div className='text-sm text-text-muted'>{payout.amount}</div>
-              <div className='text-sm text-text-muted'>{payout.dueDate}</div>
-              <div className='flex flex-col gap-2'>
-                <Image
-                  src='/icons/upcoming.svg'
-                  alt='upcoming'
-                  width={20}
-                  height={20}
-                />
-
-                <span className='text-sm text-text-muted'>{payout.status}</span>
-              </div>
+          {payouts.length === 0 ? (
+            <div className='py-8 text-center text-gray-500'>
+              <p>No upcoming payouts at the moment</p>
             </div>
-          ))}
+          ) : (
+            payouts.map((payout: UpcomingPayout) => (
+              <div
+                key={payout.id}
+                className='grid grid-cols-[1.5fr,1fr,1fr,1fr,1fr,1fr] gap-4 rounded-[10px] border border-black/5 p-5'
+              >
+                <div className='text-sm text-text-muted'>Project #{payout.project_id}</div>
+                <div className='text-sm text-text-muted'>ROI</div>
+                <div className='text-sm text-text-muted'>Investor</div>
+                <div className='text-sm text-text-muted'>{formatCurrency(payout.amount)}</div>
+                <div className='text-sm text-text-muted'>
+                  {new Date(payout.scheduled_date).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </div>
+                <div className='flex flex-col gap-2'>
+                  <Image src='/icons/upcoming.svg' alt='upcoming' width={20} height={20} />
+                  <span className='text-sm capitalize text-text-muted'>{payout.status}</span>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

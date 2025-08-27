@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { SectionProgressTracker } from "@/src/components/molecules/progress-tracker";
@@ -17,11 +18,9 @@ import {
   useSaveBusinessInformationStep,
   useSaveCompanyRepresentativeStep,
 } from "@/src/lib/hooks/use-onboarding-mutations";
-import {
-  getSectionStepNumber,
-  getCompanyRepSectionStepNumber,
-} from "@/src/lib/utils/onboarding-field-mapping";
+import { getSectionStepNumber, getCompanyRepSectionStepNumber } from "@/src/lib/utils/onboarding-field-mapping";
 import { useSaveProjectUploadStep } from "@/src/lib/hooks/use-project-upload-mutations";
+import { transformFormDataToApi, transformCompanyRepDataToApi } from "@/src/lib/utils/onboarding-field-mapping";
 import { transformFormToBackendData } from "@/src/lib/utils/project-upload-field-mapping";
 import { OnboardingField } from "@/src/types/onboarding";
 import { useCurrencySafe } from "@/src/lib/context/currency-context";
@@ -44,6 +43,7 @@ interface CongratsMessage {
 export default function FormPage({ params }: FormPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
+  const { data: session } = useSession();
   const store = useOnboardingStoreWithUser();
   const { formatCurrency } = useCurrencySafe();
   const {
@@ -397,9 +397,40 @@ export default function FormPage({ params }: FormPageProps) {
 
   // Convert form data to API format
   const convertToApiFormat = (formData: any, step: number): any => {
-    console.log(step)
-    const apiData = transformFormToBackendData(formData);
-    return apiData;
+    console.log("🔍 [DEBUG] Converting form data for step:", step);
+    console.log("🔍 [DEBUG] Form data:", formData);
+    console.log("🔍 [DEBUG] Session user ID:", session?.user?.id);
+
+    if (resolvedParams.phase === "business-information") {
+      // Validate user ID
+      const userId = parseInt(session?.user?.id || "0");
+      if (!userId || userId <= 0) {
+        console.error("🔍 [ERROR] Invalid user ID:", userId);
+        throw new Error("User ID is required and must be a positive number");
+      }
+
+      // Use the correct transformation function for business information
+      const apiData = transformFormDataToApi(formData, userId);
+      console.log("🔍 [DEBUG] Transformed business info data:", apiData);
+      return apiData;
+    } else if (resolvedParams.phase === "company-representative") {
+      // Validate user ID
+      const userId = parseInt(session?.user?.id || "0");
+      if (!userId || userId <= 0) {
+        console.error("🔍 [ERROR] Invalid user ID:", userId);
+        throw new Error("User ID is required and must be a positive number");
+      }
+
+      // Use the correct transformation function for company representative
+      const apiData = transformCompanyRepDataToApi(formData, userId);
+      console.log("🔍 [DEBUG] Transformed company rep data:", apiData);
+      return apiData;
+    } else if (resolvedParams.phase === "project-upload") {
+      // Use project upload transformation for project upload phase
+      const apiData = transformFormToBackendData(formData);
+      return apiData;
+    }
+    return formData;
   };
 
   const handleNext = async () => {

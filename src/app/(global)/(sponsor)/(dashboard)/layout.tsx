@@ -52,7 +52,7 @@ export default function SponsorDashboardLayout({ children }: { children: React.R
   const pathname = usePathname();
   return (
     <div className='relative m-0 flex h-full min-h-screen w-full bg-background-secondary p-0'>
-      <div className='sticky top-[106px] flex h-fit flex-col gap-3 bg-white px-5 py-4 lg:min-w-[227px]'>
+      <div className='sticky top-[106px] flex h-fit flex-col gap-3 bg-white px-5 py-4 lg:min-w-[207px]'>
         {currentMenu.map((item) => (
           <Link
             href={item.href}
@@ -66,7 +66,7 @@ export default function SponsorDashboardLayout({ children }: { children: React.R
           </Link>
         ))}
       </div>
-      <div className='flex-1 p-4'>{children}</div>
+      <div className='h-full w-full flex-1 overflow-x-hidden p-3'>{children}</div>
     </div>
   );
 }
