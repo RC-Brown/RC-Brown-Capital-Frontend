@@ -56,7 +56,7 @@ export interface ProjectUploadData {
   anchor_buyer_details?: string;
   percent_leased: number;
   sq_ft_leased: number;
-  investment_hold_period: number;
+  investment_hold_period: string;
   acquisition_date: string;
   closing_date: string;
   target_exit_date_debt: string;
@@ -217,19 +217,19 @@ const step4Schema = baseProjectUploadSchema.extend({
   sq_ft_leased: z.string().optional(),
 
   // Backend expected fields for Step 4
-  projected_valuation: z.number().optional(),
+  projected_valuation: z.string().optional(),
   timeline_of_completion_months: z.string().optional(),
   total_capital_required: z.string().optional(),
   total_debt_allocation_percent: z.string().optional(),
-  debt_investment_tenure_months: z.number().optional(),
-  projected_returns_equity_percent: z.number().optional(),
-  total_equity_percent: z.number().optional(),
+  debt_investment_tenure_months: z.string().optional(),
+  projected_returns_equity_percent: z.string().optional(),
+  total_equity_percent: z.string().optional(),
   properties: z.array(z.any()).optional(),
 });
 
 const step5Schema = baseProjectUploadSchema.extend({
   // Investment Returns (Step 5)
-  investment_hold_period: z.number().optional(),
+  investment_hold_period: z.string().optional(),
   acquisition_date: z.string().optional(),
   closing_date: z.string().optional(),
   target_exit_date_debt: z.string().optional(),
@@ -258,7 +258,7 @@ const step6Schema = baseProjectUploadSchema.extend({
   total_number_of_realized_projects: z.number().min(0, "Total number of realized projects must be at least 0"),
   number_of_properties_developed: z.number().min(0, "Number of properties developed must be at least 0"),
   number_of_properties_built_sold: z.number().min(0, "Number of properties built/sold must be at least 0"),
-  highest_budget_for_project: z.number().min(0, "Highest budget for project must be at least 0"),
+  highest_budget_for_project: z.string().min(1, "Highest budget for project is required"),
   average_length_of_completion_months: z.number().min(1, "Average length of completion must be at least 1 month"),
   track_record_documents: z.array(z.any()).min(1, "At least one track record document is required"),
 });
@@ -533,7 +533,7 @@ const projectUploadSchema = z.object({
   total_number_of_realized_projects: z.number().optional(),
   number_of_properties_developed: z.number().optional(),
   number_of_properties_built_sold: z.number().optional(),
-  highest_budget_for_project: z.number().optional(),
+  highest_budget_for_project: z.string().optional(),
   average_length_of_completion_months: z.number().optional(),
   track_record_documents: z.array(z.any()).optional(),
 
@@ -653,11 +653,6 @@ export async function saveProjectUploadStep(
   fieldErrors?: Record<string, string[]>;
 }> {
   try {
-    // Simple log for step 8 payload
-    if (step === 8) {
-      console.log("📤 Step 8 Payload to Backend:", data);
-    }
-
     // Clean and transform the data before validation
     const cleanedData: any = {};
     Object.entries(data).forEach(([key, value]) => {
@@ -693,11 +688,6 @@ export async function saveProjectUploadStep(
     }
 
     const { data: validatedData } = validatedFields;
-
-    // Log final validated data for step 8
-    if (step === 8) {
-      console.log("📤 Step 8 Final Validated Payload:", validatedData);
-    }
 
     // Determine if we need to use FormData (for file uploads)
     const hasFiles = hasFileFields(validatedData);
