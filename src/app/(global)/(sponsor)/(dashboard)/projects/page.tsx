@@ -42,6 +42,7 @@ export default function ProjectsPage() {
         <TabsList className='gap-3 px-0'>
           {tabs.map((tab) => (
             <TabsTrigger
+              key={tab.value}
               value={tab.value}
               className='min-w-[184px] gap-2 rounded-md border border-white bg-white px-3 py-3 font-medium tracking-normal text-text-muted data-[state=active]:border-[#407BFF] data-[state=active]:bg-transparent data-[state=active]:text-[#1F6BCC] data-[state=active]:shadow-none'
             >
@@ -51,7 +52,7 @@ export default function ProjectsPage() {
           ))}
         </TabsList>
         {tabs.map((tab) => (
-          <TabsContent value={tab.value} className='mt-4 h-full w-full'>
+          <TabsContent key={tab.value} value={tab.value} className='mt-4 h-full w-full'>
             <tab.component />
           </TabsContent>
         ))}

@@ -173,6 +173,8 @@ export const PROJECT_UPLOAD_FIELD_MAPPING = {
   adding_square_footage: "adding_square_footage",
   square_footage_expansion_plan: "square_footage_expansion_plan",
   budget_items: "budget_items",
+  budget_tabs: "budget_tabs",
+  budget_table: "budget_table",
 
   // Media and Acknowledgement (Step 10)
   picture_uploads: "picture_uploads",
@@ -180,6 +182,7 @@ export const PROJECT_UPLOAD_FIELD_MAPPING = {
   video_uploads: "video_uploads",
   fund_wallet_amount: "fund_wallet_amount",
   signed_acknowledgement_form: "signed_acknowledgement_form",
+  media_assets_upload: "media_assets_upload",
 
   // Common fields
   is_draft: "is_draft",
@@ -361,6 +364,268 @@ export function transformFormToBackendData(formData: ProjectUploadInput): any {
           }
         } else {
           backendData.track_record_documents = value;
+        }
+      } else if (frontendKey === "offer_details_table") {
+        // Extract offer details to root level
+        if (typeof value === "object" && value !== null) {
+          const offerDetails = value as any;
+
+          if (offerDetails.total_capitalization) {
+            backendData.total_capitalization = offerDetails.total_capitalization;
+          }
+
+          if (offerDetails.debt_allocation) {
+            backendData.debt_allocation_percent = offerDetails.debt_allocation;
+          }
+
+          if (offerDetails.equity_allocation) {
+            backendData.equity_allocation_percent = offerDetails.equity_allocation;
+          }
+
+          if (offerDetails.offer_deadline) {
+            backendData.offer_deadline = offerDetails.offer_deadline;
+          }
+
+          if (offerDetails.location) {
+            backendData.location = offerDetails.location;
+          }
+
+          if (offerDetails.asset_type) {
+            backendData.asset_type = offerDetails.asset_type;
+          }
+
+          if (offerDetails.strategy) {
+            backendData.strategy = offerDetails.strategy;
+          }
+
+          if (offerDetails.objective) {
+            backendData.objective = offerDetails.objective;
+          }
+
+          if (offerDetails.sponsor_co_invest) {
+            backendData.sponsor_co_invest_range = offerDetails.sponsor_co_invest;
+          }
+        }
+      } else if (frontendKey === "debt_details_form") {
+        // Extract debt details to debt_details object
+        if (typeof value === "object" && value !== null) {
+          const debtDetails = value as any;
+
+          if (!backendData.debt_details) {
+            backendData.debt_details = {};
+          }
+
+          // Calculate debt amount from allocation percentage and total capitalization
+          if (formData.offer_details_table?.debt_allocation && formData.offer_details_table?.total_capitalization) {
+            const debtAllocationPercent = parseFloat(formData.offer_details_table.debt_allocation);
+            const totalCapitalization = parseFloat(formData.offer_details_table.total_capitalization);
+            if (debtAllocationPercent > 0 && totalCapitalization > 0) {
+              const debtAmount = (debtAllocationPercent / 100) * totalCapitalization;
+              backendData.debt_details.amount = debtAmount.toString();
+            }
+          }
+
+          if (debtDetails.distribution_period) {
+            backendData.debt_details.distribution_period = debtDetails.distribution_period;
+          }
+
+          if (debtDetails.target_distribution_start) {
+            backendData.debt_details.target_distribution_start_date = debtDetails.target_distribution_start;
+          }
+
+          if (debtDetails.min_investment_amount) {
+            backendData.debt_details.minimum_investment_amount = debtDetails.min_investment_amount;
+          }
+
+          if (debtDetails.max_investment_amount) {
+            backendData.debt_details.maximum_investment_amount = debtDetails.max_investment_amount;
+          }
+
+          if (debtDetails.min_return_on_investment) {
+            backendData.debt_details.minimum_return_on_investment_percent = debtDetails.min_return_on_investment;
+          }
+
+          if (debtDetails.max_return_on_investment) {
+            backendData.debt_details.maximum_return_on_investment_percent = debtDetails.max_return_on_investment;
+          }
+
+          // Map min_return_on_investment to expected_min_annual_return
+          if (debtDetails.min_return_on_investment) {
+            backendData.debt_details.expected_min_annual_return = debtDetails.min_return_on_investment;
+          }
+
+          // Map max_return_on_investment to expected_max_annual_return
+          if (debtDetails.max_return_on_investment) {
+            backendData.debt_details.expected_max_annual_return = debtDetails.max_return_on_investment;
+          }
+
+          if (debtDetails.target_hold_period) {
+            backendData.debt_details.target_hold_period_years = debtDetails.target_hold_period;
+          }
+
+          if (debtDetails.exit_date) {
+            backendData.debt_details.exit_date = debtDetails.exit_date;
+          }
+        }
+      } else if (frontendKey === "equity_details_form") {
+        // Extract equity details to equity_details object
+        if (typeof value === "object" && value !== null) {
+          const equityDetails = value as any;
+
+          if (!backendData.equity_details) {
+            backendData.equity_details = {};
+          }
+
+          // Calculate equity amount from allocation percentage and total capitalization
+          if (formData.offer_details_table?.equity_allocation && formData.offer_details_table?.total_capitalization) {
+            const equityAllocationPercent = parseFloat(formData.offer_details_table.equity_allocation);
+            const totalCapitalization = parseFloat(formData.offer_details_table.total_capitalization);
+            if (equityAllocationPercent > 0 && totalCapitalization > 0) {
+              const equityAmount = (equityAllocationPercent / 100) * totalCapitalization;
+              backendData.equity_details.allocation_amount = equityAmount.toString();
+            }
+          }
+
+          if (equityDetails.allocation_amount) {
+            backendData.equity_details.allocation_amount = equityDetails.allocation_amount;
+          }
+
+          if (equityDetails.distribution_frequency) {
+            backendData.equity_details.distribution_frequency = equityDetails.distribution_frequency;
+          }
+
+          if (equityDetails.target_distribution_start) {
+            backendData.equity_details.target_distribution_start_date = equityDetails.target_distribution_start;
+          }
+
+          if (equityDetails.minimum_investment) {
+            backendData.equity_details.minimum_investment = equityDetails.minimum_investment;
+          }
+
+          if (equityDetails.maximum_investment) {
+            backendData.equity_details.maximum_investment = equityDetails.maximum_investment;
+          }
+
+          if (equityDetails.return_on_investment) {
+            backendData.equity_details.return_on_investment = equityDetails.return_on_investment;
+          }
+
+          // Map expected_min_return_percentage to expected_min_return
+          if (equityDetails.expected_min_return_percentage) {
+            backendData.equity_details.expected_min_return = equityDetails.expected_min_return_percentage;
+          } else if (equityDetails.return_on_investment) {
+            // Fallback to return_on_investment if expected_min_return_percentage is not available
+            backendData.equity_details.expected_min_return = equityDetails.return_on_investment;
+          }
+
+          if (equityDetails.expected_max_return) {
+            backendData.equity_details.expected_max_return = equityDetails.expected_max_return;
+          } else if (equityDetails.expected_max_return_percentage) {
+            // Map expected_max_return_percentage to expected_max_return
+            backendData.equity_details.expected_max_return = equityDetails.expected_max_return_percentage;
+          } else if (equityDetails.return_on_investment) {
+            // Fallback to return_on_investment if expected_max_return_percentage is not available
+            backendData.equity_details.expected_max_return = equityDetails.return_on_investment;
+          }
+
+          if (equityDetails.target_hold_period) {
+            backendData.equity_details.target_hold_period_years = equityDetails.target_hold_period;
+          }
+
+          if (equityDetails.exit_date) {
+            backendData.equity_details.exit_date = equityDetails.exit_date;
+          }
+        }
+      } else if (frontendKey === "what_are_you_offering") {
+        // Map offerings field
+        if (value === "both_equity_and_debt") {
+          backendData.offerings = "both";
+        } else if (value === "equity_only") {
+          backendData.offerings = "equity";
+        } else if (value === "debt_only") {
+          backendData.offerings = "debt";
+        } else {
+          backendData.offerings = value;
+        }
+      } else if (frontendKey === "budget_tabs") {
+        // Extract budget sheet data from budget_tabs
+        if (typeof value === "object" && value !== null) {
+          const budgetTabs = value as any;
+
+          // Extract property address data
+          const propertyAddress = budgetTabs["property-address"] || {};
+          if (propertyAddress.address) {
+            backendData.budget_sheet_property_address = propertyAddress.address;
+          }
+          if (propertyAddress.city) {
+            backendData.city = propertyAddress.city;
+          }
+          if (propertyAddress.state) {
+            backendData.state = propertyAddress.state;
+          }
+          if (propertyAddress.zipCode) {
+            backendData.zip_code = propertyAddress.zipCode;
+          }
+
+          // Extract description work data
+          const descriptionWork = budgetTabs["description-work"] || {};
+          if (descriptionWork.description) {
+            backendData.in_depth_description_of_work = descriptionWork.description;
+          }
+
+          // Extract project timeline data
+          const projectTimeline = budgetTabs["project-timeline"] || {};
+          if (projectTimeline.projectMonths) {
+            backendData.project_timeline_months = parseInt(projectTimeline.projectMonths) || 0;
+          }
+          if (projectTimeline.addingSquareFootage !== undefined) {
+            backendData.adding_square_footage =
+              projectTimeline.addingSquareFootage === "true" || projectTimeline.addingSquareFootage === true;
+          }
+          if (projectTimeline.expansionMethod) {
+            backendData.square_footage_expansion_plan = projectTimeline.expansionMethod;
+          }
+        }
+      } else if (frontendKey === "budget_table") {
+        // Extract budget table data
+        if (typeof value === "object" && value !== null) {
+          const budgetTable = value as any;
+
+          // Transform budget table data to the expected format
+          const budgetItems = Object.entries(budgetTable).map(([lineItem, itemData]: [string, any]) => ({
+            line_item: lineItem,
+            description: itemData.description || "",
+            scope_of_work: itemData.scope || "",
+            budget_amount: parseFloat(itemData.budget?.replace(/[^0-9.-]+/g, "") || "0"),
+          }));
+
+          if (budgetItems.length > 0) {
+            backendData.budget_items = budgetItems;
+          }
+        }
+      } else if (frontendKey === "media_assets_upload") {
+        // Extract media uploads from media_assets_upload object
+        if (typeof value === "object" && value !== null) {
+          const mediaAssets = value as any;
+
+          if (mediaAssets.picture_uploads) {
+            backendData.picture_uploads = mediaAssets.picture_uploads;
+          }
+
+          if (mediaAssets.slides_uploads) {
+            backendData.slides_uploads = mediaAssets.slides_uploads;
+          }
+
+          if (mediaAssets.video_uploads) {
+            backendData.video_uploads = mediaAssets.video_uploads;
+          }
+        }
+      } else if (frontendKey === "fund_wallet_amount") {
+        // Set default value for fund_wallet_amount if not provided
+        if (value && value !== "") {
+          backendData.fund_wallet_amount = value;
+        } else {
+          backendData.fund_wallet_amount = "0"; // Default value
         }
       } else {
         // For all other fields, map directly
@@ -599,8 +864,17 @@ export function getStepFieldMapping(step: number): Record<string, string> {
       "adding_square_footage",
       "square_footage_expansion_plan",
       "budget_items",
+      "budget_tabs",
+      "budget_table",
     ],
-    10: ["picture_uploads", "slides_uploads", "video_uploads", "fund_wallet_amount", "signed_acknowledgement_form"],
+    10: [
+      "picture_uploads",
+      "slides_uploads",
+      "video_uploads",
+      "fund_wallet_amount",
+      "signed_acknowledgement_form",
+      "media_assets_upload",
+    ],
   };
 
   const stepFields = stepMappings[step] || [];

@@ -62,7 +62,7 @@ export default function NewProjectTabComponent() {
           Launch your next Big Opportunity
         </h1>
         <p className='mt-4 text-sm font-normal tracking-normal text-white'>
-          Bring your vision to life by uploading your next investment opportunity. Whether it's real estate, tech, or
+          Bring your vision to life by uploading your next investment opportunity. Whether it&apos;s real estate, tech, or
           infrastructure reach <br className='hidden lg:block' /> the right audience and start attracting committed
           investors today.
         </p>

@@ -390,8 +390,8 @@ const step9Schema = baseProjectUploadSchema.extend({
     .array(
       z.object({
         line_item: z.string().min(1, "Line item is required"),
-        description: z.string().min(1, "Description is required"),
-        scope_of_work: z.string().min(1, "Scope of work is required"),
+        description: z.string().optional(),
+        scope_of_work: z.string().optional(),
         budget_amount: z.number().min(0, "Budget amount must be non-negative"),
       })
     )
@@ -411,7 +411,7 @@ const step10Schema = baseProjectUploadSchema.extend({
     .any()
     .refine((val) => val !== null && val !== undefined, "Signed acknowledgement form is required")
     .optional(),
-  fund_wallet_amount: z.string().min(1, "Fund wallet amount is required"),
+  fund_wallet_amount: z.string().optional(),
 
   // Legacy fields for backward compatibility (optional)
   media_assets_upload: z.any().optional(),

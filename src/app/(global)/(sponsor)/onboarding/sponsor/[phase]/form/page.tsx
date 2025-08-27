@@ -397,6 +397,7 @@ export default function FormPage({ params }: FormPageProps) {
 
   // Convert form data to API format
   const convertToApiFormat = (formData: any, step: number): any => {
+    console.log(step);
     if (resolvedParams.phase === "business-information") {
       // Validate user ID
       const userId = parseInt(session?.user?.id || "0");
