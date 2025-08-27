@@ -1,6 +1,6 @@
 import { z } from "zod";
 import axios from "axios";
-import { DashboardMetrics, DashboardMetricsResponse } from "@/src/types/dashboard";
+import {  DashboardMetricsResponse } from "@/src/types/dashboard";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 

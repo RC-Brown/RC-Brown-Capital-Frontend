@@ -2,7 +2,7 @@ import Image from "next/image";
 import React from "react";
 
 export default function ProjectMiniCards({
-  id,
+//   id,
   image,
   title,
   address,

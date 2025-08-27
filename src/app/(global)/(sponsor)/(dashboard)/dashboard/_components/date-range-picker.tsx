@@ -11,7 +11,7 @@ import {
   DateSegment,
   Group,
   Heading,
-  Label,
+  // Label,
   RangeCalendar,
   DateValue,
 } from "react-aria-components";
