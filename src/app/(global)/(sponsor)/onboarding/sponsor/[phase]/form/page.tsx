@@ -397,10 +397,6 @@ export default function FormPage({ params }: FormPageProps) {
 
   // Convert form data to API format
   const convertToApiFormat = (formData: any, step: number): any => {
-    console.log("🔍 [DEBUG] Converting form data for step:", step);
-    console.log("🔍 [DEBUG] Form data:", formData);
-    console.log("🔍 [DEBUG] Session user ID:", session?.user?.id);
-
     if (resolvedParams.phase === "business-information") {
       // Validate user ID
       const userId = parseInt(session?.user?.id || "0");
@@ -411,7 +407,6 @@ export default function FormPage({ params }: FormPageProps) {
 
       // Use the correct transformation function for business information
       const apiData = transformFormDataToApi(formData, userId);
-      console.log("🔍 [DEBUG] Transformed business info data:", apiData);
       return apiData;
     } else if (resolvedParams.phase === "company-representative") {
       // Validate user ID
@@ -423,7 +418,6 @@ export default function FormPage({ params }: FormPageProps) {
 
       // Use the correct transformation function for company representative
       const apiData = transformCompanyRepDataToApi(formData, userId);
-      console.log("🔍 [DEBUG] Transformed company rep data:", apiData);
       return apiData;
     } else if (resolvedParams.phase === "project-upload") {
       // Use project upload transformation for project upload phase

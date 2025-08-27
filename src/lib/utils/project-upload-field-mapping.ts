@@ -29,6 +29,20 @@ export const PROJECT_UPLOAD_FIELD_MAPPING = {
 
   // The Deal (Step 4) - Key Deal Points
   key_deal_points: "key_deal_points",
+  // Extract individual fields from key_deal_points for backend compatibility
+  projected_valuation: "projected_valuation",
+  timeline_completion: "timeline_of_completion_months",
+
+  // Additional required fields for Step 4
+  total_capital_required: "total_capital_required",
+  total_debt_allocation_percent: "total_debt_allocation_percent",
+  debt_investment_tenure: "debt_investment_tenure",
+  debt_yield_percent: "debt_yield_percent",
+  debt_periodic_payment: "debt_periodic_payment",
+  equity_investment_tenure: "equity_investment_tenure",
+  projected_returns_equity_percent: "projected_returns_equity_percent",
+  equity_periodic_payment: "equity_periodic_payment",
+  total_equity_allocation: "total_equity_allocation",
 
   // The Deal (Step 4) - Property Details
   property_address: "property_address",
@@ -180,145 +194,180 @@ export const PROJECT_UPLOAD_FIELD_MAPPING = {
  */
 export function transformFormToBackendData(formData: ProjectUploadInput): any {
   const backendData: any = {};
-  // Transform form data to backend format
 
-  Object.entries(formData).forEach(([frontendKey, value]) => {
-    const backendKey = PROJECT_UPLOAD_FIELD_MAPPING[frontendKey as keyof typeof PROJECT_UPLOAD_FIELD_MAPPING];
+  // Map each frontend field to its backend equivalent
+  Object.entries(PROJECT_UPLOAD_FIELD_MAPPING).forEach(([frontendKey, backendKey]) => {
+    const value = formData[frontendKey as keyof ProjectUploadInput];
 
-    if (backendKey) {
-      if (frontendKey === "signed_acknowledgement_form") {
-        // Handle signed acknowledgement form file
-        if (value instanceof File) {
-          backendData[backendKey] = value;
-        }
-      } else if (frontendKey === "sponsor_logo") {
-        // Handle sponsor logo file - extract first file from array
-        console.log("🔍 [DEBUG] Processing sponsor_logo field:", {
-          frontendKey,
-          value,
-          isArray: Array.isArray(value),
-          length: Array.isArray(value) ? value.length : "N/A",
-        });
+    if (value !== undefined && value !== null && value !== "") {
+      if (frontendKey === "sponsor_logo") {
+        // Handle sponsor logo - extract File from File[]
         if (Array.isArray(value) && value.length > 0) {
-          const firstFile = value[0];
-          console.log("🔍 [DEBUG] First file in array:", {
-            firstFile,
-            isFile: firstFile instanceof File,
-            type: typeof firstFile,
-          });
-          if (firstFile instanceof File) {
-            backendData[backendKey] = firstFile;
-            console.log("🔍 [DEBUG] Successfully set sponsor_logo file");
+          const file = value[0];
+          if (file instanceof File) {
+            backendData[backendKey] = file;
           } else {
-            console.warn("⚠️ [WARNING] First item in sponsor_logo array is not a File:", firstFile);
+            backendData[backendKey] = value;
           }
         } else {
-          console.warn("⚠️ [WARNING] sponsor_logo value is not an array or is empty:", value);
+          backendData[backendKey] = value;
         }
       } else if (
         frontendKey === "picture_uploads" ||
         frontendKey === "slides_uploads" ||
-        frontendKey === "video_uploads"
-      ) {
-        // Handle media upload arrays - extract files from arrays
-        if (Array.isArray(value) && value.length > 0) {
-          const files = value.filter((item) => item instanceof File);
-          if (files.length > 0) {
-            backendData[backendKey] = files;
-          }
-        }
-      } else if (
+        frontendKey === "video_uploads" ||
         frontendKey === "track_record_documents" ||
         frontendKey === "site_documents" ||
         frontendKey === "closing_documents" ||
         frontendKey === "offering_information"
       ) {
-        // Handle document upload arrays - extract files from arrays
+        // Handle other file array fields
         if (Array.isArray(value) && value.length > 0) {
           const files = value.filter((item) => item instanceof File);
           if (files.length > 0) {
             backendData[backendKey] = files;
+          } else {
+            backendData[backendKey] = value;
+          }
+        } else {
+          backendData[backendKey] = value;
+        }
+      } else if (frontendKey === "key_deal_points") {
+        // Extract key deal points fields to root level
+        if (typeof value === "object" && value !== null) {
+          const keyDealPoints = value as any;
+
+          // Extract projected_valuation and timeline_completion
+          if (keyDealPoints.projected_valuation) {
+            backendData.projected_valuation = keyDealPoints.projected_valuation;
+          }
+
+          if (keyDealPoints.timeline_completion) {
+            // Convert "30_months" to "30 Months"
+            const timelineValue = keyDealPoints.timeline_completion;
+            if (typeof timelineValue === "string" && timelineValue.includes("_")) {
+              const [number, unit] = timelineValue.split("_");
+              const formattedUnit = unit.charAt(0).toUpperCase() + unit.slice(1);
+              backendData.timeline_of_completion_months = `${number} ${formattedUnit}`;
+            } else {
+              backendData.timeline_of_completion_months = timelineValue;
+            }
+          }
+
+          // Extract other Step 4 fields
+          if (keyDealPoints.total_capital_required) {
+            backendData.total_capital_required = keyDealPoints.total_capital_required;
+          }
+
+          if (keyDealPoints.total_debt_allocation) {
+            backendData.total_debt_allocation_percent = keyDealPoints.total_debt_allocation;
+          }
+
+          if (keyDealPoints.debt_investment_tenure) {
+            const tenureValue = keyDealPoints.debt_investment_tenure;
+            if (typeof tenureValue === "string" && tenureValue.includes("_years")) {
+              const years = tenureValue.replace("_years", " years");
+              backendData.debt_investment_tenure_months = years;
+            } else {
+              backendData.debt_investment_tenure_months = tenureValue;
+            }
+          }
+
+          if (keyDealPoints.percentage_yield_debt) {
+            backendData.percentage_yield_debt = keyDealPoints.percentage_yield_debt;
+          }
+
+          if (keyDealPoints.equity_investment_tenure) {
+            const tenureValue = keyDealPoints.equity_investment_tenure;
+            if (typeof tenureValue === "string" && tenureValue.includes("_years")) {
+              const years = tenureValue.replace("_years", " years");
+              backendData.equity_investment_tenure = years;
+            } else {
+              backendData.equity_investment_tenure = tenureValue;
+            }
+          }
+
+          if (keyDealPoints.projected_returns_equity) {
+            backendData.projected_returns_equity_percent = keyDealPoints.projected_returns_equity;
+          }
+
+          if (keyDealPoints.total_equity) {
+            backendData.total_equity_percent = keyDealPoints.total_equity;
           }
         }
-      } else if (frontendKey === "offer_details_table" && typeof value === "object" && value !== null) {
-        // Handle offer_details_table - extract individual fields and map them to backend
-        const offerDetails = value as Record<string, any>;
+      } else if (frontendKey === "sponsor_background_section") {
+        // Extract sponsor background from custom component
+        if (typeof value === "string") {
+          backendData.sponsor_background = value;
+        }
+      } else if (frontendKey === "sponsor_metrics") {
+        // Extract individual metrics from the SponsorMetricsTable custom component
+        if (typeof value === "object" && value !== null) {
+          const metrics = value as any;
 
-        // Map individual fields from offer_details_table to backend fields
-        if (offerDetails.total_capitalization) {
-          backendData["total_capitalization"] = offerDetails.total_capitalization;
+          // Map the metrics to backend fields
+          if (metrics.yearsInOperation) {
+            backendData.years_in_operation = parseInt(metrics.yearsInOperation) || 0;
+          }
+
+          if (metrics.historicalPortfolioActivity) {
+            backendData.historical_portfolio_activity_amount = parseFloat(metrics.historicalPortfolioActivity) || 0;
+          }
+
+          if (metrics.projectsUnderManagement) {
+            backendData.project_under_management_amount = parseFloat(metrics.projectsUnderManagement) || 0;
+          }
+
+          if (metrics.totalSquareFeetManaged) {
+            backendData.total_square_feet_managed = metrics.totalSquareFeetManaged;
+          }
+
+          if (metrics.dealsFundedByRC) {
+            backendData.deals_funded_by_rc_brown = parseInt(metrics.dealsFundedByRC) || 0;
+          }
+
+          if (metrics.propertiesUnderManagement) {
+            backendData.number_of_properties_under_management = parseInt(metrics.propertiesUnderManagement) || 0;
+          }
+
+          if (metrics.totalRealizedProjects) {
+            backendData.total_number_of_realized_projects = parseInt(metrics.totalRealizedProjects) || 0;
+          }
+
+          if (metrics.propertiesDeveloped) {
+            backendData.number_of_properties_developed = parseInt(metrics.propertiesDeveloped) || 0;
+          }
+
+          if (metrics.propertiesBuiltAndSold) {
+            backendData.number_of_properties_built_sold = parseInt(metrics.propertiesBuiltAndSold) || 0;
+          }
+
+          if (metrics.highestBudgetProject) {
+            backendData.highest_budget_for_project = metrics.highestBudgetProject;
+          }
+
+          if (metrics.averageCompletionLength) {
+            backendData.average_length_of_completion_months = parseInt(metrics.averageCompletionLength) || 1;
+          }
         }
-        if (offerDetails.debt_allocation) {
-          backendData["debt_allocation"] = offerDetails.debt_allocation;
-        }
-        if (offerDetails.equity_allocation) {
-          backendData["equity_allocation"] = offerDetails.equity_allocation;
-        }
-        if (offerDetails.sponsor_co_invest) {
-          backendData["sponsor_co_invest"] = offerDetails.sponsor_co_invest;
-        }
-        if (offerDetails.offer_deadline) {
-          backendData["offer_deadline"] = offerDetails.offer_deadline;
-        }
-        if (offerDetails.location) {
-          backendData["location"] = offerDetails.location;
-        }
-        if (offerDetails.asset_type) {
-          backendData["asset_type"] = offerDetails.asset_type;
-        }
-        if (offerDetails.strategy) {
-          backendData["strategy"] = offerDetails.strategy;
-        }
-        if (offerDetails.objective) {
-          backendData["objective"] = offerDetails.objective;
+      } else if (frontendKey === "track_record_attachment") {
+        // Handle track record documents
+        if (Array.isArray(value) && value.length > 0) {
+          const files = value.filter((item) => item instanceof File);
+          if (files.length > 0) {
+            backendData.track_record_documents = files;
+          } else {
+            backendData.track_record_documents = value;
+          }
+        } else {
+          backendData.track_record_documents = value;
         }
       } else {
-        // Regular field mapping
+        // For all other fields, map directly
         backendData[backendKey] = value;
       }
     }
   });
-
-  // Special handling for step 8 - transform to new backend format
-  if (
-    formData.what_are_you_offering ||
-    formData.offer_details_table ||
-    formData.debt_details_form ||
-    formData.equity_details_form ||
-    formData.expenses_revenue_form
-  ) {
-    const step8Data = transformStep8ToBackendFormat(formData);
-
-    // Merge the transformed data into backendData
-    Object.assign(backendData, step8Data);
-  }
-
-  // Special handling for step 9 - transform to new backend format
-  if (formData.budget_tabs || formData.budget_table) {
-    const transformedStep9Data = transformStep9ToBackendFormat(formData);
-
-    // Merge the transformed data into backendData
-    Object.assign(backendData, transformedStep9Data);
-  }
-
-  // Special handling for step 10 - transform to new backend format
-  if (formData.media_assets_upload || formData.fund_wallet || formData.acknowledge_sign_docs) {
-    const transformedStep10Data = transformStep10ToBackendFormat(formData);
-
-    // Merge the transformed data into backendData
-    Object.assign(backendData, transformedStep10Data);
-  }
-
-  // Ensure percent_leased is set at root level
-  if (formData.percentage_leased !== undefined) {
-    backendData.percent_leased = (formData.percentage_leased as string) || "";
-  } else if (formData.properties && Array.isArray(formData.properties) && formData.properties.length > 0) {
-    // Extract percent_leased from the first property if not provided directly
-    const firstProperty = formData.properties[0];
-    if (firstProperty && typeof firstProperty === "object") {
-      backendData.percent_leased = firstProperty.percent_leased || "";
-    }
-  }
 
   return backendData;
 }
@@ -379,8 +428,11 @@ export function transformBackendToFormData(backendData: any): ProjectUploadInput
             } else if (/^\d{4}-\d{2}-\d{2}$/.test(value.toString())) {
               // If value is already in YYYY-MM-DD format, use it directly
               formData[frontendKey] = value.toString();
+            } else if (/^q[1-4]_\d{4}$/.test(value.toString())) {
+              // If value is already in quarter format (q1_2025), preserve it as-is
+              formData[frontendKey] = value.toString();
             } else {
-              // Try to parse and format the date
+              // Try to parse and format the date only if it's not a quarter string
               const date = new Date(value.toString());
               if (isNaN(date.getTime())) {
                 formData[frontendKey] = "";
