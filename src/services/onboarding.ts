@@ -62,7 +62,7 @@ export interface BusinessInformationData {
   legal_issues_details?: string;
   compliance_details?: string;
   update_frequency?: string;
-  social_links?: Record<string, string>;
+  social_links?: string; // Changed from Record<string, string> to string for JSON string
   supporting_documents?: {
     licenses?: string[];
     tax_certificate?: string[];
@@ -193,7 +193,7 @@ const businessInformationSchema = z.object({
   legal_issues_details: z.string().optional(),
   compliance_details: z.string().optional(),
   update_frequency: z.string().optional(),
-  social_links: z.record(z.string()).optional(),
+  social_links: z.string().optional(), // Changed from z.record(z.string()) to z.string() for JSON string
   supporting_documents: z.any().optional(),
   references: z.array(z.any()).optional(),
   terms_accepted: z.boolean().optional(),

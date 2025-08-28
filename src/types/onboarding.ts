@@ -189,7 +189,7 @@ export interface RiskComplianceData {
 
 export interface CommunicationFinalData {
   preferred_update_rate: string;
-  social_media: Record<string, string>;
+  social_media: string; // Changed from Record<string, string> to string for JSON string
   supporting_documents: File[];
   testimonials: string;
   reference_links: Record<string, string>[];

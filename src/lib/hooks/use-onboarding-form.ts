@@ -61,7 +61,7 @@ export const riskComplianceSchema = z.object({
 
 export const communicationFinalSchema = z.object({
   preferred_update_rate: z.string().min(1, "Update frequency is required"),
-  social_media: z.record(z.string()).optional(),
+  social_media: z.string().optional(), // Changed from z.record(z.string()) to z.string() for JSON string
   supporting_documents: z.array(z.instanceof(File)).optional(),
   testimonials: z.string().optional(),
   reference_links: z.array(z.record(z.string())).optional(),
