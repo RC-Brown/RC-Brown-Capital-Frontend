@@ -113,6 +113,14 @@ export function transformFormDataToApi(
           };
         }
       }
+      // Handle social media links - convert to JSON string for backend
+      else if (frontendKey === "social_media" && typeof value === "object" && value !== null) {
+        // Convert social media object to JSON string for backend
+        (apiData as any)[backendKey] = JSON.stringify(value);
+      } else if (frontendKey === "social_media" && typeof value === "string" && value.trim()) {
+        // If it's already a JSON string, pass it through as-is
+        (apiData as any)[backendKey] = value;
+      }
       // Handle array fields
       else if (frontendKey === "primary_focus" && typeof value === "string") {
         (apiData as any)[backendKey] = [value];
@@ -187,6 +195,16 @@ export function transformApiDataToForm(apiData: Record<string, unknown>): Record
         } else {
           // Backward compatibility: just text
           formData["company_description"] = companyHistory.text || "";
+        }
+      }
+      // Handle social media links - parse JSON string back to object for frontend
+      else if (apiKey === "social_links" && typeof value === "string" && value.trim()) {
+        try {
+          // Parse JSON string back to object for frontend form
+          formData["social_media"] = JSON.parse(value);
+        } catch (error) {
+          console.warn("Failed to parse social links JSON:", error);
+          formData["social_media"] = {};
         }
       }
       // Handle array fields

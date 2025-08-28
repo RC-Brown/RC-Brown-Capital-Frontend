@@ -556,7 +556,20 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
           );
 
         case "multi-text":
-          const multiTextValue = (value as Record<string, string>) || {};
+          // Special handling for social media fields - parse JSON string to object for display
+          let multiTextValue: Record<string, string> = {};
+          if (field.key === "social_media") {
+            try {
+              // Parse JSON string to object for display
+              multiTextValue = (typeof value === "string" && value.trim()) ? JSON.parse(value) : {};
+            } catch (error) {
+              console.warn("Failed to parse social media JSON:", error);
+              multiTextValue = {};
+            }
+          } else {
+            multiTextValue = (value as Record<string, string>) || {};
+          }
+          
           return (
             <div className='grid grid-cols-1 gap-4 lg:grid-cols-2'>
               {field.multiTextOptions?.map((option) => (
@@ -565,7 +578,15 @@ export const FormField = forwardRef<FormFieldRef, FormFieldProps>(
                   <Input
                     placeholder={`${option}`}
                     value={multiTextValue[option] || ""}
-                    onChange={(e) => onChange({ ...multiTextValue, [option]: e.target.value })}
+                    onChange={(e) => {
+                      const newValue = { ...multiTextValue, [option]: e.target.value };
+                      if (field.key === "social_media") {
+                        // Convert object to JSON string for social media fields
+                        onChange(JSON.stringify(newValue));
+                      } else {
+                        onChange(newValue);
+                      }
+                    }}
                     className={cn("h-[51px] max-w-[300px] text-sm shadow-none placeholder:text-text-muted/50")}
                   />
                 </div>

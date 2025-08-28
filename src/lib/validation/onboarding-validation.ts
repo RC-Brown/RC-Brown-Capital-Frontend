@@ -260,7 +260,7 @@ export const BusinessInformationSchema = z.object({
 
   // Communication & Final
   preferred_update_rate: z.string().min(1, "Update frequency is required"),
-  social_media: z.record(z.string()).optional(),
+  social_media: z.string().optional(), // Changed from z.record(z.string()) to z.string() for JSON string
   supporting_documents: SupportingDocumentsSchema,
   testimonials: z.string().optional(),
   reference_links: ReferenceLinksSchema,
