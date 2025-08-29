@@ -32,7 +32,7 @@ export function AddressInput({ value = { address: "", useCompanyAddress: false }
           placeholder='Company address'
           value={addressData.address}
           onChange={(e) => handleAddressChange(e.target.value)}
-          className='pl-10 text-sm'
+          className='h-[51px] rounded-md border-black/10 pl-10 text-sm shadow-none'
         />
       </div>
     </div>

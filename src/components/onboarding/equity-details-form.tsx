@@ -16,6 +16,7 @@ interface DualFieldConfig {
   placeholder: string;
   value?: string;
   inputType: "percentage" | "currency";
+  disabled?: boolean;
 }
 
 interface BaseTableDataItem {
@@ -34,11 +35,13 @@ interface DualTableDataItem extends BaseTableDataItem {
     percentage: DualFieldConfig;
     amount: DualFieldConfig;
   };
+  disabled?: boolean;
 }
 
 interface SingleTableDataItem extends BaseTableDataItem {
   inputType: "text" | "currency" | "percentage" | "date-picker" | "select" | "calculated";
   field: string;
+  disabled?: boolean;
 }
 
 type TableDataItem = SingleTableDataItem | DualTableDataItem;
@@ -133,37 +136,23 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
     };
 
     if (totalEquityAllocation > 0 && minInvestment > 0) {
-      // Step 1: Calculate percentage of equity invested for minimum investment
-      const minEquityPercent = (minInvestment / totalEquityAllocation) * 100;
-
-      // Step 2: Calculate Y = total rental income + total equity appreciation
-      const Y = totalRentalIncome + totalEquityAppreciation;
-
-      // Step 3: Calculate expected min return = [(min percentage of equity invested / 100) × Y] - total expenses
-      const minROIValue = (minEquityPercent / 100) * Y - totalExpenses;
+      const minEquityAllocationPercentage = (minInvestment / totalEquityAllocation) * 100;
 
       // Store monetary value
-      calculations.minROIAmount = minROIValue;
+      calculations.minROIAmount =
+        ((totalEquityAppreciation + totalRentalIncome - totalExpenses) * minEquityAllocationPercentage) / 100;
 
-      // Step 4: Calculate ROI percentage = (expected min return / min investment) × 100
-      calculations.minROIPercentage = (minROIValue / minInvestment) * 100;
+      calculations.minROIPercentage = (calculations.minROIAmount / minInvestment) * 100;
     }
 
     if (totalEquityAllocation > 0 && maxInvestment > 0) {
-      // Step 1: Calculate percentage of equity invested for maximum investment
-      const maxEquityPercent = (maxInvestment / totalEquityAllocation) * 100;
+      const maxEquityAllocationPercentage = (maxInvestment / totalEquityAllocation) * 100;
 
-      // Step 2: Calculate Y = total rental income + total equity appreciation
-      const Y = totalRentalIncome + totalEquityAppreciation;
-
-      // Step 3: Calculate expected max return = [(max percentage of equity invested / 100) × Y] - total expenses
-      const maxROIValue = (maxEquityPercent / 100) * Y - totalExpenses;
+      calculations.maxROIAmount =
+        ((totalEquityAppreciation + totalRentalIncome - totalExpenses) * maxEquityAllocationPercentage) / 100;
 
       // Store monetary value
-      calculations.maxROIAmount = maxROIValue;
-
-      // Step 4: Calculate ROI percentage = (expected max return / max investment) × 100
-      calculations.maxROIPercentage = (maxROIValue / maxInvestment) * 100;
+      calculations.maxROIPercentage = (calculations.maxROIAmount / maxInvestment) * 100;
     }
 
     return calculations;
@@ -410,6 +399,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
       inputType: "select",
       field: "return_on_investment",
       placeholder: "%",
+      disabled: true,
       options: returnOnInvestmentOptions,
       briefInfo: "What is the % yield on the investment",
     },
@@ -470,7 +460,7 @@ const EquityDetailsForm: React.FC<EquityDetailsFormProps> = ({ value = {}, onCha
           </thead>
           <tbody>
             {tableData.map((item, index) => (
-              <tr key={index} className='border-b border-black/10'>
+              <tr key={index} className={`border-b border-black/10 ${item.disabled ? "hidden" : ""}`}>
                 <td className='whitespace-nowrap p-4 text-xs text-text-muted/80'>{item.category}</td>
                 <td className='p-4'>
                   {item.inputType === "dual" &&

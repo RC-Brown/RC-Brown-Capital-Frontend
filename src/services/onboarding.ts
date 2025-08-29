@@ -215,6 +215,7 @@ const companyRepresentativeSchema = z.object({
   bvn: z.string().optional(),
   nin: z.string().optional(),
   ssn: z.string().optional(),
+  identification_number: z.string().min(1, "Identification numbers are required").optional(),
   address: z
     .union([
       z.string(),
@@ -258,6 +259,7 @@ function validateCompanyRepresentativeStep(step: number, data: any): { success: 
       "first_name",
       "last_name",
       "country",
+      "identification_number",
       "address",
     ];
     const missingFields = requiredFields.filter((field) => {
@@ -287,6 +289,7 @@ function validateCompanyRepresentativeStep(step: number, data: any): { success: 
       first_name: z.string().min(2, "First name must be at least 2 characters"),
       last_name: z.string().min(2, "Last name must be at least 2 characters"),
       country: z.string().min(1, "Country is required"),
+      identification_number: z.string().min(1, "Identification numbers are required"),
       address: z.union([
         z.string().min(5, "Address is required"),
         z.object({

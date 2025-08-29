@@ -98,8 +98,6 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
     return null;
   };
 
-
-
   // Calculate exit date based on target distribution start date + target hold period
   const calculateExitDate = (): string => {
     const targetDistributionStart = value.target_distribution_start;
@@ -414,14 +412,15 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
         <div className='space-y-2'>
           <Tooltip content='This is automatically calculated based on Minimum Investment Amount and Return on Investment percentage'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>
-              Expected Min Annual Return ({currencySymbol}) *
+              Expected Min Return ({currencySymbol}) *
             </span>
           </Tooltip>
           <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 px-3 text-sm text-text-muted/80'>
             {(() => {
-              const minAmount = parseFloat(value.min_investment_amount || "0");
+              // const minAmount = parseFloat(value.min_investment_amount || "0");
+              const debtAllocation = parseFloat(calculateDebtAllocation());
               const roiPercent = parseFloat(value.min_return_on_investment || "0");
-              const calculatedReturn = (minAmount * roiPercent) / 100;
+              const calculatedReturn = (roiPercent / 100) * debtAllocation;
               return calculatedReturn > 0
                 ? `${currencySymbol}${calculatedReturn.toLocaleString()}`
                 : `${currencySymbol}0`;
@@ -433,14 +432,15 @@ const DebtDetailsForm: React.FC<DebtDetailsFormProps> = ({ value = {}, onChange 
         <div className='space-y-2'>
           <Tooltip content='This is automatically calculated based on Maximum Investment Amount and Return on Investment percentage'>
             <span className='text-sm font-normal -tracking-[3%] text-text-muted'>
-              Expected Max Annual Return ({currencySymbol}) *
+              Expected Max Return ({currencySymbol}) *
             </span>
           </Tooltip>
           <div className='flex h-[51px] w-full items-center rounded-md border border-black/10 px-3 text-sm text-text-muted/80'>
             {(() => {
-              const maxAmount = parseFloat(value.max_investment_amount || "0");
+              // const maxAmount = parseFloat(value.max_investment_amount || "0");
+              const debtAllocation = parseFloat(calculateDebtAllocation());
               const roiPercent = parseFloat(value.max_return_on_investment || "0");
-              const calculatedReturn = (maxAmount * roiPercent) / 100;
+              const calculatedReturn = (roiPercent / 100) * debtAllocation;
               return calculatedReturn > 0
                 ? `${currencySymbol}${calculatedReturn.toLocaleString()}`
                 : `${currencySymbol}0`;

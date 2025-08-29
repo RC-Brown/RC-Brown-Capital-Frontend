@@ -221,6 +221,7 @@ const ExpensesRevenueForm: React.FC<ExpensesRevenueFormProps> = ({ value = {}, o
             value={totalExpense.toFixed(2)}
             onChange={() => {}} // No-op function since this is auto-calculated
             placeholder=''
+            disabled={true}
             className='mt-3 h-[51px] w-full rounded-md border-black/10 bg-gray-50 shadow-none'
           />
         </div>

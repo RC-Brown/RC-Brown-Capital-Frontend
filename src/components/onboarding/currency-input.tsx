@@ -11,6 +11,7 @@ interface CurrencyInputProps {
   error?: string;
   className?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
@@ -20,6 +21,7 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
   error,
   className,
   required,
+  disabled,
 }) => {
   const { currencySymbol } = useCurrencySafe();
   const [displayValue, setDisplayValue] = useState("");
@@ -223,8 +225,9 @@ export const CurrencyInput: React.FC<CurrencyInputProps> = ({
         onBlur={handleBlur}
         onBeforeInput={handleBeforeInput}
         placeholder={placeholder || currencySymbol}
-        className={`${className} ${finalError ? "border-red-500 focus:border-red-500" : ""}`}
+        className={`h-[51px] ${className} ${finalError ? "border-red-500 focus:border-red-500" : ""}`}
         required={required}
+        disabled={disabled}
       />
       {finalError && <p className='mt-1 text-sm text-red-500'>{finalError}</p>}
     </div>

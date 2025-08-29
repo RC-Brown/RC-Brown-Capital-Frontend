@@ -43,7 +43,11 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
     });
 
     if (validFiles.length > 0) {
-      onChange?.({ ...value, [type]: validFiles });
+      // Get existing files for this type, or empty array if none exist
+      const existingFiles = value[type] || [];
+      // Combine existing files with new files
+      const combinedFiles = [...existingFiles, ...validFiles];
+      onChange?.({ ...value, [type]: combinedFiles });
     }
   };
 
@@ -101,59 +105,67 @@ const MediaAssetsUpload: React.FC<MediaAssetsUploadProps> = ({ value = {}, onCha
     <div className='mb-6 w-full'>
       <h3 className='mb-4 text-base font-medium text-text-muted'>Media Assets Upload</h3>
 
-      {/* Horizontal Carousel */}
-      <div className='overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
-        <div className='flex min-w-max space-x-6'>
-          {uploadAreas.map((area) => {
-            const isDragOver = dragOver === area.key;
-            const hasFiles = value[area.key] && value[area.key]!.length > 0;
+      {/* Scroll hint text */}
+      <p className='mb-3 text-sm italic text-gray-500'>Scroll to see more upload options →</p>
 
-            return (
-              <div
-                key={area.key}
-                className={`w-[344px] flex-shrink-0 rounded-2xl border border-text-muted/10 bg-white p-6 shadow-lg ${isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-200"} ${hasFiles ? "border-green-500 bg-green-50" : ""} transition-colors`}
-                onDragOver={(e) => handleDragOver(e, area.key)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, area.key)}
-              >
-                <div className='text-center'>
-                  <div className='mb-4 flex justify-center'>
-                    <Image src={area.src} alt={area.title} width={50} height={50} />
-                  </div>
+      {/* Horizontal Carousel with fade effect */}
+      <div className='relative'>
+        <div className='overflow-x-auto pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden'>
+          <div className='flex min-w-max space-x-6'>
+            {uploadAreas.map((area) => {
+              const isDragOver = dragOver === area.key;
+              const hasFiles = value[area.key] && value[area.key]!.length > 0;
 
-                  <h4 className='mb-4 text-base font-medium text-primary'>{area.title}</h4>
-
-                  <p className='mb-8 text-sm leading-relaxed text-[#898989]'>{area.description}</p>
-
-                  {hasFiles && value[area.key] && (
-                    <div className='mb-4 rounded bg-green-100 p-2'>
-                      <p className='text-sm text-green-800'>
-                        {value[area.key]!.length} file{value[area.key]!.length !== 1 ? "s" : ""} uploaded
-                      </p>
+              return (
+                <div
+                  key={area.key}
+                  className={`w-[344px] flex-shrink-0 rounded-2xl border border-text-muted/10 bg-white p-6 shadow-lg ${isDragOver ? "border-blue-500 bg-blue-50" : "border-gray-200"} ${hasFiles ? "border-green-500 bg-green-50" : ""} transition-colors`}
+                  onDragOver={(e) => handleDragOver(e, area.key)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={(e) => handleDrop(e, area.key)}
+                >
+                  <div className='text-center'>
+                    <div className='mb-4 flex justify-center'>
+                      <Image src={area.src} alt={area.title} width={50} height={50} />
                     </div>
-                  )}
 
-                  <div className='relative'>
-                    <input
-                      type='file'
-                      accept={area.acceptedTypes}
-                      multiple={area.multiple}
-                      onChange={(e) => handleFileUpload(area.key, e.target.files)}
-                      className='absolute inset-0 h-full w-full cursor-pointer opacity-0'
-                    />
-                    <Button
-                      type='button'
-                      variant='outline'
-                      className='h-[43px] w-full rounded-md border-none bg-[#F5F5F5] font-medium text-text-muted hover:bg-gray-50'
-                    >
-                      Upload
-                    </Button>
+                    <h4 className='mb-4 text-base font-medium text-primary'>{area.title}</h4>
+
+                    <p className='mb-8 text-sm leading-relaxed text-[#898989]'>{area.description}</p>
+
+                    {hasFiles && value[area.key] && (
+                      <div className='mb-4 rounded bg-green-100 p-2'>
+                        <p className='text-sm text-green-800'>
+                          {value[area.key]!.length} file{value[area.key]!.length !== 1 ? "s" : ""} uploaded
+                        </p>
+                      </div>
+                    )}
+
+                    <div className='relative'>
+                      <input
+                        type='file'
+                        accept={area.acceptedTypes}
+                        multiple={area.multiple}
+                        onChange={(e) => handleFileUpload(area.key, e.target.files)}
+                        className='absolute inset-0 h-full w-full cursor-pointer opacity-0'
+                      />
+                      <Button
+                        type='button'
+                        variant='outline'
+                        className='h-[43px] w-full rounded-md border-none bg-[#F5F5F5] font-medium text-text-muted hover:bg-gray-50'
+                      >
+                        Upload
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+
+        {/* Fade-out effect on the right */}
+        <div className='pointer-events-none absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-white via-white/80 to-transparent'></div>
       </div>
     </div>
   );

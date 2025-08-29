@@ -277,6 +277,7 @@ export const CompanyRepresentativeSchema = z.object({
   bvn: z.string().optional(),
   nin: z.string().optional(),
   ssn: z.string().optional(),
+  identification_number: z.string().min(1, "Identification numbers are required"),
   address: AddressInputSchema,
   utility_bill: z.any().optional(),
 

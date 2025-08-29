@@ -454,12 +454,29 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               key: "means_of_identification",
               label: "Means of Identification (Government-issued)",
               type: "select",
+              labelType: "no-wrap",
               options: [
                 { label: "National Id Card", value: "national_id" },
                 { label: "International Passport", value: "passport" },
                 { label: "Driver's License", value: "drivers_license" },
                 { label: "Voter's Card", value: "voters_card" },
               ],
+              validation: { required: true },
+            },
+            {
+              key: "address",
+              label: "Address",
+              gridSpan: 1,
+              type: "custom-component",
+              customComponent: "AddressInput",
+              validation: { required: true },
+            },
+            {
+              key: "identification_number",
+              label: "Identification Number",
+              type: "text",
+              gridSpan: 1,
+              placeholder: "Enter number",
               validation: { required: true },
             },
             {
@@ -494,21 +511,6 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
                 value: "United States",
               },
               validation: { required: false },
-            },
-            // {
-            //   key: "identification_numbers",
-            //   label: "Identification Numbers",
-            //   type: "custom-component",
-            //   customComponent: "IdentificationFields",
-            //   validation: { required: false },
-            // },
-            {
-              key: "address",
-              label: "Address",
-              gridSpan: 1,
-              type: "custom-component",
-              customComponent: "AddressInput",
-              validation: { required: true },
             },
             {
               key: "utility_bill",
@@ -820,7 +822,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               label: "Location Description *",
               type: "textarea",
               placeholder: "Enter location description",
-              validation: { required: true, minLength: 10, maxLength: 500 },
+              validation: { required: true, minLength: 10, maxLength: 1500 },
             },
             {
               key: "occupancy_status",
@@ -940,7 +942,7 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
             {
               key: "acquisition_date",
               label: "Acquisition Date *",
-              tooltip: "When the asset/investment is expected to be acquired.",
+              tooltip: "When date was the property acquired.",
               type: "select",
               options: [
                 { label: "Q1 2025", value: "q1_2025" },
@@ -1212,6 +1214,10 @@ export const sponsorOnboardingSchema: OnboardingSchema = {
               customComponent: "ExpensesRevenueForm",
               gridSpan: 2,
               validation: { required: true },
+              condition: {
+                dependsOn: "what_are_you_offering",
+                value: ["equity", "both_equity_and_debt"],
+              },
             },
             {
               key: "equity_details_form",

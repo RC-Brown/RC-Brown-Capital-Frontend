@@ -8,7 +8,7 @@ import { useOnboardingStoreWithUser } from "@/src/lib/store/onboarding-store";
 
 type SponsorCoInvestPercentage = "5.0" | "6.0" | "7.0" | "8.0" | "9.0" | "10.0";
 type AssetType = "residential" | "commercial" | "industrial" | "retail" | "office" | "hospitality" | "mixed_use";
-type InvestmentStrategy = "core" | "core_plus" | "value_add" | "opportunistic" | "development";
+type InvestmentStrategy = "core" | "core_plus" | "value_added" | "opportunistic" | "development";
 type InvestmentObjective = "income" | "appreciation" | "balanced" | "growth" | "preservation";
 
 interface OfferDetailsData {
@@ -126,7 +126,7 @@ const OfferDetailsTable: React.FC<OfferDetailsTableProps> = ({ value = {}, onCha
   const strategyOptions = [
     { label: "Core", value: "core" },
     { label: "Core Plus", value: "core_plus" },
-    { label: "Value-Added", value: "value_add" },
+    { label: "Value-Added", value: "value_added" },
     { label: "Opportunistic", value: "opportunistic" },
   ];
 
