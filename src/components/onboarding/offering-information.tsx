@@ -23,7 +23,7 @@ export interface OfferingInformationRef {
 const informationTypes = [
   { value: "offering_memorandum", label: "Offering Memorandum" },
   { value: "rcb_capital_due_diligence", label: "RCB Capital Due Diligence" },
-  { value: "2025_progress_update", label: "2025 Progress Update" },
+  { value: "progress_update", label: "2025 Progress Update" },
   { value: "quaterly_investors_report", label: "Quaterly Investors Report - (QQ/YYYY)" },
   { value: "renovation_update", label: "Renovation Update" },
   { value: "webinar_transcript", label: "Webinar Transcript" },

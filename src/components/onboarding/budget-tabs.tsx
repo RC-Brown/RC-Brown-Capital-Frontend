@@ -22,6 +22,7 @@ interface BudgetTabData {
     projectMonths?: string;
     addingSquareFootage?: string;
     expansionMethod?: string;
+    otherExpansionMethod?: string;
   };
 }
 
@@ -57,14 +58,26 @@ const BudgetTabs: React.FC<BudgetTabsProps> = ({ value = {}, onChange, error }) 
 
   const handleTabClick = (tabKey: string) => {
     setActiveTab(tabKey);
-    setModalData(value[tabKey as keyof BudgetTabData] || {});
+    const existingData = value[tabKey as keyof BudgetTabData] || {};
+    setModalData(existingData);
     setIsModalOpen(true);
   };
 
   const handleModalSave = () => {
+    // Prepare the data to save
+    let dataToSave = { ...modalData };
+
+    // If expansion method is "other", use the custom text instead
+    if (activeTab === "project-timeline" && modalData.expansionMethod === "other") {
+      dataToSave = {
+        ...modalData,
+        expansionMethod: modalData.otherExpansionMethod || "other",
+      };
+    }
+
     const updatedValue = {
       ...value,
-      [activeTab]: modalData,
+      [activeTab]: dataToSave,
     };
     onChange?.(updatedValue);
     setIsModalOpen(false);
@@ -218,6 +231,20 @@ const BudgetTabs: React.FC<BudgetTabsProps> = ({ value = {}, onChange, error }) 
                 </SelectContent>
               </Select>
             </div>
+
+            {/* Other expansion method input field */}
+            {modalData.expansionMethod === "other" && (
+              <div className='flex items-center justify-between'>
+                <label className='text-sm font-medium text-gray-700'>Please specify:</label>
+                <Input
+                  type='text'
+                  value={modalData.otherExpansionMethod || ""}
+                  onChange={(e) => setModalData({ ...modalData, otherExpansionMethod: e.target.value })}
+                  placeholder='Enter expansion method'
+                  className='flex h-[51px] w-full max-w-[270px] rounded-md border border-black/10 text-sm shadow-none focus:outline-none'
+                />
+              </div>
+            )}
           </div>
         );
 

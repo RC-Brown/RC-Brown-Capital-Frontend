@@ -164,16 +164,30 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
     return lineItem === "Contingency";
   };
 
-  const calculateTotalCost = () => {
-    let total = 0;
+  const calculateSubtotal = () => {
+    let subtotal = 0;
     budgetLineItems.forEach((item) => {
-      const budget = value[item]?.budget || "";
-      const numericValue = parseFloat(budget.replace(/[^0-9.-]+/g, ""));
-      if (!isNaN(numericValue)) {
-        total += numericValue;
+      if (!isContingencyItem(item)) {
+        const budget = value[item]?.budget || "";
+        const numericValue = parseFloat(budget.replace(/[^0-9.-]+/g, ""));
+        if (!isNaN(numericValue)) {
+          subtotal += numericValue;
+        }
       }
     });
-    return total;
+    return subtotal;
+  };
+
+  const calculateContingencyAmount = () => {
+    const subtotal = calculateSubtotal();
+    const contingencyPercent = parseFloat(contingencyPercentage) / 100;
+    return subtotal * contingencyPercent;
+  };
+
+  const calculateTotalCost = () => {
+    const subtotal = calculateSubtotal();
+    const contingencyAmount = calculateContingencyAmount();
+    return subtotal + contingencyAmount;
   };
 
   const contingencyOptions = [
@@ -350,14 +364,44 @@ const BudgetTable: React.FC<BudgetTableProps> = ({ value = {}, onChange }) => {
         </table>
         {/* Total Construction Cost - Outside Table */}
         <div className='flex w-full justify-end'>
-          <div className='flex w-[45%] items-center font-medium'>
-            <div className='flex w-[67%] items-center justify-center bg-background-secondary py-5 text-right text-sm font-medium text-text-muted'>
-              Total Construction Cost
+          <div className='flex w-[45%] flex-col'>
+            {/* Subtotal */}
+            <div className='flex items-center font-medium'>
+              <div className='flex w-[67%] items-center justify-center bg-background-secondary py-3 text-right text-sm font-medium text-text-muted'>
+                Subtotal
+              </div>
+              <div className='flex w-[33%] items-center justify-center border border-l-0 border-t-0 border-black/10 py-3 text-sm font-medium text-text-muted'>
+                {formatCurrency(
+                  calculateSubtotal().toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                )}
+              </div>
             </div>
-            <div className='flex w-[33%] items-center justify-center border border-l-0 border-t-0 border-black/10 py-5 text-sm font-medium text-text-muted'>
-              {formatCurrency(
-                calculateTotalCost().toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-              )}
+
+            {/* Contingency */}
+            <div className='flex items-center font-medium'>
+              <div className='flex w-[67%] items-center justify-center bg-background-secondary py-3 text-right text-sm font-medium text-text-muted'>
+                Contingency ({contingencyPercentage}%)
+              </div>
+              <div className='flex w-[33%] items-center justify-center border border-l-0 border-t-0 border-black/10 py-3 text-sm font-medium text-text-muted'>
+                {formatCurrency(
+                  calculateContingencyAmount().toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Total */}
+            <div className='flex items-center font-medium'>
+              <div className='flex w-[67%] items-center justify-center bg-background-secondary py-3 text-right text-sm font-medium text-text-muted'>
+                Total Construction Cost
+              </div>
+              <div className='flex w-[33%] items-center justify-center border border-l-0 border-t-0 border-black/10 py-3 text-sm font-medium text-text-muted'>
+                {formatCurrency(
+                  calculateTotalCost().toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                )}
+              </div>
             </div>
           </div>
         </div>

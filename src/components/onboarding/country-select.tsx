@@ -25,7 +25,7 @@ export function CountrySelect({
       <SelectTrigger
         className={cn(
           error && "border-red-500",
-          "text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
+          "h-[51px] rounded-md border-black/10 text-xs text-text-muted/80 shadow-none placeholder:text-text-muted/50 data-[placeholder]:text-xs data-[placeholder]:text-text-muted/80",
           className
         )}
       >

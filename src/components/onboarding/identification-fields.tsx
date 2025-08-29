@@ -29,7 +29,7 @@ export function IdentificationFields({ value = {}, onChange, selectedCountry }: 
   };
 
   // Clear fields when country changes
-   
+
   useEffect(() => {
     if (prevCountryRef.current !== selectedCountry && prevCountryRef.current !== undefined) {
       const clearedData = {};

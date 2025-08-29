@@ -56,6 +56,7 @@ export const COMPANY_REPRESENTATIVE_FIELD_MAPPING = {
   last_name: "last_name",
   country: "country", // Optional field
   means_of_identification: "identification_type", // Backend expects 'identification_type'
+  identification_number: "identification_number", // New field for general identification numbers
   bvn: "bvn", // Optional field
   nin: "nin", // Optional field
   ssn: "ssn", // Optional field
@@ -307,6 +308,7 @@ export function transformCompanyRepDataToApi(
   const criticalFields = [
     "relationship",
     "identification_type",
+    "identification_number",
     "address",
     "bank_name",
     "swift_code",

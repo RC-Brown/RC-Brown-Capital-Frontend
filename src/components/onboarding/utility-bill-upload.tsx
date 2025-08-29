@@ -113,11 +113,11 @@ export function UtilityBillUpload({ value = null, onChange }: UtilityBillUploadP
             <input
               type='text'
               placeholder='e.g water, electricity, gas'
-              className='w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20'
+              className='h-[51px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20'
               readOnly
             />
           </div>
-          <Button type='button' onClick={openUploadModal} className='rounded-lg px-6 py-2 text-white'>
+          <Button type='button' onClick={openUploadModal} className='h-[51px] rounded-lg px-6 py-2 text-white'>
             <span className='flex items-center gap-2'>
               <span className='text-sm font-semibold'>Upload</span>
               <Paperclip className='h-4 w-4' />
